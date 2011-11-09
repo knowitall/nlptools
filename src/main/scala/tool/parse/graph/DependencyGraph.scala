@@ -17,12 +17,14 @@ object Direction {
   }
 }
 
-abstract class DirectedEdge(val edge: Dependency) {
+sealed abstract class DirectedEdge(val edge: Dependency) {
   def start: DependencyNode
   def end: DependencyNode
   def dir: Direction
   def switchStart(newStart: DependencyNode): DirectedEdge
   def switchEnd(newEnd: DependencyNode): DirectedEdge
+  def flip: DirectedEdge
+  
   override def toString() = edge.toString
 }
 
@@ -34,6 +36,8 @@ class UpEdge(edge: Dependency) extends DirectedEdge(edge) {
     new UpEdge(new Dependency(edge.source, newStart, edge.label))
   def switchEnd(newEnd: DependencyNode) =
     new UpEdge(new Dependency(newEnd, edge.dest, edge.label))
+  def flip = new DownEdge(edge)
+  
   override def toString() = "Up(" + super.toString + ")"
 }
 
@@ -45,6 +49,8 @@ class DownEdge(edge: Dependency) extends DirectedEdge(edge) {
     new DownEdge(new Dependency(newStart, edge.dest, edge.label))
   def switchEnd(newEnd: DependencyNode) =
     new DownEdge(new Dependency(edge.source, newEnd, edge.label))
+  def flip = new UpEdge(edge)
+  
   override def toString() = "Down(" + super.toString + ")"
 }
 
