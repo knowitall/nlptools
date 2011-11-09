@@ -24,6 +24,11 @@ sealed abstract class DirectedEdge(val edge: Dependency) {
   def flip: DirectedEdge
   
   override def toString() = edge.toString
+  def canEqual(that: Any): Boolean
+  override def equals(that: Any) = that match {
+    case that: DirectedEdge => (that canEqual this) && that.edge == this.edge
+    case _ => false
+  }
 }
 
 class UpEdge(edge: Dependency) extends DirectedEdge(edge) {
@@ -37,6 +42,7 @@ class UpEdge(edge: Dependency) extends DirectedEdge(edge) {
   def flip = new DownEdge(edge)
   
   override def toString() = "Up(" + super.toString + ")"
+  override def canEqual(that: Any) = that.isInstanceOf[UpEdge]
 }
 
 class DownEdge(edge: Dependency) extends DirectedEdge(edge) {
@@ -50,4 +56,5 @@ class DownEdge(edge: Dependency) extends DirectedEdge(edge) {
   def flip = new UpEdge(edge)
   
   override def toString() = "Down(" + super.toString + ")"
+  override def canEqual(that: Any) = that.isInstanceOf[DownEdge]
 }
