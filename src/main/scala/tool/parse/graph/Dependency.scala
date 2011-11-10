@@ -20,7 +20,7 @@ class Dependency(val source: DependencyNode, val dest: DependencyNode, val label
       other.asInstanceOf[Dependency].source.equals(source) &&
       other.asInstanceOf[Dependency].dest.equals(dest) &&
       other.asInstanceOf[Dependency].label == label
-  override def hashCode() = 39 * (this.source.hashCode + this.dest.hashCode * 39) + label.hashCode
+  override def hashCode() = 37 * (this.source.hashCode + this.dest.hashCode * 37) + label.hashCode
 }
 
 object Dependency {
