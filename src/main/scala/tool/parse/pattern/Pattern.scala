@@ -55,8 +55,10 @@ class Pattern(val matchers: List[Matcher]) extends Function[DependencyGraph, Lis
         if (m.matches(vertex)) rec(xs, vertex, edges, groups)
         else None
       case (m: EdgeMatcher) :: xs => 
+        // only consider edges that have not been used
+        val uniqueEdges = graph.dedges(vertex)--edges.flatMap(e => List(e, e.flip))
         // search for an edge that matches
-        graph.dedges(vertex).find(m.matches(_)).flatMap { dedge =>
+        uniqueEdges.find(m.matches(_)).flatMap { dedge =>
           // we found one, so recurse
           rec(xs, dedge.end, dedge :: edges, groups)
         }
