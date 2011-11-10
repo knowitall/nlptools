@@ -68,10 +68,10 @@ class Pattern(val matchers: List[Matcher]) extends Function[DependencyGraph, Lis
     rec(this.matchers, vertex, List(), List())
   }
   
-  def replaceNodeMatcherAtIndex(index: Int, replacement: NodeMatcher) = 
+  def replaceMatcherAt(index: Int, replacement: NodeMatcher) = 
     new Pattern(
       matchers.view.zipWithIndex.map {
-        case (matcher, i) => if (i == index*2) replacement else matcher 
+        case (matcher, i) => if (i == index) replacement else matcher 
       }.toList)
   
   override def toString = {
