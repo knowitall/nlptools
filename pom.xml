@@ -160,7 +160,6 @@
     <dependency>
       <groupId>edu.stanford</groupId>
       <artifactId>stanford-corenlp</artifactId>
-      <version>2011-09-16</version>
     </dependency>
     <dependency>
       <groupId>opennlp</groupId>
