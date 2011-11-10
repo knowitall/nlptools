@@ -43,6 +43,7 @@ class UpEdge(edge: Dependency) extends DirectedEdge(edge) {
   
   override def toString() = "Up(" + super.toString + ")"
   override def canEqual(that: Any) = that.isInstanceOf[UpEdge]
+  override def hashCode() = (edge.hashCode + 2) * 37
 }
 
 class DownEdge(edge: Dependency) extends DirectedEdge(edge) {
@@ -57,4 +58,5 @@ class DownEdge(edge: Dependency) extends DirectedEdge(edge) {
   
   override def toString() = "Down(" + super.toString + ")"
   override def canEqual(that: Any) = that.isInstanceOf[DownEdge]
+  override def hashCode() = (edge.hashCode + 1) * 37
 }
