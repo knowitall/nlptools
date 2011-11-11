@@ -13,7 +13,7 @@ class Dependency(val source: DependencyNode, val dest: DependencyNode, val label
     if (source == dest) throw new IllegalStateException("source == dest")
     else if (source == node) dest
     else source
-  def normalize(stemmer: Stemmer) = new Dependency(source.normalize(stemmer), dest.normalize(stemmer), label)
+  def lemmatize(stemmer: Stemmer) = new Dependency(source.lemmatize(stemmer), dest.lemmatize(stemmer), label)
   def serialize = label + "(" + source.serialize + ", " + dest.serialize + ")"
   override def equals(other: Any) =
     other != null && other.isInstanceOf[Dependency] &&

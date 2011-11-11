@@ -45,6 +45,6 @@ class DependencyNode(val text: String, val pos: String, val index: Int) extends 
       other.asInstanceOf[DependencyNode].index == index
   override def hashCode() = this.text.hashCode * 37 + index.hashCode
 
-  def normalize(stemmer: Stemmer) = new DependencyNode(stemmer.stem(text), pos, index)
+  def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), pos, index)
   def serialize = text.replaceAll("[_(),]", "") + "_" + pos + "_" + index;
 }
