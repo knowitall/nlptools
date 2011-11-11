@@ -6,6 +6,7 @@ import common.main.LineProcessor
 
 abstract class Stemmer {
   def stem(word: String): String
+  def lemmatize(word: String) = this.stem(word).toLowerCase
 }
 
 abstract class StemmerMain
