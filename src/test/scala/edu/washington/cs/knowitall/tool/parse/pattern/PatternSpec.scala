@@ -35,7 +35,7 @@ object PatternSpec extends Specification {
   for (patternString <- patterns) {
     patternString should {
       "deserialize correctly" in {
-        Pattern.deserialize(patternString).toString must_== patternString
+        DependencyPattern.deserialize(patternString).toString must_== patternString
       }
     }
   }

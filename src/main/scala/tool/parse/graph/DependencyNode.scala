@@ -35,9 +35,8 @@ object DependencyNode {
   }
 }
 
-class DependencyNode(val text: String, val pos: String, val index: Int) extends Ordered[DependencyNode] {
-  //override def toString() = this.text + "_" + index
-  override def compare(other: DependencyNode) = this.index - other.index
+class DependencyNode(val text: String, val pos: String, val index: Int) extends Vertex with Ordered[DependencyNode] {
+  override def compare(that: DependencyNode) = this.index - that.index
   override def toString() = this.text
   override def equals(other: Any) =
     other != null && other.isInstanceOf[DependencyNode] &&

@@ -5,53 +5,33 @@ package graph
 
 import scala.collection._
 
-class DependencyGraph(val sentence: Option[String], 
-  val vertices: Iterable[DependencyNode], 
-  val dependencies: Iterable[Dependency]) {
-
-  val _outgoing = new mutable.HashMap[DependencyNode, mutable.Set[Dependency]]() 
-    with mutable.MultiMap[DependencyNode, Dependency]
-  val _incoming = new mutable.HashMap[DependencyNode, mutable.Set[Dependency]]() 
-    with mutable.MultiMap[DependencyNode, Dependency]
-  val nodes = dependencies.map(dep => dep.source).toSet union dependencies.map(dep => dep.dest).toSet
-  dependencies.foreach { dep => _outgoing.addBinding(dep.source, dep) }
-  dependencies.foreach { dep => _incoming.addBinding(dep.dest, dep) }
-
+class DependencyGraph(
+    val sentence: Option[String], 
+    val graph: Graph[DependencyNode]
+  ) {
+  
+  // constructors
+  
   def this(sentence: Option[String], dependencies: Iterable[Dependency]) =
-    this(sentence, DependencyNode.nodes(dependencies), dependencies)
+    this(sentence, new Graph[DependencyNode](DependencyNode.nodes(dependencies), dependencies))
 
   def this(sentence: String, dependencies: Iterable[Dependency]) =
-    this(Some(sentence), dependencies)
+    this(Some(sentence), new Graph[DependencyNode](dependencies))
 
   def this(dependencies: Iterable[Dependency]) =
-    this(None, dependencies)
-  
-  def expand(deps: Set[DependencyNode], pred: Dependency=>Boolean) = {
-    deps.flatMap { node => neighbors(node, pred) + node }
-  }
-  
-  def connected(dep: DependencyNode, pred: Dependency=>Boolean) = {
-    var nodes = Set(dep)
-    var last: Set[DependencyNode] = Set.empty
-    while (nodes.size > last.size) {
-      last = nodes
-      nodes = expand(nodes, pred)
-    }
+    this(None, new Graph[DependencyNode](dependencies))
     
-    nodes
-  }
-
   def collapseXNsubj =
     new DependencyGraph(this.sentence,
-      dependencies.map { dep =>
+      new Graph[DependencyNode](graph.edges.map { dep =>
         if (dep.label.equals("xsubj") || dep.label.equals("nsubj"))
           new Dependency(dep.source, dep.dest, "subj")
         else dep
-      })
+      }))
   
   def collapseNNPOf() = {
-    def pred(dep: Dependency) =
-      dep.label.equals("prep_of") && dep.source.pos == "NNP" && dep.dest.pos == "NNP"
+    def pred(edge: Edge[DependencyNode]) =
+      edge.label.equals("prep_of") && edge.source.pos == "NNP" && edge.dest.pos == "NNP"
     def merge(nodes: List[DependencyNode]) = {
       if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
       val sorted = nodes.sortBy(_.index).view
@@ -62,15 +42,15 @@ class DependencyGraph(val sentence: Option[String],
           sorted.map(_.pos).mkString(" of "), sorted.head.index)
     }
       
-    collapse(pred, merge)
+    new DependencyGraph(sentence, graph.collapse(pred, merge))
   }
   
   def collapseNounGroups = {
-    def pred(dep: Dependency) = dep.label.equals("nn")
+    def pred(edge: Edge[DependencyNode]) = edge.label.equals("nn")
     var groups: Set[Set[DependencyNode]] = Set()
-    for (dep <- this.dependencies) {
+    for (dep <- graph.edges) {
       if (dep.label.equals("nn")) {
-        groups += connected(dep.source, pred)
+        groups += graph.connected(dep.source, pred)
       }
     }
     
@@ -91,143 +71,15 @@ class DependencyGraph(val sentence: Option[String],
       }
     }
     
-    collapseNodes(map)
+    new DependencyGraph(sentence, graph.collapseVertices(map, DependencyNode.merge))
   }
   
   def collapseNN =
-    collapse(_.label.equals("nn"))
-
-  def collapse(collapsable: Dependency => Boolean): DependencyGraph = {
-    collapse(collapsable, DependencyNode.merge)
-  }
-  
-  def collapse(collapsable: Dependency => Boolean, merge: List[DependencyNode] => DependencyNode): DependencyGraph = {
-    // find nn edges
-    val (nndeps, otherdeps) = dependencies.partition(collapsable)
-
-    // collapse edges by building a map from collapsed nodes
-    // to collections of joined nodes
-    var map: Map[DependencyNode, mutable.Set[DependencyNode]] = Map()
-    for (dep <- nndeps) {
-      // dest is already collapsed
-      if (map.contains(dep.dest)) {
-        map(dep.dest) += dep.source
-        map += dep.source -> map(dep.dest)
-      } // source is already collapsed
-      else if (map.contains(dep.source)) {
-        map(dep.source) += dep.dest
-        map += dep.dest -> map(dep.source)
-      } // neither is collapsed
-      else {
-        val set = new mutable.HashSet[DependencyNode]()
-        set += dep.source
-        set += dep.dest
-        map += dep.dest -> set
-        map += dep.source -> set
-      }
-    }
-    
-    collapseNodes(map, merge)
-  }
-  
-  def collapseNodes(groups: Map[DependencyNode, Set[DependencyNode]]): DependencyGraph = 
-    collapseNodes(groups, DependencyNode.merge)
-  
-  def collapseNodes(groups: Map[DependencyNode, Set[DependencyNode]], merge: List[DependencyNode] => DependencyNode) = {
-    // convert collapsed nodes to a single DependencyNode
-    val transformed = groups.values.flatMap { deps =>
-      val sorted = deps.toList.sortBy(_.index)
-      deps.map { dep => (dep, merge(sorted)) }
-    }.toMap
-    
-    // map other dependencies to the new DependencyNodes
-    val newdeps = dependencies.flatMap { dep =>
-      val tsource = transformed.get(dep.source)
-      val tdest = transformed.get(dep.dest)
-      
-      val source = tsource.getOrElse(dep.source)
-      val dest = tdest.getOrElse(dep.dest)
-      
-      if (source == dest) List()
-      else List(new Dependency(source, dest, dep.label))
-    }
-
-    new DependencyGraph(this.sentence, newdeps)
-  }
-
-  def outgoing(node: DependencyNode): mutable.Set[Dependency] =
-    _outgoing.getOrElse(node, mutable.HashSet.empty)
-
-  def incoming(node: DependencyNode): mutable.Set[Dependency] =
-    _incoming.getOrElse(node, mutable.HashSet.empty)
-
-  def edges(node: DependencyNode): immutable.Set[Dependency] = (outgoing(node).toSet) union (incoming(node).toSet)
-
-  def dedges(node: DependencyNode): immutable.Set[DirectedEdge] = 
-    outgoing(node).map(new DownEdge(_): DirectedEdge).union(
-      incoming(node).map(new UpEdge(_): DirectedEdge)).toSet
-    
-  def neighbors(node: DependencyNode, pred: Dependency=>Boolean): Set[DependencyNode] =
-    outgoing(node).filter(pred).map(edge => edge.dest) union incoming(node).filter(pred).map(edge => edge.source)
-
-  def neighbors(node: DependencyNode): Set[DependencyNode] = neighbors(node, Any=>true)
-
-  def inferiors(node: DependencyNode): List[DependencyNode] =
-    node :: outgoing(node).map(edge => inferiors(edge.dest)).toList.flatten
-
-  private def toBipath(nodes: List[DependencyNode]) = {
-    def toEdgeBipath(nodes: List[DependencyNode]): List[List[DirectedEdge]] = nodes match {
-      case a :: b :: xs =>
-        val out = outgoing(a)
-        val in = incoming(a)
-        val outedge = out.find(edge => edge.dest.equals(b)).map(edge => new DownEdge(edge))
-        val inedge = in.find(edge => edge.source.equals(b)).map(edge => new UpEdge(edge))
-        val edge = outedge.getOrElse(inedge.getOrElse(throw new IllegalArgumentException))
-        (outedge ++ inedge).flatMap(edge => toEdgeBipath(b :: xs).map(path => edge :: path)).toList
-      case _ => List(List())
-    }
-    toEdgeBipath(nodes).map(new Bipath(_))
-  }
-
-  def edgeBipaths(start: DependencyNode, end: DependencyNode): List[Bipath] = {
-    val nodePaths = bipaths(start, end)
-    nodePaths.flatMap(np => toBipath(np))
-  }
-
-  def edgeBipaths(nodes: Set[DependencyNode]): Set[Bipath] = {
-    val nodePaths = bipaths(nodes)
-    nodePaths.flatMap(np => toBipath(np))
-  }
-
-  /**
-   * Find a path from node (start) to node (end).
-   */
-  def bipaths(start: DependencyNode, end: DependencyNode): List[List[DependencyNode]] = {
-    def bipaths(start: DependencyNode, path: List[DependencyNode]): List[List[DependencyNode]] = {
-      if (start.equals(end)) List(path)
-      else neighbors(start).filter(nb => !path.contains(nb)).toList.flatMap(nb => bipaths(nb, nb :: path))
-    }
-
-    bipaths(start, List(start)).map(_.reverse)
-  }
-
-  /**
-   * Find a path that contains all nodes in (nodes).
-   */
-  def bipaths(nodes: Set[DependencyNode]): Set[List[DependencyNode]] = {
-    def bipaths(start: DependencyNode, path: List[DependencyNode]): List[List[DependencyNode]] = {
-      if (nodes.forall(path.contains(_))) List(path)
-      else neighbors(start).filter(nb => !path.contains(nb)).toList.flatMap(nb => bipaths(nb, nb :: path))
-    }
-
-    nodes.flatMap(start => bipaths(start, List(start)).map(_.reverse))
-  }
-
-  def contents(node: DependencyNode): List[String] = inferiors(node).sortBy(node => node.index).map(node => node.text)
+    new DependencyGraph(sentence, graph.collapse(_.label.equals("nn"), DependencyNode.merge))
   
   def dot(title: String): String = dot(title, Set.empty, Set.empty)
   
-  def dot(title: String, filled: Set[DependencyNode], dotted: Set[Dependency]): String = {
+  def dot(title: String, filled: Set[DependencyNode], dotted: Set[Edge[DependencyNode]]): String = {
     val buffer = new StringBuffer(4092)
     printDOT(buffer, title, filled, dotted)
     buffer.toString
@@ -237,10 +89,10 @@ class DependencyGraph(val sentence: Option[String],
     printDOT(writer, title, Set.empty, Set.empty)
   }
 
-  def printDOT(writer: java.lang.Appendable, title: String, filled: Set[DependencyNode], dotted: Set[Dependency]) {
+  def printDOT(writer: java.lang.Appendable, title: String, filled: Set[DependencyNode], dotted: Set[Edge[DependencyNode]]) {
     def quote(string: String) = "\"" + string + "\""
     def nodeString(node: DependencyNode) = 
-      if (this.nodes.filter(_.text.equals(node.text)).size > 1) 
+      if (graph.nodes.filter(_.text.equals(node.text)).size > 1) 
         node.text + "_" + node.pos + "_" + node.index
       else
         node.text  + "_" + node.pos
@@ -267,12 +119,12 @@ class DependencyGraph(val sentence: Option[String],
       writer.append(indent + quote(nodeString(node)) + " [style=filled,fillcolor=gray]\n")
     }
 
-    for (node <- dotted.flatMap(_.nodes)) {
+    for (node <- dotted.flatMap(_.vertices)) {
       writer.append(indent + quote(nodeString(node)) + " [style=filled]\n");
     }
     
     writer.append("\n")
-    for (dep <- dependencies) {
+    for (dep <- graph.edges) {
       val brackets = "[label=\"" + dep.label + "\"" + { if (dotted(dep)) ",style=\"dotted\"" else "" } + "]"
       writer.append(indent + quote(nodeString(dep.source)) + " -> " + quote(nodeString(dep.dest)) + " " + brackets + "\n")
     }
@@ -280,18 +132,18 @@ class DependencyGraph(val sentence: Option[String],
   }
 
   def printDependencies() {
-    _outgoing.keys.foreach { key =>
-      println(key + ": " + outgoing(key).map(edge => edge.label + "(" + edge.dest + ")").mkString(", "))
+    graph._outgoing.keys.foreach { key =>
+      println(key + ": " + graph.outgoing(key).map(edge => edge.label + "(" + edge.dest + ")").mkString(", "))
     }
   }
 
   def print() {
     def print(node: DependencyNode, indent: Int) {
       println(" " * indent + node)
-      outgoing(node).foreach { edge => print(edge.dest, indent + 2) }
+      graph.outgoing(node).foreach { edge => print(edge.dest, indent + 2) }
     }
 
-    val start = nodes.find(node => incoming(node).isEmpty).get
+    val start = graph.nodes.find(node => graph.incoming(node).isEmpty).get
     print(start, 0)
   }
 }

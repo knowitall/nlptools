@@ -19,7 +19,7 @@ object ApplyPattern {
 
     if (parser.parse(args)) {
       val patternSource = Source.fromFile(parser.patternFilePath)
-      val patterns = patternSource.getLines.map(Pattern.deserialize(_)).toList
+      val patterns = patternSource.getLines.map(DependencyPattern.deserialize(_)).toList
       patternSource.close
 
       val sentenceSource = Source.fromFile(parser.sentenceFilePath)
@@ -29,7 +29,7 @@ object ApplyPattern {
           for (line <- sentenceSource.getLines) {
             val Array(text, deps) = line.split("\t")
             val graph = new DependencyGraph(text, Dependencies.deserialize(deps))
-            for (m <- p(graph)) {
+            for (m <- p(graph.graph)) {
               println(m)
             }
           }

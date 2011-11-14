@@ -6,7 +6,11 @@ package graph
 import stem.Stemmer
 import scala.util.matching.Regex
 
-class Dependency(val source: DependencyNode, val dest: DependencyNode, val label: String) {
+class Dependency(
+    source: DependencyNode, 
+    dest: DependencyNode, 
+    label: String) 
+extends Edge[DependencyNode](source, dest, label) {
   override def toString() = this.label + "(" + this.source + " -> " + this.dest + ")"
   def nodes = Set(source, dest)
   def otherNode(node: DependencyNode) = 

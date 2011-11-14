@@ -10,51 +10,42 @@ import collection._
 
 
 /**
-  * Represents a pattern with which parse trees can be searched.  
+  * Represents a pattern with which graphs can be searched.  
   * A pattern will start and end with a node matcher, and every
   * matcher (necessarily) alternates between a NodeMatcher and
   * and EdgeMatcher.
   */
-class Pattern(val matchers: List[Matcher]) extends Function[DependencyGraph, List[Match]] {
+class Pattern[V <: Vertex with Ordered[V]](val matchers: List[Matcher[V]]) extends Function[Graph[V], List[Match[V]]] {
   // ensure that the matchers alternate
   matchers.view.zipWithIndex.foreach { case(m, i) => 
     (m, (i%2)) match {
-      case (m: NodeMatcher, 0) =>
-      case (m: EdgeMatcher, 1) =>
+      case (m: NodeMatcher[V], 0) =>
+      case (m: EdgeMatcher[V], 1) =>
       case _ => throw new IllegalArgumentException("matchers must start with a node matcher and alternate")
     }
   }
 
-  def this(edgeMatchers: List[EdgeMatcher], nodeMatchers: List[NodeMatcher]) = {
+  def this(edgeMatchers: List[EdgeMatcher[V]], nodeMatchers: List[NodeMatcher[V]]) = {
     this(pimp.Iterables.interleave(nodeMatchers, edgeMatchers).toList)
   }
-
-  /**
-    * A more intuitive constructor that builds the pattern from a 
-    * bidirectional path though the tree.
-    */
-  def this(bipath: Bipath) = this(
-    bipath.path.map(dedge => new DefaultEdgeMatcher(dedge)),
-    new DefaultNodeMatcher(bipath.path.head.start) :: bipath.path.map(dedge => new DefaultNodeMatcher(dedge.end))
-  )
   
-  def apply(graph: DependencyGraph): List[Match] = {
+  def apply(graph: Graph[V]): List[Match[V]] = {
     graph.nodes.view.toList.flatMap(apply(graph, _).toList)
   }
 
-  def apply(graph: DependencyGraph, vertex: DependencyNode): Option[Match] = {
-    def rec(matchers: List[Matcher], 
-      vertex: DependencyNode, 
-      edges: List[DirectedEdge],
-      groups: List[(String, DependencyNode)]): Option[Match] = matchers match {
+  def apply(graph: Graph[V], vertex: V): Option[Match[V]] = {
+    def rec(matchers: List[Matcher[V]], 
+      vertex: V, 
+      edges: List[DirectedEdge[V]],
+      groups: List[(String, V)]): Option[Match[V]] = matchers match {
 
-      case (m: CaptureNodeMatcher) :: xs =>
+      case (m: CaptureNodeMatcher[V]) :: xs =>
         if (m.matches(vertex)) rec(xs, vertex, edges, (m.alias, vertex) :: groups)
         else None
-      case (m: NodeMatcher) :: xs => 
+      case (m: NodeMatcher[V]) :: xs => 
         if (m.matches(vertex)) rec(xs, vertex, edges, groups)
         else None
-      case (m: EdgeMatcher) :: xs => 
+      case (m: EdgeMatcher[V]) :: xs => 
         // only consider edges that have not been used
         val uniqueEdges = graph.dedges(vertex)--edges.flatMap(e => List(e, e.flip))
         // search for an edge that matches
@@ -68,7 +59,7 @@ class Pattern(val matchers: List[Matcher]) extends Function[DependencyGraph, Lis
     rec(this.matchers, vertex, List(), List())
   }
   
-  def replaceMatcherAt(index: Int, replacement: NodeMatcher) = 
+  def replaceMatcherAt(index: Int, replacement: NodeMatcher[V]) = 
     new Pattern(
       matchers.view.zipWithIndex.map {
         case (matcher, i) => if (i == index) replacement else matcher 
@@ -79,83 +70,31 @@ class Pattern(val matchers: List[Matcher]) extends Function[DependencyGraph, Lis
   }
 }
 
-object Pattern {
-  import scala.util.parsing.combinator._
-
-  object PatternParser extends RegexParsers {
-    def simpleNodeMatcher = """\w+""".r ^^ { s => new DefaultNodeMatcher(s) }
-    def captureNodeMatcher = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher(s) }
-    def nodeMatcher: Parser[NodeMatcher] = (captureNodeMatcher | simpleNodeMatcher) ^^ { s => s.asInstanceOf[NodeMatcher] }
-    
-    def upEdgeMatcher = "<" ~> """\w+""".r <~ "<" ^^ { s => new DefaultEdgeMatcher(s, Direction.Up) }
-    def downEdgeMatcher = ">" ~> """\w+""".r <~ ">" ^^ { s => new DefaultEdgeMatcher(s, Direction.Down) }
-    def edgeMatcher: Parser[EdgeMatcher] = (upEdgeMatcher | downEdgeMatcher) ^^ { s => s.asInstanceOf[EdgeMatcher] }
-    
-    // def chain = nodeMatcher ~! edgeMatcher ^^ { case n ~ e => List(n, e) }
-    def chain: Parser[List[Matcher]] = nodeMatcher ~ edgeMatcher ~ chain ^^ { case n ~ e ~ ch => n :: e :: ch } | nodeMatcher ^^ { List(_) }
-    // def expr = chain ~ nodeMatcher ^^ { case ch ~ n => ch ::: List(n)}
-    
-    def parse(s: String) = {
-      parseAll(chain, s)
-    }
-
-    def apply(s: String): Pattern = {
-      parse(s) match {
-        case Success(matchers, _) => new Pattern(matchers)
-        case e: NoSuccess =>
-          System.err.println(e)
-          throw new IllegalArgumentException("improper pattern syntax: " + s)
-      }
-    }
-  }
-  
-  def deserialize(string: String): Pattern = {
-    PatternParser(string)
-  }
-}
-
-class Match(val pattern: Pattern, 
-  val bipath: Bipath, 
-  val groups: Map[String, DependencyNode]) {
+class Match[V <: Vertex with Ordered[V]](val pattern: Pattern[V], 
+  val bipath: Bipath[V], 
+  val groups: Map[String, V]) {
   override def toString = bipath.toString + ": " + groups.toString
 }
 
-abstract class Matcher
+abstract class Matcher[V <: Vertex]
 
 /**
   * Trait to match dependency graph edges. 
   */
-trait EdgeMatcher extends Matcher {
-  def matches(edge: DirectedEdge): Boolean
-}
-
-class DefaultEdgeMatcher(val label: String, val dir: Direction) extends EdgeMatcher {
-  def this(dedge: DirectedEdge) = this(dedge.edge.label, dedge.dir)
-  
-  override def matches(edge: DirectedEdge) =
-    edge.dir == dir && edge.edge.label == label
-    
-  def symbol = dir match { case Direction.Up => "<" case Direction.Down => ">" }
-  override def toString = symbol + label + symbol
+trait EdgeMatcher[V <: Vertex] extends Matcher[V] {
+  def matches(edge: DirectedEdge[V]): Boolean
 }
 
 /**
   * Trait to match dependency graph nodes. 
   */
-trait NodeMatcher extends Matcher {
-  def matches(edge: DependencyNode): Boolean
+trait NodeMatcher[V <: Vertex] extends Matcher[V] {
+  def matches(node: V): Boolean
 }
 
-class TrivialNodeMatcher extends NodeMatcher {
-  override def matches(edge: DependencyNode) = true
+class TrivialNodeMatcher[V <: Vertex] extends NodeMatcher[V] {
+  override def matches(edge: V) = true
   override def toString = ".*"
-}
-
-class DefaultNodeMatcher(val label: String) extends NodeMatcher {
-  def this(node: DependencyNode) = this(node.text)
-  
-  override def matches(node: DependencyNode) = node.text == label
-  override def toString = label
 }
 
 /**
@@ -163,13 +102,13 @@ class DefaultNodeMatcher(val label: String) extends NodeMatcher {
   * @param  alias  the name of the captured node
   * @param  matcher  the matcher to apply
   */
-class CaptureNodeMatcher(val alias: String, val matcher: NodeMatcher) 
-extends NodeMatcher {
+class CaptureNodeMatcher[V <: Vertex](val alias: String, val matcher: NodeMatcher[V]) 
+extends NodeMatcher[V] {
   /**
     * Convenience constructor that uses the TrivialNodeMatcher.
     */
   def this(alias: String) = this(alias, new TrivialNodeMatcher)
 
-  override def matches(node: DependencyNode) = matcher.matches(node)
+  override def matches(node: V) = matcher.matches(node)
   override def toString = "{" + alias + "}"
 }
