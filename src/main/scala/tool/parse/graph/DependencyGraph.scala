@@ -46,11 +46,11 @@ class DependencyGraph(
   }
   
   def collapseNounGroups = {
-    def pred(edge: Edge[DependencyNode]) = edge.label.equals("nn")
+    def pred(dedge: DirectedEdge[DependencyNode]) = dedge.edge.label.equals("nn")
     var groups: Set[Set[DependencyNode]] = Set()
     for (dep <- graph.edges) {
       if (dep.label.equals("nn")) {
-        groups += graph.connected(dep.source, pred)
+        groups += graph.connected(dep.source, pred(_))
       }
     }
     

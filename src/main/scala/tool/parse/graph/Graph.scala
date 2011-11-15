@@ -43,7 +43,7 @@ class Graph[V <: Vertex with Ordered[V]] (
    * @param  pred  the predicate edges must match to be expanded upon
    * @return  the  the set of `Vertex`s in the expansion
    */
-  def expand(deps: Set[V], pred: Edge[V]=>Boolean) = {
+  def expand(deps: Set[V], pred: DirectedEdge[V]=>Boolean) = {
     deps.flatMap { node => neighbors(node, pred) + node }
   }
   
@@ -54,7 +54,7 @@ class Graph[V <: Vertex with Ordered[V]] (
    * @param  pred  the predicate edges must match to be expanded upon
    * @return  the set of `Vertex`s in the expansion
    */
-  def connected(dep: V, pred: Edge[V]=>Boolean) = {
+  def connected(dep: V, pred: DirectedEdge[V]=>Boolean): Set[V] = {
     var nodes = Set(dep)
     var last: Set[V] = Set.empty
     while (nodes.size > last.size) {
@@ -64,6 +64,17 @@ class Graph[V <: Vertex with Ordered[V]] (
     
     nodes
   }
+  
+  /* Iteratively expand a vertex to all nodes beneath it. 
+   * 
+   * @param  vertex  the seed `Vertex` 
+   * @return  the set of vertices beneath `vertex`
+   */
+  def subgraph(vertex: V) = connected(vertex, (dedge: DirectedEdge[V]) =>
+    dedge match {
+      case _: UpEdge[V] => false
+      case _: DownEdge[V] => true
+    })
 
   def collapse(collapsable: Edge[V] => Boolean, merge: List[V] => V): Graph[V] = {
     // find nn edges
@@ -128,10 +139,14 @@ class Graph[V <: Vertex with Ordered[V]] (
     outgoing(node).map(new DownEdge(_): DirectedEdge[V]).union(
       incoming(node).map(new UpEdge(_): DirectedEdge[V])).toSet
     
-  def neighbors(node: V, pred: Edge[V]=>Boolean): Set[V] =
-    outgoing(node).filter(pred).map(edge => edge.dest) union incoming(node).filter(pred).map(edge => edge.source)
+  def neighbors(node: V, pred: DirectedEdge[V]=>Boolean): Set[V] =
+    dedges(node).filter(pred).map { _ match { 
+      case out: DownEdge[V] => out.end
+      case in: UpEdge[V] => in.start
+    }}
 
-  def neighbors(node: V): Set[V] = neighbors(node, Any=>true)
+  def neighbors(node: V): Set[V] = 
+    outgoing(node).map(edge => edge.dest) union incoming(node).map(edge => edge.source)
 
   def inferiors(node: V): List[V] =
     node :: outgoing(node).map(edge => inferiors(edge.dest)).toList.flatten
