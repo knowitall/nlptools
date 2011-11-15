@@ -8,7 +8,7 @@ import graph._
 object DependencyPattern {
   import scala.util.parsing.combinator._
 
-  object PatternParser extends RegexParsers {
+  object Parser extends RegexParsers {
     def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(s) }
     def captureNodeMatcher = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher[DependencyNode](s) }
     def nodeMatcher[V <: Vertex]: Parser[NodeMatcher[DependencyNode]] = (captureNodeMatcher | simpleNodeMatcher) ^^ { s => s.asInstanceOf[NodeMatcher[DependencyNode]] }
@@ -26,24 +26,25 @@ object DependencyPattern {
     }
 
     def apply(s: String): Pattern[DependencyNode] = {
-      parse(s) match {
+      this.parse(s) match {
         case Success(matchers, _) => new Pattern[DependencyNode](matchers)
         case e: NoSuccess =>
           System.err.println(e)
           throw new IllegalArgumentException("improper pattern syntax: " + s)
       }
     }
-    
-    /**
-      * A more intuitive constructor that builds the pattern from a 
-      * bidirectional path though the tree. */
-    def create(bipath: Bipath[DependencyNode]) = new Pattern[DependencyNode](
-        bipath.path.map(dedge => new DependencyEdgeMatcher(dedge)),
-        new DependencyNodeMatcher(bipath.path.head.start) :: bipath.path.map(dedge => new DependencyNodeMatcher(dedge.end)))
   }
-  
+
+  /**
+   * A more intuitive constructor that builds the pattern from a
+   * bidirectional path though the tree.
+   */
+  def create(bipath: Bipath[DependencyNode]) = new Pattern[DependencyNode](
+    bipath.path.map(dedge => new DependencyEdgeMatcher(dedge)),
+    new DependencyNodeMatcher(bipath.path.head.start) :: bipath.path.map(dedge => new DependencyNodeMatcher(dedge.end)))
+
   def deserialize(string: String): Pattern[DependencyNode] = {
-    PatternParser(string)
+    Parser(string)
   }
 }
 
