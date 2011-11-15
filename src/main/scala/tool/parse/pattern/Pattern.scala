@@ -19,8 +19,8 @@ class Pattern[V <: Vertex with Ordered[V]](val matchers: List[Matcher[V]]) exten
   // ensure that the matchers alternate
   matchers.view.zipWithIndex.foreach { case(m, i) => 
     (m, (i%2)) match {
-      case (m: NodeMatcher[V], 0) =>
-      case (m: EdgeMatcher[V], 1) =>
+      case (m: NodeMatcher[_], 0) =>
+      case (m: EdgeMatcher[_], 1) =>
       case _ => throw new IllegalArgumentException("matchers must start with a node matcher and alternate")
     }
   }
@@ -39,13 +39,13 @@ class Pattern[V <: Vertex with Ordered[V]](val matchers: List[Matcher[V]]) exten
       edges: List[DirectedEdge[V]],
       groups: List[(String, V)]): Option[Match[V]] = matchers match {
 
-      case (m: CaptureNodeMatcher[V]) :: xs =>
+      case (m: CaptureNodeMatcher[_]) :: xs =>
         if (m.matches(vertex)) rec(xs, vertex, edges, (m.alias, vertex) :: groups)
         else None
-      case (m: NodeMatcher[V]) :: xs => 
+      case (m: NodeMatcher[_]) :: xs => 
         if (m.matches(vertex)) rec(xs, vertex, edges, groups)
         else None
-      case (m: EdgeMatcher[V]) :: xs => 
+      case (m: EdgeMatcher[_]) :: xs => 
         // only consider edges that have not been used
         val uniqueEdges = graph.dedges(vertex)--edges.flatMap(e => List(e, e.flip))
         // search for an edge that matches

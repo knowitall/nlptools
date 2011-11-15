@@ -17,7 +17,7 @@ class Bipath[V <: Vertex](val path: List[DirectedEdge[V]]) {
         if (pred(current.edge)) {
           // TODO: sorted
           val merged = merge(current.start, current.end)
-          if (current.isInstanceOf[UpEdge[V]]) {
+          if (current.isInstanceOf[UpEdge[_]]) {
             if (array.indices contains (i + 1)) {
               array(i + 1) = array(i + 1).switchStart(merged)
             }
@@ -25,7 +25,7 @@ class Bipath[V <: Vertex](val path: List[DirectedEdge[V]]) {
             if (array.indices contains (i - 1)) {
               array(i - 1) = array(i - 1).switchEnd(merged)
             }
-          } else if (current.isInstanceOf[DownEdge[V]]) {
+          } else if (current.isInstanceOf[DownEdge[_]]) {
             if (array.indices contains (i + 1)) {
               array(i + 1).switchStart(merged)
             }

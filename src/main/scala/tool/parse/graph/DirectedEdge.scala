@@ -26,7 +26,7 @@ sealed abstract class DirectedEdge[V <: Vertex](val edge: Edge[V]) {
   override def toString() = edge.toString
   def canEqual(that: Any): Boolean
   override def equals(that: Any) = that match {
-    case that: DirectedEdge[V] => (that canEqual this) && that.edge == this.edge
+    case that: DirectedEdge[_] => (that canEqual this) && that.edge == this.edge
     case _ => false
   }
 }
@@ -42,7 +42,7 @@ class UpEdge[V <: Vertex](edge: Edge[V]) extends DirectedEdge[V](edge) {
   def flip = new DownEdge[V](edge)
   
   override def toString() = "Up(" + super.toString + ")"
-  override def canEqual(that: Any) = that.isInstanceOf[UpEdge[V]]
+  override def canEqual(that: Any) = that.isInstanceOf[UpEdge[_]]
   override def hashCode() = (edge.hashCode + 2) * 37
 }
 
@@ -57,6 +57,6 @@ class DownEdge[V <: Vertex](edge: Edge[V]) extends DirectedEdge[V](edge) {
   def flip = new UpEdge[V](edge)
   
   override def toString() = "Down(" + super.toString + ")"
-  override def canEqual(that: Any) = that.isInstanceOf[DownEdge[V]]
+  override def canEqual(that: Any) = that.isInstanceOf[DownEdge[_]]
   override def hashCode() = (edge.hashCode + 1) * 37
 }

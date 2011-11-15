@@ -64,17 +64,6 @@ class Graph[V <: Vertex with Ordered[V]] (
     
     nodes
   }
-  
-  /* Iteratively expand a vertex to all nodes beneath it. 
-   * 
-   * @param  vertex  the seed `Vertex` 
-   * @return  the set of vertices beneath `vertex`
-   */
-  def subgraph(vertex: V) = connected(vertex, (dedge: DirectedEdge[V]) =>
-    dedge match {
-      case _: UpEdge[V] => false
-      case _: DownEdge[V] => true
-    })
 
   def collapse(collapsable: Edge[V] => Boolean, merge: List[V] => V): Graph[V] = {
     // find nn edges
@@ -102,12 +91,12 @@ class Graph[V <: Vertex with Ordered[V]] (
       }
     }
     
-    collapseVertices(map, merge)
+    collapseVertices(map.values, merge)
   }
   
-  def collapseVertices(groups: Map[V, Set[V]], merge: List[V] => V) = {
+  def collapseVertices(groups: Iterable[Set[V]], merge: List[V] => V) = {
     // convert collapsed nodes to a single Vertex
-    val transformed = groups.values.flatMap { vertices =>
+    val transformed = groups.flatMap { vertices =>
       val sorted = vertices.toList.sorted
       vertices.map { dep => (dep, merge(sorted)) }
     }.toMap
@@ -141,13 +130,18 @@ class Graph[V <: Vertex with Ordered[V]] (
     
   def neighbors(node: V, pred: DirectedEdge[V]=>Boolean): Set[V] =
     dedges(node).filter(pred).map { _ match { 
-      case out: DownEdge[V] => out.end
-      case in: UpEdge[V] => in.start
+      case out: DownEdge[_] => out.end
+      case in: UpEdge[_] => in.start
     }}
 
   def neighbors(node: V): Set[V] = 
     outgoing(node).map(edge => edge.dest) union incoming(node).map(edge => edge.source)
 
+  /* Iteratively expand a vertex to all nodes beneath it. 
+   * 
+   * @param  vertex  the seed `Vertex` 
+   * @return  the set of vertices beneath `vertex`
+   */
   def inferiors(node: V): List[V] =
     node :: outgoing(node).map(edge => inferiors(edge.dest)).toList.flatten
 

@@ -71,7 +71,7 @@ class DependencyGraph(
       }
     }
     
-    new DependencyGraph(sentence, graph.collapseVertices(map, DependencyNode.merge))
+    new DependencyGraph(sentence, graph.collapseVertices(map.values, DependencyNode.merge))
   }
   
   def collapseNN =
