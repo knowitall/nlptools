@@ -129,22 +129,40 @@ class Graph[V] (
     outgoing(node).map(new DownEdge(_): DirectedEdge[V]).union(
       incoming(node).map(new UpEdge(_): DirectedEdge[V])).toSet
     
-  def neighbors(node: V, pred: DirectedEdge[V]=>Boolean): Set[V] =
-    dedges(node).filter(pred).map { _ match { 
+  def neighbors(v: V, pred: DirectedEdge[V]=>Boolean): Set[V] =
+    dedges(v).filter(pred).map { _ match { 
       case out: DownEdge[_] => out.end
       case in: UpEdge[_] => in.start
     }}
 
-  def neighbors(node: V): Set[V] = 
-    outgoing(node).map(edge => edge.dest) union incoming(node).map(edge => edge.source)
+  def neighbors(v: V): Set[V] = predecessors(v) union successors(v)
+
+  def predecessors(v: V) = incoming(v).map(edge => edge.source)
+
+  def successors(v: V) = outgoing(v).map(edge => edge.dest)
 
   /* Iteratively expand a vertex to all nodes beneath it. 
    * 
-   * @param  vertex  the seed `Vertex` 
+   * @param  vertex  the seed vertex
    * @return  the set of vertices beneath `vertex`
    */
-  def inferiors(node: V): List[V] =
-    node :: outgoing(node).map(edge => inferiors(edge.dest)).toList.flatten
+  def inferiors(v: V): List[V] =
+    v :: outgoing(v).map(edge => inferiors(edge.dest)).toList.flatten
+
+  /* Iteratively expand a vertex to all nodes above it. 
+   * 
+   * @param  vertex  the seed vertex 
+   * @return  the set of vertices beneath `vertex`
+   */
+  def superiors(v: V): List[V] =
+    v :: outgoing(v).map(edge => inferiors(edge.source)).toList.flatten
+
+  /* number of out-edges bordering v */
+  def outdegree(v: V) = outgoing(v).size
+  /* number of in-edges bordering v */
+  def indegree(v: V) = incoming(v).size
+  /* number of edges bordering v */
+  def degree(v: V) = indegree(v) + outdegree(v)
 
   private def toBipath(nodes: List[V]) = {
     def toEdgeBipath(nodes: List[V]): List[List[DirectedEdge[V]]] = nodes match {
