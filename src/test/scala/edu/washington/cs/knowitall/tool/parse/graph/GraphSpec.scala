@@ -13,11 +13,6 @@ import org.specs.runner.JUnitSuiteRunner
 @RunWith(classOf[JUnitSuiteRunner])
 class GraphSpecTest extends JUnit4(GraphSpec)
 object GraphSpec extends Specification {
-  class V(val string: String) extends Vertex with Ordered[V] {
-    def compare(that: V) = this.string.compare(that.string)
-    override def toString = string
-  }
-
   val vertices = List(
     "Animal",
     "Mammel",
@@ -26,7 +21,7 @@ object GraphSpec extends Specification {
     "Cat",
     "Reptile",
     "Lizard"
-  ).map(s => (s, new V(s))).toMap
+  ).map(s => (s, s)).toMap
 
   val edges = List(
     new Edge(vertices("Animal"), vertices("Mammel"), ""),
@@ -37,7 +32,7 @@ object GraphSpec extends Specification {
     new Edge(vertices("Reptile"), vertices("Lizard"), "")
   )
 
-  val graph = new Graph[V](edges)
+  val graph = new Graph[String](edges)
 
   "graph" should {
     "have 6 edges" in {
@@ -79,10 +74,10 @@ object GraphSpec extends Specification {
 
   val collapse = List("Mammel", "Reptile")
   "graph with {"+collapse.mkString(", ")+"} collapsed" should {
-    val mutant = new V("mutant")
+    val mutant = "mutant"
     val elements = (vertices.keys.toSet - "Mammel" - "Reptile").map(vertices(_)) + mutant
     "have elements {" + elements.mkString(", ") + "}" in {
-      val collapsed = graph.collapseVertices(Iterable(collapse.map(vertices(_)).toSet), vertices=>mutant)
+      val collapsed = graph.collapseGroups(Iterable(collapse.map(vertices(_)).toSet))(vertices=>mutant)
       collapsed.vertices must haveTheSameElementsAs(elements)
     }
   }

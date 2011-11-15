@@ -15,7 +15,7 @@ object Direction {
   }
 }
 
-sealed abstract class DirectedEdge[V <: Vertex](val edge: Edge[V]) {
+sealed abstract class DirectedEdge[V](val edge: Edge[V]) {
   def start: V
   def end: V
   def dir: Direction
@@ -31,7 +31,7 @@ sealed abstract class DirectedEdge[V <: Vertex](val edge: Edge[V]) {
   }
 }
 
-class UpEdge[V <: Vertex](edge: Edge[V]) extends DirectedEdge[V](edge) {
+class UpEdge[V](edge: Edge[V]) extends DirectedEdge[V](edge) {
   def start = edge.dest
   def end = edge.source
   def dir = Direction.Up
@@ -46,7 +46,7 @@ class UpEdge[V <: Vertex](edge: Edge[V]) extends DirectedEdge[V](edge) {
   override def hashCode() = (edge.hashCode + 2) * 37
 }
 
-class DownEdge[V <: Vertex](edge: Edge[V]) extends DirectedEdge[V](edge) {
+class DownEdge[V](edge: Edge[V]) extends DirectedEdge[V](edge) {
   def start = edge.source
   def end = edge.dest
   def dir = Direction.Down

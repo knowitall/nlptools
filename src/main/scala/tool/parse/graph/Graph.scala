@@ -5,10 +5,7 @@ package graph
 
 import scala.collection._
 
-abstract trait Vertex {
-}
-
-class Edge[V <: Vertex] (
+class Edge[V] (
     val source: V,
     val dest: V,
     val label: String
@@ -16,17 +13,20 @@ class Edge[V <: Vertex] (
   def vertices = List(source, dest)
 }
 
-class Graph[V <: Vertex with Ordered[V]] (
+class Graph[V] (
     val vertices: Iterable[V], 
     val edges: Iterable[Edge[V]]
   ) {
-  
+
+  type G = Graph[V]
+  type E = Edge[V]
+
   // fields
 
-  val _outgoing = new mutable.HashMap[V, mutable.Set[Edge[V]]]() 
-    with mutable.MultiMap[V, Edge[V]]
-  val _incoming = new mutable.HashMap[V, mutable.Set[Edge[V]]]() 
-    with mutable.MultiMap[V, Edge[V]]
+  val _outgoing = new mutable.HashMap[V, mutable.Set[E]]() 
+    with mutable.MultiMap[V, E]
+  val _incoming = new mutable.HashMap[V, mutable.Set[E]]() 
+    with mutable.MultiMap[V, E]
   val nodes = edges.map(dep => dep.source).toSet union edges.map(dep => dep.dest).toSet
   edges.foreach { dep => _outgoing.addBinding(dep.source, dep) }
   edges.foreach { dep => _incoming.addBinding(dep.dest, dep) }
@@ -65,7 +65,7 @@ class Graph[V <: Vertex with Ordered[V]] (
     nodes
   }
 
-  def collapse(collapsable: Edge[V] => Boolean, merge: List[V] => V): Graph[V] = {
+  def collapse(collapsable: E => Boolean)(implicit merge: Traversable[V] => V): G = {
     // find nn edges
     val (nndeps, otherdeps) = edges.partition(collapsable)
 
@@ -91,14 +91,15 @@ class Graph[V <: Vertex with Ordered[V]] (
       }
     }
     
-    collapseVertices(map.values, merge)
+    collapseGroups(map.values)(merge)
   }
+
+  def collapse(set: Set[V])(implicit merge: Traversable[V] => V) = collapseGroups(Iterable(set))
   
-  def collapseVertices(groups: Iterable[Set[V]], merge: List[V] => V) = {
+  def collapseGroups(groups: Iterable[Set[V]])(implicit merge: Traversable[V] => V) = {
     // convert collapsed nodes to a single Vertex
     val transformed = groups.flatMap { vertices =>
-      val sorted = vertices.toList.sorted
-      vertices.map { dep => (dep, merge(sorted)) }
+      vertices.map { dep => (dep, merge(vertices)) }
     }.toMap
     
     // map other edges to the new vertices
@@ -110,19 +111,19 @@ class Graph[V <: Vertex with Ordered[V]] (
       val dest = tdest.getOrElse(dep.dest)
       
       if (source == dest) List()
-      else List(new Edge[V](source, dest, dep.label))
+      else List(new E(source, dest, dep.label))
     }
 
     new Graph(newdeps)
   }
 
-  def outgoing(node: V): immutable.Set[Edge[V]] =
+  def outgoing(node: V): immutable.Set[E] =
     _outgoing.getOrElse(node, mutable.HashSet.empty).toSet
 
-  def incoming(node: V): immutable.Set[Edge[V]] =
+  def incoming(node: V): immutable.Set[E] =
     _incoming.getOrElse(node, mutable.HashSet.empty).toSet
 
-  def edges(node: V): immutable.Set[Edge[V]] = (outgoing(node).toSet) union (incoming(node).toSet)
+  def edges(node: V): immutable.Set[E] = (outgoing(node).toSet) union (incoming(node).toSet)
 
   def dedges(node: V): immutable.Set[DirectedEdge[V]] = 
     outgoing(node).map(new DownEdge(_): DirectedEdge[V]).union(
@@ -193,7 +194,7 @@ class Graph[V <: Vertex with Ordered[V]] (
     nodes.flatMap(start => bipaths(start, List(start)).map(_.reverse))
   }
 
-  def contents(vertex: V): List[String] = inferiors(vertex).sorted.map(vertex => vertex.toString)
+  def contents(vertex: V)(implicit ord: Ordering[V]): List[String] = inferiors(vertex).sorted.map(vertex => vertex.toString)
 
   def print() {
     def print(node: V, indent: Int) {
@@ -207,7 +208,7 @@ class Graph[V <: Vertex with Ordered[V]] (
 }
 
 object Graph {
-  def vertices[V <: Vertex](edges: Iterable[Edge[V]]) = {
+  def vertices[V](edges: Iterable[Edge[V]]) = {
     edges.flatMap(edge => List(edge.source, edge.dest)).toSet
   }
 }

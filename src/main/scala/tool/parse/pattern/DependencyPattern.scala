@@ -11,14 +11,14 @@ object DependencyPattern {
   object Parser extends RegexParsers {
     def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(s) }
     def captureNodeMatcher = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher[DependencyNode](s) }
-    def nodeMatcher[V <: Vertex]: Parser[NodeMatcher[DependencyNode]] = (captureNodeMatcher | simpleNodeMatcher) ^^ { s => s.asInstanceOf[NodeMatcher[DependencyNode]] }
+    def nodeMatcher[V]: Parser[NodeMatcher[DependencyNode]] = (captureNodeMatcher | simpleNodeMatcher) ^^ { s => s.asInstanceOf[NodeMatcher[DependencyNode]] }
     
     def upEdgeMatcher = "<" ~> """\w+""".r <~ "<" ^^ { s => new DependencyEdgeMatcher(s, Direction.Up) }
     def downEdgeMatcher = ">" ~> """\w+""".r <~ ">" ^^ { s => new DependencyEdgeMatcher(s, Direction.Down) }
-    def edgeMatcher[V <: Vertex]: Parser[EdgeMatcher[DependencyNode]] = (upEdgeMatcher | downEdgeMatcher) ^^ { s => s.asInstanceOf[EdgeMatcher[DependencyNode]] }
+    def edgeMatcher[V]: Parser[EdgeMatcher[DependencyNode]] = (upEdgeMatcher | downEdgeMatcher) ^^ { s => s.asInstanceOf[EdgeMatcher[DependencyNode]] }
     
     // def chain = nodeMatcher ~! edgeMatcher ^^ { case n ~ e => List(n, e) }
-    def chain[V <: Vertex]: Parser[List[Matcher[DependencyNode]]] = nodeMatcher ~ edgeMatcher ~ chain ^^ { case n ~ e ~ ch => n :: e :: ch } | nodeMatcher ^^ { List(_) }
+    def chain[V]: Parser[List[Matcher[DependencyNode]]] = nodeMatcher ~ edgeMatcher ~ chain ^^ { case n ~ e ~ ch => n :: e :: ch } | nodeMatcher ^^ { List(_) }
     // def expr = chain ~ nodeMatcher ^^ { case ch ~ n => ch ::: List(n)}
     
     def parse(s: String) = {

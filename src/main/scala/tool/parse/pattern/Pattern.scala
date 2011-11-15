@@ -15,7 +15,7 @@ import collection._
   * matcher (necessarily) alternates between a NodeMatcher and
   * and EdgeMatcher.
   */
-class Pattern[V <: Vertex with Ordered[V]](val matchers: List[Matcher[V]]) extends Function[Graph[V], List[Match[V]]] {
+class Pattern[V](val matchers: List[Matcher[V]]) extends Function[Graph[V], List[Match[V]]] {
   // ensure that the matchers alternate
   matchers.view.zipWithIndex.foreach { case(m, i) => 
     (m, (i%2)) match {
@@ -70,29 +70,29 @@ class Pattern[V <: Vertex with Ordered[V]](val matchers: List[Matcher[V]]) exten
   }
 }
 
-class Match[V <: Vertex with Ordered[V]](val pattern: Pattern[V], 
+class Match[V](val pattern: Pattern[V], 
   val bipath: Bipath[V], 
   val groups: Map[String, V]) {
   override def toString = bipath.toString + ": " + groups.toString
 }
 
-abstract class Matcher[V <: Vertex]
+abstract class Matcher[V]
 
 /**
   * Trait to match dependency graph edges. 
   */
-trait EdgeMatcher[V <: Vertex] extends Matcher[V] {
+trait EdgeMatcher[V] extends Matcher[V] {
   def matches(edge: DirectedEdge[V]): Boolean
 }
 
 /**
   * Trait to match dependency graph nodes. 
   */
-trait NodeMatcher[V <: Vertex] extends Matcher[V] {
+trait NodeMatcher[V] extends Matcher[V] {
   def matches(node: V): Boolean
 }
 
-class TrivialNodeMatcher[V <: Vertex] extends NodeMatcher[V] {
+class TrivialNodeMatcher[V] extends NodeMatcher[V] {
   override def matches(edge: V) = true
   override def toString = ".*"
 }
@@ -102,7 +102,7 @@ class TrivialNodeMatcher[V <: Vertex] extends NodeMatcher[V] {
   * @param  alias  the name of the captured node
   * @param  matcher  the matcher to apply
   */
-class CaptureNodeMatcher[V <: Vertex](val alias: String, val matcher: NodeMatcher[V]) 
+class CaptureNodeMatcher[V](val alias: String, val matcher: NodeMatcher[V]) 
 extends NodeMatcher[V] {
   /**
     * Convenience constructor that uses the TrivialNodeMatcher.

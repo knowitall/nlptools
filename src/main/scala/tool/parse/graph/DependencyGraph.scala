@@ -32,9 +32,9 @@ class DependencyGraph(
   def collapseNNPOf() = {
     def pred(edge: Edge[DependencyNode]) =
       edge.label.equals("prep_of") && edge.source.pos == "NNP" && edge.dest.pos == "NNP"
-    def merge(nodes: List[DependencyNode]) = {
+    def merge(nodes: Traversable[DependencyNode]) = {
       if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
-      val sorted = nodes.sortBy(_.index).view
+      val sorted = nodes.toList.sortBy(_.index).view
       new DependencyNode(sorted.map(_.text).mkString(" of "), 
         if (nodes.forall(_.pos.equals(nodes.head.pos))) 
           nodes.head.pos
@@ -42,7 +42,7 @@ class DependencyGraph(
           sorted.map(_.pos).mkString(" of "), sorted.head.index)
     }
       
-    new DependencyGraph(sentence, graph.collapse(pred, merge))
+    new DependencyGraph(sentence, graph.collapse(pred(_))(merge))
   }
   
   def collapseNounGroups = {
@@ -71,11 +71,11 @@ class DependencyGraph(
       }
     }
     
-    new DependencyGraph(sentence, graph.collapseVertices(map.values, DependencyNode.merge))
+    new DependencyGraph(sentence, graph.collapseGroups(map.values))
   }
   
   def collapseNN =
-    new DependencyGraph(sentence, graph.collapse(_.label.equals("nn"), DependencyNode.merge))
+    new DependencyGraph(sentence, graph.collapse(_.label.equals("nn")))
   
   def dot(title: String): String = dot(title, Set.empty, Set.empty)
   

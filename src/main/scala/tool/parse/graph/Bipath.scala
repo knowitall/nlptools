@@ -3,7 +3,7 @@ package tool
 package parse
 package graph
 
-class Bipath[V <: Vertex](val path: List[DirectedEdge[V]]) {
+class Bipath[V](val path: List[DirectedEdge[V]]) {
   def edges = path.foldRight[Set[Edge[V]]](Set()) { case (item, set) => set + item.edge }
   def nodes = path.head.start :: path.map(_.end)
   def start = path.head.start

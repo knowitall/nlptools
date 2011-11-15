@@ -9,9 +9,9 @@ object DependencyNode {
   def fromLists(tokens: Iterable[String], pos: Iterable[String]) =
     (tokens zip pos).zipWithIndex.map { case ((token, pos), index) => new DependencyNode(token, pos, index) }.toArray
 
-  def merge(nodes: List[DependencyNode]) = {
+  implicit def merge(nodes: Traversable[DependencyNode]) = {
     if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
-    val sorted = nodes.sortBy(_.index).view
+    val sorted = nodes.toList.sortBy(_.index).view
     new DependencyNode(sorted.map(_.text).mkString(" "), 
         if (nodes.forall(_.pos.equals(nodes.head.pos))) 
           nodes.head.pos
@@ -35,7 +35,7 @@ object DependencyNode {
   }
 }
 
-class DependencyNode(val text: String, val pos: String, val index: Int) extends Vertex with Ordered[DependencyNode] {
+class DependencyNode(val text: String, val pos: String, val index: Int) extends Ordered[DependencyNode] {
   override def compare(that: DependencyNode) = this.index - that.index
   override def toString() = this.text
   override def equals(other: Any) =
