@@ -218,6 +218,7 @@
         <configuration>
           <args>
             <arg>-deprecation</arg>
+            <arg>-unchecked</arg>
           </args>
           <jvmArgs>
             <jvmArg>-Xms128m</jvmArg>
