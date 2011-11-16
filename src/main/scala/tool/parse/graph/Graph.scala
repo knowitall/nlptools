@@ -146,16 +146,16 @@ class Graph[V] (
    * @param  vertex  the seed vertex
    * @return  the set of vertices beneath `vertex`
    */
-  def inferiors(v: V): List[V] =
-    v :: outgoing(v).map(edge => inferiors(edge.dest)).toList.flatten
+  def inferiors(v: V, cond: E=>Boolean = (x=>true)): List[V] =
+    v :: outgoing(v).filter(cond).map(edge => inferiors(edge.dest)).toList.flatten
 
   /* Iteratively expand a vertex to all nodes above it. 
    * 
    * @param  vertex  the seed vertex 
    * @return  the set of vertices beneath `vertex`
    */
-  def superiors(v: V): List[V] =
-    v :: outgoing(v).map(edge => inferiors(edge.source)).toList.flatten
+  def superiors(v: V, cond: E=>Boolean = (x=>true)): List[V] =
+    v :: outgoing(v).filter(cond).map(edge => inferiors(edge.source)).toList.flatten
 
   /* number of out-edges bordering v */
   def outdegree(v: V) = outgoing(v).size
