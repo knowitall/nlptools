@@ -20,8 +20,8 @@ class DependencyGraph(
     this(Some(text), Some(nodes), dependencies)
   }
 
-  def this(nodes: Array[DependencyNode], dependencies: Iterable[Dependency]) =
-    this(Some(nodes.map(_.text).mkString(" ")), Some(nodes), new Graph[DependencyNode](dependencies))
+  def this(text: String, dependencies: Iterable[Dependency]) =
+    this(Some(text), None, dependencies)
 
   def this(dependencies: Iterable[Dependency]) =
     this(None, None, new Graph[DependencyNode](dependencies))

@@ -10,7 +10,7 @@ trait DependencyParser {
   def dependencyGraph(string: String) = {
     val dependencies = this.dependencies(string)
     val nodes = dependencies.flatMap(dep => List(dep.source, dep.dest)).toArray.sorted
-    new DependencyGraph(nodes, dependencies)
+    new DependencyGraph(string, nodes, dependencies)
   }
 }
 
