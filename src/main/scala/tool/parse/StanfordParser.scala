@@ -18,8 +18,11 @@ object StanfordParser extends DependencyParserMain {
 }
 
 abstract class BaseStanfordParser extends DependencyParser {
-  def dependencies(string: String): Iterable[Dependency] = dependencies(string, true)
+  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, true)
   def dependencies(string: String, post: Boolean): Iterable[Dependency]
+  
+  override def dependencyGraph(string: String) = dependencyGraph(string, true)
+  def dependencyGraph(string: String, post: Boolean): DependencyGraph
   
   def convertDependency(nodes: Map[Int, DependencyNode], dep: edu.stanford.nlp.trees.TypedDependency) = {
     new Dependency(nodes(dep.gov.index - 1), nodes(dep.dep.index - 1), dep.reln.toString)
@@ -34,17 +37,27 @@ class StanfordParser(lp : LexicalizedParser) extends BaseStanfordParser with Con
   def this() = this(new LexicalizedParser("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"))
   private val tlp = new PennTreebankLanguagePack();
   private val gsf = tlp.grammaticalStructureFactory();
-
-  override def dependencies(string: String, post: Boolean): Iterable[Dependency] = {
+  
+  private def depHelper(string: String, post: Boolean): (Map[Int, DependencyNode], Iterable[Dependency]) = {
     val tree = lp.apply(string)
     val nodes = tree.taggedYield().view.zipWithIndex.map {
       case (tw, i) => (i, new DependencyNode(tw.word, tw.tag, i)) 
     }.toMap
     
-    if (post) convertDependencies(nodes, gsf.newGrammaticalStructure(tree).typedDependenciesCCprocessed)
-    else convertDependencies(nodes, gsf.newGrammaticalStructure(tree).typedDependencies)
+    (nodes, post match {
+      case true => convertDependencies(nodes, gsf.newGrammaticalStructure(tree).typedDependenciesCCprocessed)
+      case false => convertDependencies(nodes, gsf.newGrammaticalStructure(tree).typedDependencies) 
+    })
   }
 
+  override def dependencies(string: String, post: Boolean): Iterable[Dependency] = 
+    depHelper(string, post)._2
+  
+  override def dependencyGraph(string: String, post: Boolean): DependencyGraph = {
+    val (nodes, deps) = depHelper(string, post)
+    new DependencyGraph(string, nodes.toArray.sortBy(_._1).map(_._2), deps)
+  }
+  
   override def parse(string: String) = {
     var index = 0
     def convertTree(tree: edu.stanford.nlp.trees.Tree): ParseTree = {

@@ -6,23 +6,28 @@ package graph
 import scala.collection._
 
 class DependencyGraph(
-    val tokens: Option[Array[String]], 
+    val text: Option[String],
+    val nodes: Option[Array[DependencyNode]], 
     val graph: Graph[DependencyNode]
   ) {
   
   // constructors
   
-  def this(sentence: Option[Array[String]], dependencies: Iterable[Dependency]) =
-    this(sentence, new Graph[DependencyNode](DependencyNode.nodes(dependencies), dependencies))
+  def this(text: Option[String], nodes: Option[Array[DependencyNode]], dependencies: Iterable[Dependency]) =
+    this(text, nodes, new Graph[DependencyNode](DependencyNode.nodes(dependencies), dependencies))
+    
+  def this(text: String, nodes: Array[DependencyNode], dependencies: Iterable[Dependency]) {
+    this(Some(text), Some(nodes), dependencies)
+  }
 
-  def this(sentence: Array[String], dependencies: Iterable[Dependency]) =
-    this(Some(sentence), new Graph[DependencyNode](dependencies))
+  def this(nodes: Array[DependencyNode], dependencies: Iterable[Dependency]) =
+    this(Some(nodes.map(_.text).mkString(" ")), Some(nodes), new Graph[DependencyNode](dependencies))
 
   def this(dependencies: Iterable[Dependency]) =
-    this(None, new Graph[DependencyNode](dependencies))
+    this(None, None, new Graph[DependencyNode](dependencies))
     
   def collapseXNsubj =
-    new DependencyGraph(this.tokens,
+    new DependencyGraph(this.text, this.nodes,
       new Graph[DependencyNode](graph.edges.map { dep =>
         if (dep.label.equals("xsubj") || dep.label.equals("nsubj"))
           new Dependency(dep.source, dep.dest, "subj")
@@ -42,7 +47,7 @@ class DependencyGraph(
           sorted.map(_.pos).mkString(" of "), sorted.head.index)
     }
       
-    new DependencyGraph(tokens, graph.collapse(pred(_))(merge))
+    new DependencyGraph(text, this.nodes, graph.collapse(pred(_))(merge))
   }
   
   def collapseNounGroups = {
@@ -71,11 +76,11 @@ class DependencyGraph(
       }
     }
     
-    new DependencyGraph(tokens, graph.collapseGroups(map.values))
+    new DependencyGraph(text, nodes, graph.collapseGroups(map.values))
   }
   
   def collapseNN =
-    new DependencyGraph(tokens, graph.collapse(_.label.equals("nn")))
+    new DependencyGraph(text, nodes, graph.collapse(_.label.equals("nn")))
   
   def dot(title: String): String = dot(title, Set.empty, Set.empty)
   
@@ -85,7 +90,7 @@ class DependencyGraph(
     buffer.toString
   }
 
-  def printDOT(writer: java.lang.Appendable, title: Option[String] = this.tokens.map(_.mkString(" "))) {
+  def printDOT(writer: java.lang.Appendable, title: Option[String] = this.text) {
     printDOT(writer, title, Set.empty, Set.empty)
   }
 
@@ -101,7 +106,7 @@ class DependencyGraph(
 
     writer.append("digraph g {\n")
 
-    if (this.tokens.isDefined) {
+    if (this.nodes.isDefined) {
       writer.append(indent + "graph [\n")
       writer.append(indent * 2 + "fontname=\"Helvetica-Oblique\"\n")
       writer.append(indent * 2 + "fontsize=\"12\"\n")
