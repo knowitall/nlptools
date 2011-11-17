@@ -82,3 +82,27 @@ object GraphSpec extends Specification {
     }
   }
 }
+
+@RunWith(classOf[JUnitSuiteRunner])
+class GraphSpecLoopTest extends JUnit4(GraphSpecLoop)
+object GraphSpecLoop extends Specification {
+  val vertices = List(
+      "Strange"
+  ).map(s => (s, s)).toMap
+
+  val edges = List(
+    new Edge(vertices("Strange"), vertices("Strange"), "Loop")
+  )
+
+  val graph = new Graph[String](edges)
+
+  "vertex Strange" should {
+    "have itself as its only neighbor" in {
+      graph.neighbors("Strange") must haveTheSameElementsAs(List("Strange"))
+    }
+    
+    "be connected to nothing" in {
+      graph.connected("Strange", x=>true) must haveTheSameElementsAs(List("Strange"))
+    }
+  }
+}
