@@ -50,13 +50,24 @@ object GraphSpec extends Specification {
 
   "vertex Mammel" should {
     val vertex = vertices("Mammel")
-    "have 4 neighbors" in {
-      graph.neighbors(vertex).size must ==(4)
+
+    val neighbors = List("Animal", "Ape", "Cat", "Human")
+    "have neighbors {"+neighbors.mkString(", ")+"}" in {
+      graph.neighbors(vertex) must haveTheSameElementsAs(neighbors.map(vertices(_)))
     }
 
-    val subgraph = List("Mammel", "Ape", "Cat", "Human")
-    "have a inferiors of {"+subgraph.mkString(", ")+"}" in {
-      graph.inferiors(vertex) must haveTheSameElementsAs(subgraph.map(vertices(_)))
+    "have neighbors (x=>true) {"+neighbors.mkString(", ")+"}" in {
+      graph.neighbors(vertex, x=>true) must haveTheSameElementsAs(neighbors.map(vertices(_)))
+    }
+
+    val inferiors = List("Mammel", "Ape", "Cat", "Human")
+    "have inferiors {"+inferiors.mkString(", ")+"}" in {
+      graph.inferiors(vertex) must haveTheSameElementsAs(inferiors.map(vertices(_)))
+    }
+
+    val superiors = List("Animal", "Mammel")
+    "have superiors {"+superiors.mkString(", ")+"}" in {
+      graph.superiors(vertex) must haveTheSameElementsAs(superiors.map(vertices(_)))
     }
   }
 
@@ -101,8 +112,16 @@ object GraphSpecLoop extends Specification {
       graph.neighbors("Strange") must haveTheSameElementsAs(List("Strange"))
     }
     
-    "be connected to nothing" in {
+    "be connected to only itself" in {
       graph.connected("Strange", x=>true) must haveTheSameElementsAs(List("Strange"))
+    }
+
+    "have itself as its only inferior" in {
+      graph.inferiors("Strange") must haveTheSameElementsAs(List("Strange"))
+    }
+
+    "have itself as its only superior" in {
+      graph.superiors("Strange") must haveTheSameElementsAs(List("Strange"))
     }
   }
 }

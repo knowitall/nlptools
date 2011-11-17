@@ -11,6 +11,7 @@ class Edge[V] (
     val label: String
   ) {
   def vertices = List(source, dest)
+  override def toString = label+"("+source+", "+dest+")"
 }
 
 class Graph[V] (
@@ -43,8 +44,8 @@ class Graph[V] (
    * @param  pred  the predicate edges must match to be expanded upon
    * @return  the  the set of `Vertex`s in the expansion
    */
-  def expand(deps: Set[V], pred: DirectedEdge[V]=>Boolean) = {
-    deps.flatMap { node => neighbors(node, pred) + node }
+  def expand(vertices: Set[V], pred: DirectedEdge[V]=>Boolean) = {
+    vertices ++ vertices.flatMap { node => neighbors(node, pred) }
   }
   
   /* Iteratively expand the neighbors of a `Vertex` to all
@@ -54,15 +55,14 @@ class Graph[V] (
    * @param  pred  the predicate edges must match to be expanded upon
    * @return  the set of `Vertex`s in the expansion
    */
-  def connected(dep: V, pred: DirectedEdge[V]=>Boolean): Set[V] = {
-    var nodes = Set(dep)
-    var last: Set[V] = Set.empty
-    while (nodes.size > last.size) {
-      last = nodes
-      nodes = expand(nodes, pred)
+  def connected(v: V, pred: DirectedEdge[V]=>Boolean): Set[V] = {
+    def rec(vertices: Set[V], last: Set[V]): Set[V] = {
+      val neighbors: Set[V] = last.flatMap(this.neighbors(_, pred))
+      if (neighbors.isEmpty) vertices
+      else rec(vertices ++ neighbors, neighbors -- vertices)
     }
-    
-    nodes
+
+    rec(Set(v), Set(v))
   }
 
   def collapse(collapsable: E => Boolean)(implicit merge: Traversable[V] => V): G = {
@@ -131,8 +131,8 @@ class Graph[V] (
     
   def neighbors(v: V, pred: DirectedEdge[V]=>Boolean): Set[V] =
     dedges(v).filter(pred).map { _ match { 
-      case out: DownEdge[_] => out.end
-      case in: UpEdge[_] => in.start
+      case out: DownEdge[_] =>  out.end
+      case in: UpEdge[_] =>  in.end
     }}
 
   def neighbors(v: V): Set[V] = predecessors(v) union successors(v)
@@ -146,16 +146,26 @@ class Graph[V] (
    * @param  vertex  the seed vertex
    * @return  the set of vertices beneath `vertex`
    */
-  def inferiors(v: V, cond: E=>Boolean = (x=>true)): List[V] =
-    v :: outgoing(v).filter(cond).map(edge => inferiors(edge.dest)).toList.flatten
+  def inferiors(v: V, cond: E=>Boolean = (x=>true)): Set[V] = {
+    def conditional(dedge: DirectedEdge[V]) = dedge match {
+      case down: DownEdge[_] => cond(down.edge)
+      case _: UpEdge[_] => false
+    }
+    connected(v, conditional)
+  }
 
   /* Iteratively expand a vertex to all nodes above it. 
    * 
    * @param  vertex  the seed vertex 
    * @return  the set of vertices beneath `vertex`
    */
-  def superiors(v: V, cond: E=>Boolean = (x=>true)): List[V] =
-    v :: outgoing(v).filter(cond).map(edge => inferiors(edge.source)).toList.flatten
+  def superiors(v: V, cond: E=>Boolean = (x=>true)): Set[V] = {
+    def conditional(dedge: DirectedEdge[V]) = dedge match {
+      case up: UpEdge[_] => cond(up.edge)
+      case _: DownEdge[_] => false
+    }
+    connected(v, conditional)
+  }
 
   /* number of out-edges bordering v */
   def outdegree(v: V) = outgoing(v).size
@@ -212,7 +222,7 @@ class Graph[V] (
     nodes.flatMap(start => bipaths(start, List(start)).map(_.reverse))
   }
 
-  def contents(vertex: V)(implicit ord: Ordering[V]): List[String] = inferiors(vertex).sorted.map(vertex => vertex.toString)
+  def contents(vertex: V)(implicit ord: Ordering[V]): List[String] = inferiors(vertex).toList.sorted.map(vertex => vertex.toString)
 
   def print() {
     def print(node: V, indent: Int) {

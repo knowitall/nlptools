@@ -45,6 +45,9 @@ class UpEdge[V](edge: Edge[V]) extends DirectedEdge[V](edge) {
   override def canEqual(that: Any) = that.isInstanceOf[UpEdge[_]]
   override def hashCode() = (edge.hashCode + 2) * 37
 }
+object UpEdge {
+  def unapply[V](dedge: DownEdge[V]) = Some(dedge.edge)
+}
 
 class DownEdge[V](edge: Edge[V]) extends DirectedEdge[V](edge) {
   def start = edge.source
@@ -59,4 +62,7 @@ class DownEdge[V](edge: Edge[V]) extends DirectedEdge[V](edge) {
   override def toString() = "Down(" + super.toString + ")"
   override def canEqual(that: Any) = that.isInstanceOf[DownEdge[_]]
   override def hashCode() = (edge.hashCode + 1) * 37
+}
+object DownEdge {
+  def unapply[V](dedge: DownEdge[V]) = Some(dedge.edge)
 }
