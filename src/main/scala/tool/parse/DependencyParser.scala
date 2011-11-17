@@ -7,7 +7,11 @@ import common.main._
 
 trait DependencyParser {
   def dependencies(string: String): Iterable[Dependency]
-  def dependencyGraph(string: String) = new DependencyGraph(string, dependencies(string))
+  def dependencyGraph(string: String) = {
+    val dependencies = this.dependencies(string)
+    val tokens = dependencies.flatMap(dep => List(dep.source, dep.dest)).toArray.sorted.map(_.text)
+    new DependencyGraph(tokens, dependencies)
+  }
 }
 
 abstract class DependencyParserMain extends common.main.LineProcessor {

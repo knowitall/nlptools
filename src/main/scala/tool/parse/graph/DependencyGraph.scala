@@ -6,23 +6,23 @@ package graph
 import scala.collection._
 
 class DependencyGraph(
-    val sentence: Option[String], 
+    val tokens: Option[Array[String]], 
     val graph: Graph[DependencyNode]
   ) {
   
   // constructors
   
-  def this(sentence: Option[String], dependencies: Iterable[Dependency]) =
+  def this(sentence: Option[Array[String]], dependencies: Iterable[Dependency]) =
     this(sentence, new Graph[DependencyNode](DependencyNode.nodes(dependencies), dependencies))
 
-  def this(sentence: String, dependencies: Iterable[Dependency]) =
+  def this(sentence: Array[String], dependencies: Iterable[Dependency]) =
     this(Some(sentence), new Graph[DependencyNode](dependencies))
 
   def this(dependencies: Iterable[Dependency]) =
     this(None, new Graph[DependencyNode](dependencies))
     
   def collapseXNsubj =
-    new DependencyGraph(this.sentence,
+    new DependencyGraph(this.tokens,
       new Graph[DependencyNode](graph.edges.map { dep =>
         if (dep.label.equals("xsubj") || dep.label.equals("nsubj"))
           new Dependency(dep.source, dep.dest, "subj")
@@ -42,7 +42,7 @@ class DependencyGraph(
           sorted.map(_.pos).mkString(" of "), sorted.head.index)
     }
       
-    new DependencyGraph(sentence, graph.collapse(pred(_))(merge))
+    new DependencyGraph(tokens, graph.collapse(pred(_))(merge))
   }
   
   def collapseNounGroups = {
@@ -71,25 +71,25 @@ class DependencyGraph(
       }
     }
     
-    new DependencyGraph(sentence, graph.collapseGroups(map.values))
+    new DependencyGraph(tokens, graph.collapseGroups(map.values))
   }
   
   def collapseNN =
-    new DependencyGraph(sentence, graph.collapse(_.label.equals("nn")))
+    new DependencyGraph(tokens, graph.collapse(_.label.equals("nn")))
   
   def dot(title: String): String = dot(title, Set.empty, Set.empty)
   
   def dot(title: String, filled: Set[DependencyNode], dotted: Set[Edge[DependencyNode]]): String = {
     val buffer = new StringBuffer(4092)
-    printDOT(buffer, title, filled, dotted)
+    printDOT(buffer, Some(title), filled, dotted)
     buffer.toString
   }
 
-  def printDOT(writer: java.lang.Appendable, title: String = this.sentence.get) {
+  def printDOT(writer: java.lang.Appendable, title: Option[String] = this.tokens.map(_.mkString(" "))) {
     printDOT(writer, title, Set.empty, Set.empty)
   }
 
-  def printDOT(writer: java.lang.Appendable, title: String, filled: Set[DependencyNode], dotted: Set[Edge[DependencyNode]]) {
+  def printDOT(writer: java.lang.Appendable, title: Option[String], filled: Set[DependencyNode], dotted: Set[Edge[DependencyNode]]) {
     def quote(string: String) = "\"" + string + "\""
     def nodeString(node: DependencyNode) = 
       if (graph.nodes.filter(_.text.equals(node.text)).size > 1) 
@@ -101,12 +101,14 @@ class DependencyGraph(
 
     writer.append("digraph g {\n")
 
-    if (this.sentence.isDefined) {
-      val cleanedTitle = title.replaceAll("\\n", "").replaceAll("\"", "'").replaceAll(";", ",")
+    if (this.tokens.isDefined) {
       writer.append(indent + "graph [\n")
       writer.append(indent * 2 + "fontname=\"Helvetica-Oblique\"\n")
       writer.append(indent * 2 + "fontsize=\"12\"\n")
-      writer.append(indent * 2 + "label=\"" + cleanedTitle + "\"\n")
+      if (title.isDefined) {
+	    val cleanedTitle = title.get.replaceAll("\\n", "").replaceAll("\"", "'").replaceAll(";", ",")
+	    writer.append(indent * 2 + "label=\"" + cleanedTitle + "\"\n")
+	  }
       writer.append(indent + "]\n\n")
     }
 
