@@ -130,7 +130,7 @@ class Graph[V] (
       incoming(node).map(new UpEdge(_): DirectedEdge[V])).toSet
     
   def neighbors(v: V, pred: DirectedEdge[V]=>Boolean): Set[V] =
-    dedges(v).filter(pred).map { _ match { 
+    dedges(v).withFilter(pred).map { _ match { 
       case out: DownEdge[_] =>  out.end
       case in: UpEdge[_] =>  in.end
     }}

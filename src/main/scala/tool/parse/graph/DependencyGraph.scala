@@ -36,15 +36,15 @@ class DependencyGraph(
   
   def collapseNNPOf() = {
     def pred(edge: Edge[DependencyNode]) =
-      edge.label.equals("prep_of") && edge.source.pos == "NNP" && edge.dest.pos == "NNP"
+      edge.label.equals("prep_of") && edge.source.postag == "NNP" && edge.dest.postag == "NNP"
     def merge(nodes: Traversable[DependencyNode]) = {
       if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
       val sorted = nodes.toList.sortBy(_.index).view
       new DependencyNode(sorted.map(_.text).mkString(" of "), 
-        if (nodes.forall(_.pos.equals(nodes.head.pos))) 
-          nodes.head.pos
+        if (nodes.forall(_.postag.equals(nodes.head.postag))) 
+          nodes.head.postag
         else
-          sorted.map(_.pos).mkString(" of "), sorted.head.index)
+          sorted.map(_.postag).mkString(" of "), sorted.head.index)
     }
       
     new DependencyGraph(text, this.nodes, graph.collapse(pred(_))(merge))
@@ -60,8 +60,8 @@ class DependencyGraph(
     }
     
     def splitByPos(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
-        case x :: xs => nodes.takeWhile(_.pos.equals(x.pos)) :: 
-          splitByPos(nodes.dropWhile(_.pos.equals(x.pos)))
+        case x :: xs => nodes.takeWhile(_.postag.equals(x.postag)) :: 
+          splitByPos(nodes.dropWhile(_.postag.equals(x.postag)))
         case Nil => Nil
     }
     
@@ -98,9 +98,9 @@ class DependencyGraph(
     def quote(string: String) = "\"" + string + "\""
     def nodeString(node: DependencyNode) = 
       if (graph.nodes.filter(_.text.equals(node.text)).size > 1) 
-        node.text + "_" + node.pos + "_" + node.index
+        node.text + "_" + node.postag + "_" + node.index
       else
-        node.text  + "_" + node.pos
+        node.text  + "_" + node.postag
 
     val indent = " " * 2;
 

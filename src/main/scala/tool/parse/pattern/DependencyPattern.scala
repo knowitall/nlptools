@@ -9,7 +9,7 @@ object DependencyPattern {
   import scala.util.parsing.combinator._
 
   object Parser extends RegexParsers {
-    def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(s) }
+    def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(s, "") }
     def captureNodeMatcher = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher[DependencyNode](s) }
     def nodeMatcher[V]: Parser[NodeMatcher[DependencyNode]] = (captureNodeMatcher | simpleNodeMatcher) ^^ { s => s.asInstanceOf[NodeMatcher[DependencyNode]] }
     
@@ -58,8 +58,8 @@ class DependencyEdgeMatcher(val label: String, val dir: Direction) extends EdgeM
   override def toString = symbol + label + symbol
 }
 
-class DependencyNodeMatcher(val label: String) extends NodeMatcher[DependencyNode] {
-  def this(node: DependencyNode) = this(node.text)
+class DependencyNodeMatcher(val label: String, val postag: String) extends NodeMatcher[DependencyNode] {
+  def this(node: DependencyNode) = this(node.text, node.postag)
   
   override def matches(node: DependencyNode) = node.text == label
   override def toString = label
