@@ -10,7 +10,9 @@ object DependencyPattern {
 
   object Parser extends RegexParsers {
     def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(s, "") }
-    def captureNodeMatcher = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher[DependencyNode](s) }
+    def simpleCaptureNodeMatcher = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher[DependencyNode](s) }
+    def postagCaptureNodeMatcher = "{" ~> """\w+""".r ~ ":" ~ """\w+""".r <~ "}" ^^ { case s~":"~postag => new CaptureNodeMatcher[DependencyNode](s) }
+    def captureNodeMatcher[V]: Parser[CaptureNodeMatcher[DependencyNode]] = simpleCaptureNodeMatcher | postagCaptureNodeMatcher
     def nodeMatcher[V]: Parser[NodeMatcher[DependencyNode]] = (captureNodeMatcher | simpleNodeMatcher) ^^ { s => s.asInstanceOf[NodeMatcher[DependencyNode]] }
     
     def upEdgeMatcher = "<" ~> """\w+""".r <~ "<" ^^ { s => new DependencyEdgeMatcher(s, Direction.Up) }
@@ -58,9 +60,22 @@ class DependencyEdgeMatcher(val label: String, val dir: Direction) extends EdgeM
   override def toString = symbol + label + symbol
 }
 
-class DependencyNodeMatcher(val label: String, val postag: String) extends NodeMatcher[DependencyNode] {
+abstract class AbstractDependencyNodeMatcher(val label: String, val postag: String) 
+extends NodeMatcher[DependencyNode] {
+  override def matches(node: DependencyNode) = true
+  override def toString = label
+}
+
+class DependencyNodeMatcher(label: String, postag: String) 
+extends AbstractDependencyNodeMatcher(label, postag) with MatchLabel {
   def this(node: DependencyNode) = this(node.text, node.postag)
   
-  override def matches(node: DependencyNode) = node.text == label
-  override def toString = label
+}
+
+trait MatchLabel extends AbstractDependencyNodeMatcher {
+  override def matches(node: DependencyNode) = super.matches(node) && node.text == label
+}
+
+trait MatchPostag extends AbstractDependencyNodeMatcher {
+  override def matches(node: DependencyNode) = super.matches(node) && node.text == label
 }
