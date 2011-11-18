@@ -3,6 +3,8 @@ package tool
 package parse
 package graph
 
+import Graph._
+
 sealed trait Direction {
   def name: String
 }

@@ -3,6 +3,8 @@ package tool
 package parse
 package graph
 
+import Graph._
+
 import scala.collection._
 
 class DependencyGraph(

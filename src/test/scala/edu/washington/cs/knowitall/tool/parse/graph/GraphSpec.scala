@@ -10,6 +10,8 @@ import org.specs.runner.JUnit4
 import org.junit.runner.RunWith
 import org.specs.runner.JUnitSuiteRunner
 
+import Graph._
+
 @RunWith(classOf[JUnitSuiteRunner])
 class GraphSpecTest extends JUnit4(GraphSpec)
 object GraphSpec extends Specification {
