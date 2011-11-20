@@ -99,7 +99,7 @@ class DependencyGraph(
   def printDOT(writer: java.lang.Appendable, title: Option[String], filled: Set[DependencyNode], dotted: Set[Edge[DependencyNode]]) {
     def quote(string: String) = "\"" + string + "\""
     def nodeString(node: DependencyNode) = 
-      if (graph.nodes.filter(_.text.equals(node.text)).size > 1) 
+      if (graph.vertices.filter(_.text.equals(node.text)).size > 1) 
         node.text + "_" + node.postag + "_" + node.index
       else
         node.text  + "_" + node.postag
@@ -141,7 +141,7 @@ class DependencyGraph(
   }
 
   def printDependencies() {
-    graph._outgoing.keys.foreach { key =>
+    graph.outgoing.keys.foreach { key =>
       println(key + ": " + graph.outgoing(key).map(edge => edge.label + "(" + edge.dest + ")").mkString(", "))
     }
   }
@@ -152,7 +152,7 @@ class DependencyGraph(
       graph.outgoing(node).foreach { edge => print(edge.dest, indent + 2) }
     }
 
-    val start = graph.nodes.find(node => graph.incoming(node).isEmpty).get
+    val start = graph.vertices.find(node => graph.incoming(node).isEmpty).get
     print(start, 0)
   }
 }

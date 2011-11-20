@@ -7,8 +7,8 @@ import scala.collection._
 import Graph._
 
 class Graph[T] (
-    val vertices: Iterable[T], 
-    val edges: Iterable[Edge[T]]
+    val vertices: Set[T], 
+    val edges: Set[Edge[T]]
   ) {
 
   type G = Graph[T]
@@ -16,36 +16,37 @@ class Graph[T] (
 
   // fields
 
-  val _outgoing = new mutable.HashMap[T, mutable.Set[E]]() 
-    with mutable.MultiMap[T, E]
-  val _incoming = new mutable.HashMap[T, mutable.Set[E]]() 
-    with mutable.MultiMap[T, E]
-  val nodes = edges.map(dep => dep.source).toSet union edges.map(dep => dep.dest).toSet
-  edges.foreach { dep => _outgoing.addBinding(dep.source, dep) }
-  edges.foreach { dep => _incoming.addBinding(dep.dest, dep) }
+  val outgoing = edges.groupBy(_.source).toMap.withDefaultValue(Set.empty)
+  val incoming = edges.groupBy(_.dest).toMap.withDefaultValue(Set.empty) 
 
   // constructors
   
+  def this(edges: Set[Edge[T]]) =
+    this(edges.flatMap(_.vertices), edges)
+
   def this(edges: Iterable[Edge[T]]) =
-    this(Graph.vertices(edges), edges)
-  
-  /* Expand a set of `Vertex`s to all neighbors along immediate edges
+    this(edges.toSet)
+
+  def this(vertices: Iterable[T], edges: Iterable[Edge[T]]) = 
+    this(vertices.toSet, edges.toSet)
+
+  /* Expand a set of verticess to all neighbors along immediate edges
    * that satisfy the supplied predicate. 
    * 
-   * @param  deps  the seed `Vertex`s
+   * @param  vertices  the seed vertices
    * @param  pred  the predicate edges must match to be expanded upon
-   * @return  the  the set of `Vertex`s in the expansion
+   * @return  the  the set of vertices in the expansion
    */
   def expand(vertices: Set[T], pred: DirectedEdge[T]=>Boolean) = {
-    vertices ++ vertices.flatMap { node => neighbors(node, pred) }
+    vertices ++ vertices.flatMap { vertex => neighbors(vertex, pred) }
   }
   
-  /* Iteratively expand the neighbors of a `Vertex` to all
+  /* Iteratively expand the neighbors of a vertex to all
    * neighbors along an edge that satisfy the supplied predicate.
    * 
-   * @param  dep  the seed `Vertex`
+   * @param  v  the seed vertex
    * @param  pred  the predicate edges must match to be expanded upon
-   * @return  the set of `Vertex`s in the expansion
+   * @return  the set of vertices in the expansion
    */
   def connected(v: T, pred: DirectedEdge[T]=>Boolean): Set[T] = {
     def rec(vertices: Set[T], last: Set[T]): Set[T] = {
@@ -59,27 +60,27 @@ class Graph[T] (
 
   def collapse(collapsable: E => Boolean)(implicit merge: Traversable[T] => T): G = {
     // find nn edges
-    val (nndeps, otherdeps) = edges.partition(collapsable)
+    val targetEdges = edges.filter(collapsable)
 
-    // collapse edges by building a map from collapsed nodes
-    // to collections of joined nodes
+    // collapse edges by building a map from collapsed vertices
+    // to collections of joined vertices
     var map: Map[T, mutable.Set[T]] = Map()
-    for (dep <- nndeps) {
+    for (edge <- targetEdges) {
       // dest is already collapsed
-      if (map.contains(dep.dest)) {
-        map(dep.dest) += dep.source
-        map += dep.source -> map(dep.dest)
+      if (map.contains(edge.dest)) {
+        map(edge.dest) += edge.source
+        map += edge.source -> map(edge.dest)
       } // source is already collapsed
-      else if (map.contains(dep.source)) {
-        map(dep.source) += dep.dest
-        map += dep.dest -> map(dep.source)
+      else if (map.contains(edge.source)) {
+        map(edge.source) += edge.dest
+        map += edge.dest -> map(edge.source)
       } // neither is collapsed
       else {
         val set = new mutable.HashSet[T]()
-        set += dep.source
-        set += dep.dest
-        map += dep.dest -> set
-        map += dep.source -> set
+        set += edge.source
+        set += edge.dest
+        map += edge.dest -> set
+        map += edge.source -> set
       }
     }
     
@@ -89,37 +90,31 @@ class Graph[T] (
   def collapse(set: Set[T])(implicit merge: Traversable[T] => T) = collapseGroups(Iterable(set))
   
   def collapseGroups(groups: Iterable[Set[T]])(implicit merge: Traversable[T] => T) = {
-    // convert collapsed nodes to a single Vertex
+    // convert collapsed vertices to a single Vertex
     val transformed = groups.flatMap { vertices =>
-      vertices.map { dep => (dep, merge(vertices)) }
+      vertices.map { v => (v, merge(vertices)) }
     }.toMap
     
     // map other edges to the new vertices
-    val newdeps = edges.flatMap { dep =>
-      val tsource = transformed.get(dep.source)
-      val tdest = transformed.get(dep.dest)
+    val newedges = edges.flatMap { edge =>
+      val tsource = transformed.get(edge.source)
+      val tdest = transformed.get(edge.dest)
       
-      val source = tsource.getOrElse(dep.source)
-      val dest = tdest.getOrElse(dep.dest)
+      val source = tsource.getOrElse(edge.source)
+      val dest = tdest.getOrElse(edge.dest)
       
       if (source == dest) List()
-      else List(new E(source, dest, dep.label))
+      else List(new E(source, dest, edge.label))
     }
 
-    new Graph(newdeps)
+    new Graph(newedges)
   }
 
-  def outgoing(node: T): immutable.Set[E] =
-    _outgoing.getOrElse(node, mutable.HashSet.empty).toSet
+  def edges(vertex: T): Set[E] = outgoing(vertex) union incoming(vertex)
 
-  def incoming(node: T): immutable.Set[E] =
-    _incoming.getOrElse(node, mutable.HashSet.empty).toSet
-
-  def edges(node: T): immutable.Set[E] = (outgoing(node).toSet) union (incoming(node).toSet)
-
-  def dedges(node: T): immutable.Set[DirectedEdge[T]] = 
-    outgoing(node).map(new DownEdge(_): DirectedEdge[T]).union(
-      incoming(node).map(new UpEdge(_): DirectedEdge[T])).toSet
+  def dedges(vertex: T): Set[DirectedEdge[T]] = 
+    outgoing(vertex).map(new DownEdge(_): DirectedEdge[T]).union(
+      incoming(vertex).map(new UpEdge(_): DirectedEdge[T])).toSet
     
   def neighbors(v: T, pred: DirectedEdge[T]=>Boolean): Set[T] =
     dedges(v).withFilter(pred).map { _ match { 
@@ -133,7 +128,7 @@ class Graph[T] (
 
   def successors(v: T) = outgoing(v).map(edge => edge.dest)
 
-  /* Iteratively expand a vertex to all nodes beneath it. 
+  /* Iteratively expand a vertex to all vertices beneath it. 
    * 
    * @param  vertex  the seed vertex
    * @return  the set of vertices beneath `vertex`
@@ -146,7 +141,7 @@ class Graph[T] (
     connected(v, conditional)
   }
 
-  /* Iteratively expand a vertex to all nodes above it. 
+  /* Iteratively expand a vertex to all vertices above it. 
    * 
    * @param  vertex  the seed vertex 
    * @return  the set of vertices beneath `vertex`
@@ -166,8 +161,8 @@ class Graph[T] (
   /* number of edges bordering v */
   def degree(v: T) = indegree(v) + outdegree(v)
 
-  private def toBipath(nodes: List[T]) = {
-    def toEdgeBipath(nodes: List[T]): List[List[DirectedEdge[T]]] = nodes match {
+  private def toBipath(vertices: List[T]) = {
+    def toEdgeBipath(vertices: List[T]): List[List[DirectedEdge[T]]] = vertices match {
       case a :: b :: xs =>
         val out = outgoing(a)
         val in = incoming(a)
@@ -177,21 +172,21 @@ class Graph[T] (
         (outedge ++ inedge).flatMap(edge => toEdgeBipath(b :: xs).map(path => edge :: path)).toList
       case _ => List(List())
     }
-    toEdgeBipath(nodes).map(new Bipath(_))
+    toEdgeBipath(vertices).map(new Bipath(_))
   }
 
   def edgeBipaths(start: T, end: T): List[Bipath[T]] = {
-    val nodePaths = bipaths(start, end)
-    nodePaths.flatMap(np => toBipath(np))
+    val vertexPaths = bipaths(start, end)
+    vertexPaths.flatMap(np => toBipath(np))
   }
 
-  def edgeBipaths(nodes: Set[T]): Set[Bipath[T]] = {
-    val nodePaths = bipaths(nodes)
-    nodePaths.flatMap(np => toBipath(np))
+  def edgeBipaths(vertices: Set[T]): Set[Bipath[T]] = {
+    val vertexPaths = bipaths(vertices)
+    vertexPaths.flatMap(np => toBipath(np))
   }
 
   /**
-   * Find a path from node (start) to node (end).
+   * Find a path from vertex (start) to vertex (end).
    */
   def bipaths(start: T, end: T): List[List[T]] = {
     def bipaths(start: T, path: List[T]): List[List[T]] = {
@@ -203,35 +198,31 @@ class Graph[T] (
   }
 
   /**
-   * Find a path that contains all nodes in (nodes).
+   * Find a path that contains all vertices in (vertices).
    */
-  def bipaths(nodes: Set[T]): Set[List[T]] = {
+  def bipaths(vertices: Set[T]): Set[List[T]] = {
     def bipaths(start: T, path: List[T]): List[List[T]] = {
-      if (nodes.forall(path.contains(_))) List(path)
+      if (vertices.forall(path.contains(_))) List(path)
       else neighbors(start).filter(nb => !path.contains(nb)).toList.flatMap(nb => bipaths(nb, nb :: path))
     }
 
-    nodes.flatMap(start => bipaths(start, List(start)).map(_.reverse))
+    vertices.flatMap(start => bipaths(start, List(start)).map(_.reverse))
   }
 
   def contents(vertex: T)(implicit ord: Ordering[T]): List[String] = inferiors(vertex).toList.sorted.map(vertex => vertex.toString)
 
   def print() {
-    def print(node: T, indent: Int) {
-      println(" " * indent + node)
-      outgoing(node).foreach { edge => print(edge.dest, indent + 2) }
+    def print(vertex: T, indent: Int) {
+      println(" " * indent + vertex)
+      outgoing(vertex).foreach { edge => print(edge.dest, indent + 2) }
     }
 
-    val start = nodes.find(node => incoming(node).isEmpty).get
+    val start = vertices.find(vertex => incoming(vertex).isEmpty).get
     print(start, 0)
   }
 }
 
 object Graph {
-  def vertices[T](edges: Iterable[Edge[T]]) = {
-    edges.flatMap(edge => List(edge.source, edge.dest)).toSet
-  }
-
   class Edge[T] (
       val source: T,
       val dest: T,

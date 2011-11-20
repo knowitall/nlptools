@@ -30,7 +30,7 @@ class Pattern[T](val matchers: List[Matcher[T]]) extends Function[Graph[T], List
   }
   
   def apply(graph: Graph[T]): List[Match[T]] = {
-    graph.nodes.view.toList.flatMap(apply(graph, _).toList)
+    graph.vertices.toList.flatMap(apply(graph, _).toList)
   }
 
   def apply(graph: Graph[T], vertex: T): Option[Match[T]] = {
