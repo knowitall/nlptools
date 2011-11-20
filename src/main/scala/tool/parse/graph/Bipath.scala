@@ -5,11 +5,11 @@ package graph
 
 import Graph._
 
-class Bipath[V](val path: List[DirectedEdge[V]]) {
-  def edges = path.foldRight[Set[Edge[V]]](Set()) { case (item, set) => set + item.edge }
+class Bipath[T](val path: List[DirectedEdge[T]]) {
+  def edges = path.foldRight[Set[Edge[T]]](Set()) { case (item, set) => set + item.edge }
   def nodes = path.head.start :: path.map(_.end)
   def start = path.head.start
-  def collapse(pred: Edge[V]=>Boolean, merge: (V, V) => V) = {
+  def collapse(pred: Edge[T]=>Boolean, merge: (T, T) => T) = {
     if (path.forall(dep => pred(dep.edge))) {
       this
     } else {

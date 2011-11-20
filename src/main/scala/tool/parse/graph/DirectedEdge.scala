@@ -17,13 +17,13 @@ object Direction {
   }
 }
 
-sealed abstract class DirectedEdge[V](val edge: Edge[V]) {
-  def start: V
-  def end: V
+sealed abstract class DirectedEdge[T](val edge: Edge[T]) {
+  def start: T
+  def end: T
   def dir: Direction
-  def switchStart(newStart: V): DirectedEdge[V]
-  def switchEnd(newEnd: V): DirectedEdge[V]
-  def flip: DirectedEdge[V]
+  def switchStart(newStart: T): DirectedEdge[T]
+  def switchEnd(newEnd: T): DirectedEdge[T]
+  def flip: DirectedEdge[T]
   
   override def toString() = edge.toString
   def canEqual(that: Any): Boolean
@@ -33,38 +33,38 @@ sealed abstract class DirectedEdge[V](val edge: Edge[V]) {
   }
 }
 
-class UpEdge[V](edge: Edge[V]) extends DirectedEdge[V](edge) {
+class UpEdge[T](edge: Edge[T]) extends DirectedEdge[T](edge) {
   def start = edge.dest
   def end = edge.source
   def dir = Direction.Up
-  def switchStart(newStart: V) =
-    new UpEdge(new Edge[V](edge.source, newStart, edge.label))
-  def switchEnd(newEnd: V) =
-    new UpEdge(new Edge[V](newEnd, edge.dest, edge.label))
-  def flip = new DownEdge[V](edge)
+  def switchStart(newStart: T) =
+    new UpEdge(new Edge[T](edge.source, newStart, edge.label))
+  def switchEnd(newEnd: T) =
+    new UpEdge(new Edge[T](newEnd, edge.dest, edge.label))
+  def flip = new DownEdge[T](edge)
   
   override def toString() = "Up(" + super.toString + ")"
   override def canEqual(that: Any) = that.isInstanceOf[UpEdge[_]]
   override def hashCode() = (edge.hashCode + 2) * 37
 }
 object UpEdge {
-  def unapply[V](dedge: DownEdge[V]) = Some(dedge.edge)
+  def unapply[T](dedge: DownEdge[T]) = Some(dedge.edge)
 }
 
-class DownEdge[V](edge: Edge[V]) extends DirectedEdge[V](edge) {
+class DownEdge[T](edge: Edge[T]) extends DirectedEdge[T](edge) {
   def start = edge.source
   def end = edge.dest
   def dir = Direction.Down
-  def switchStart(newStart: V) =
-    new DownEdge(new Edge[V](newStart, edge.dest, edge.label))
-  def switchEnd(newEnd: V) =
-    new DownEdge(new Edge[V](edge.source, newEnd, edge.label))
-  def flip = new UpEdge[V](edge)
+  def switchStart(newStart: T) =
+    new DownEdge(new Edge[T](newStart, edge.dest, edge.label))
+  def switchEnd(newEnd: T) =
+    new DownEdge(new Edge[T](edge.source, newEnd, edge.label))
+  def flip = new UpEdge[T](edge)
   
   override def toString() = "Down(" + super.toString + ")"
   override def canEqual(that: Any) = that.isInstanceOf[DownEdge[_]]
   override def hashCode() = (edge.hashCode + 1) * 37
 }
 object DownEdge {
-  def unapply[V](dedge: DownEdge[V]) = Some(dedge.edge)
+  def unapply[T](dedge: DownEdge[T]) = Some(dedge.edge)
 }

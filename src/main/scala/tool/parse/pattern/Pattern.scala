@@ -15,7 +15,7 @@ import collection._
   * matcher (necessarily) alternates between a NodeMatcher and
   * and EdgeMatcher.
   */
-class Pattern[V](val matchers: List[Matcher[V]]) extends Function[Graph[V], List[Match[V]]] {
+class Pattern[T](val matchers: List[Matcher[T]]) extends Function[Graph[T], List[Match[T]]] {
   // ensure that the matchers alternate
   matchers.view.zipWithIndex.foreach { case(m, i) => 
     (m, (i%2)) match {
@@ -25,19 +25,19 @@ class Pattern[V](val matchers: List[Matcher[V]]) extends Function[Graph[V], List
     }
   }
 
-  def this(edgeMatchers: List[EdgeMatcher[V]], nodeMatchers: List[NodeMatcher[V]]) = {
+  def this(edgeMatchers: List[EdgeMatcher[T]], nodeMatchers: List[NodeMatcher[T]]) = {
     this(pimp.Iterables.interleave(nodeMatchers, edgeMatchers).toList)
   }
   
-  def apply(graph: Graph[V]): List[Match[V]] = {
+  def apply(graph: Graph[T]): List[Match[T]] = {
     graph.nodes.view.toList.flatMap(apply(graph, _).toList)
   }
 
-  def apply(graph: Graph[V], vertex: V): Option[Match[V]] = {
-    def rec(matchers: List[Matcher[V]], 
-      vertex: V, 
-      edges: List[DirectedEdge[V]],
-      groups: List[(String, V)]): Option[Match[V]] = matchers match {
+  def apply(graph: Graph[T], vertex: T): Option[Match[T]] = {
+    def rec(matchers: List[Matcher[T]], 
+      vertex: T, 
+      edges: List[DirectedEdge[T]],
+      groups: List[(String, T)]): Option[Match[T]] = matchers match {
 
       case (m: CaptureNodeMatcher[_]) :: xs =>
         if (m.matches(vertex)) rec(xs, vertex, edges, (m.alias, vertex) :: groups)
@@ -59,7 +59,7 @@ class Pattern[V](val matchers: List[Matcher[V]]) extends Function[Graph[V], List
     rec(this.matchers, vertex, List(), List())
   }
   
-  def replaceMatcherAt(index: Int, replacement: NodeMatcher[V]) = 
+  def replaceMatcherAt(index: Int, replacement: NodeMatcher[T]) = 
     new Pattern(
       matchers.view.zipWithIndex.map {
         case (matcher, i) => if (i == index) replacement else matcher 
@@ -70,30 +70,30 @@ class Pattern[V](val matchers: List[Matcher[V]]) extends Function[Graph[V], List
   }
 }
 
-class Match[V](val pattern: Pattern[V], 
-  val bipath: Bipath[V], 
-  val groups: Map[String, V]) {
+class Match[T](val pattern: Pattern[T], 
+  val bipath: Bipath[T], 
+  val groups: Map[String, T]) {
   override def toString = bipath.toString + ": " + groups.toString
 }
 
-abstract class Matcher[V]
+abstract class Matcher[T]
 
 /**
   * Trait to match dependency graph edges. 
   */
-trait EdgeMatcher[V] extends Matcher[V] {
-  def matches(edge: DirectedEdge[V]): Boolean
+trait EdgeMatcher[T] extends Matcher[T] {
+  def matches(edge: DirectedEdge[T]): Boolean
 }
 
 /**
   * Trait to match dependency graph nodes. 
   */
-trait NodeMatcher[V] extends Matcher[V] {
-  def matches(node: V): Boolean
+trait NodeMatcher[T] extends Matcher[T] {
+  def matches(node: T): Boolean
 }
 
-class TrivialNodeMatcher[V] extends NodeMatcher[V] {
-  override def matches(edge: V) = true
+class TrivialNodeMatcher[T] extends NodeMatcher[T] {
+  override def matches(edge: T) = true
   override def toString = ".*"
 }
 
@@ -102,13 +102,13 @@ class TrivialNodeMatcher[V] extends NodeMatcher[V] {
   * @param  alias  the name of the captured node
   * @param  matcher  the matcher to apply
   */
-class CaptureNodeMatcher[V](val alias: String, val matcher: NodeMatcher[V]) 
-extends NodeMatcher[V] {
+class CaptureNodeMatcher[T](val alias: String, val matcher: NodeMatcher[T]) 
+extends NodeMatcher[T] {
   /**
     * Convenience constructor that uses the TrivialNodeMatcher.
     */
   def this(alias: String) = this(alias, new TrivialNodeMatcher)
 
-  override def matches(node: V) = matcher.matches(node)
+  override def matches(node: T) = matcher.matches(node)
   override def toString = "{" + alias + "}"
 }
