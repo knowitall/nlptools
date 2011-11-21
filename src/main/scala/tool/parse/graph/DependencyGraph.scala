@@ -9,30 +9,31 @@ import scala.collection._
 
 class DependencyGraph(
     val text: Option[String],
-    val nodes: Array[DependencyNode], 
+    val nodes: List[DependencyNode], 
+    val dependencies: List[Dependency],
     val graph: Graph[DependencyNode]
   ) {
   
   // constructors
   
-  def this(text: Option[String], nodes: Array[DependencyNode], dependencies: Iterable[Dependency]) =
-    this(text, nodes, new Graph[DependencyNode](DependencyNode.nodes(dependencies), dependencies))
+  def this(text: Option[String], nodes: List[DependencyNode], dependencies: Iterable[Dependency]) =
+    this(text, nodes, dependencies.toList, new Graph[DependencyNode](DependencyNode.nodes(dependencies), dependencies))
     
-  def this(text: String, nodes: Array[DependencyNode], dependencies: Iterable[Dependency]) {
+  def this(text: String, nodes: List[DependencyNode], dependencies: Iterable[Dependency]) {
     this(Some(text), nodes, dependencies)
   }
 
   def this(text: Option[String], dependencies: Iterable[Dependency]) =
-    this(text, dependencies.flatMap(_.vertices).toArray, dependencies)
+    this(text, dependencies.flatMap(_.vertices).toSet.toList.sorted, dependencies)
 
   def this(text: String, dependencies: Iterable[Dependency]) =
-    this(Some(text), dependencies.flatMap(_.vertices).toArray, dependencies)
+    this(Some(text), dependencies.flatMap(_.vertices).toSet.toList.sorted, dependencies)
 
   def this(dependencies: Iterable[Dependency]) =
     this(None, dependencies)
     
   def collapseXNsubj =
-    new DependencyGraph(this.text, this.nodes,
+    new DependencyGraph(this.text, this.nodes, this.dependencies,
       new Graph[DependencyNode](graph.edges.map { dep =>
         if (dep.label.equals("xsubj") || dep.label.equals("nsubj"))
           new Dependency(dep.source, dep.dest, "subj")
@@ -44,15 +45,15 @@ class DependencyGraph(
       edge.label.equals("prep_of") && edge.source.postag == "NNP" && edge.dest.postag == "NNP"
     def merge(nodes: Traversable[DependencyNode]) = {
       if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
-      val sorted = nodes.toList.sortBy(_.index).view
+      val sorted = nodes.toList.sorted.view
       new DependencyNode(sorted.map(_.text).mkString(" of "), 
         if (nodes.forall(_.postag.equals(nodes.head.postag))) 
           nodes.head.postag
         else
-          sorted.map(_.postag).mkString(" of "), sorted.head.index)
+          sorted.map(_.postag).mkString(" of "), sorted.map(_.indices) reduce (_ ++ _))
     }
       
-    new DependencyGraph(text, this.nodes, graph.collapse(pred(_))(merge))
+    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred(_))(merge))
   }
   
   def collapseNounGroups = {
@@ -72,7 +73,7 @@ class DependencyGraph(
     
     var map: Map[DependencyNode, Set[DependencyNode]] = Map()
     for (group <- groups) {
-      val nodes = group.toList.sortBy(_.index)
+      val nodes = group.toList.sorted
       val sets = splitByPos(nodes).map(new mutable.HashSet[DependencyNode]() ++ _)
       for (set <- sets) {
         for (node <- set) {
@@ -81,11 +82,11 @@ class DependencyGraph(
       }
     }
     
-    new DependencyGraph(text, nodes, graph.collapseGroups(map.values))
+    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(map.values))
   }
   
   def collapseNN =
-    new DependencyGraph(text, nodes, graph.collapse(_.label.equals("nn")))
+    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(_.label.equals("nn")))
   
   def dot(title: String): String = dot(title, Set.empty, Set.empty)
   
@@ -103,7 +104,7 @@ class DependencyGraph(
     def quote(string: String) = "\"" + string + "\""
     def nodeString(node: DependencyNode) = 
       if (graph.vertices.filter(_.text.equals(node.text)).size > 1) 
-        node.text + "_" + node.postag + "_" + node.index
+        node.text + "_" + node.postag + "_" + node.indices.mkString("_")
       else
         node.text  + "_" + node.postag
 
@@ -120,10 +121,23 @@ class DependencyGraph(
     }
     writer.append(indent + "]\n\n")
 
-    writer.append(indent + "node [\n")
-    writer.append(indent * 2 + "color=gray\n")
-    writer.append(indent * 2 + "fillcolor=lightgray\n")
-    writer.append(indent + "]\n\n")
+    for (node <- this.nodes) {
+      var parts: List[String] = List()
+      if (filled contains node) {
+        parts ::= "fillcolor=grey"
+        parts ::= "style=filled"
+      }
+
+      if (node.postag.startsWith("NN")) {
+        parts ::= "color=green"
+      }
+      else {
+        parts ::= "color=grey"
+      }
+
+      val brackets = "[" + parts.mkString(",") + "]"
+      writer.append(indent + quote(nodeString(node)) + " " + brackets)
+    }
     
     for (node <- filled) {
       writer.append(indent + quote(nodeString(node)) + " [style=filled,fillcolor=gray]\n")
@@ -135,7 +149,19 @@ class DependencyGraph(
     
     writer.append("\n")
     for (dep <- graph.edges) {
-      val brackets = "[label=\"" + dep.label + "\"" + { if (dotted(dep)) ",style=\"dotted\"" else "" } + "]"
+      val color = dep.label match {
+        case "neg" => Some("red")
+        case "amod" | "advmod" => Some("lightblue")
+        case "dt" | "punc" => Some("grey")
+        case x if x startsWith "prep" => Some("blue")
+        case _ => None
+      }
+
+      var parts = List("label=\"" + dep.label + "\"")
+      if (color.isDefined) parts ::= "color=\"" + color.get + "\""
+      if (dotted(dep)) parts ::= "style=\"dotted\""
+
+      val brackets = "[" + parts.mkString(",") + "]"
       writer.append(indent + quote(nodeString(dep.source)) + " -> " + quote(nodeString(dep.dest)) + " " + brackets + "\n")
     }
     writer.append("}")

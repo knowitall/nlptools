@@ -7,9 +7,9 @@ import common.main._
 
 trait DependencyParser {
   def dependencies(string: String): Iterable[Dependency]
-  def dependencyGraph(string: String) = {
+  def dependencyGraph(string: String): DependencyGraph = {
     val dependencies = this.dependencies(string)
-    val nodes = dependencies.flatMap(dep => List(dep.source, dep.dest)).toArray.sorted
+    val nodes = dependencies.toList.flatMap(dep => List(dep.source, dep.dest)).sorted
     new DependencyGraph(string, nodes, dependencies)
   }
 }
