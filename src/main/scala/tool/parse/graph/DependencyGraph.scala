@@ -9,24 +9,27 @@ import scala.collection._
 
 class DependencyGraph(
     val text: Option[String],
-    val nodes: Option[Array[DependencyNode]], 
+    val nodes: Array[DependencyNode], 
     val graph: Graph[DependencyNode]
   ) {
   
   // constructors
   
-  def this(text: Option[String], nodes: Option[Array[DependencyNode]], dependencies: Iterable[Dependency]) =
+  def this(text: Option[String], nodes: Array[DependencyNode], dependencies: Iterable[Dependency]) =
     this(text, nodes, new Graph[DependencyNode](DependencyNode.nodes(dependencies), dependencies))
     
   def this(text: String, nodes: Array[DependencyNode], dependencies: Iterable[Dependency]) {
-    this(Some(text), Some(nodes), dependencies)
+    this(Some(text), nodes, dependencies)
   }
 
+  def this(text: Option[String], dependencies: Iterable[Dependency]) =
+    this(text, dependencies.flatMap(_.vertices).toArray, dependencies)
+
   def this(text: String, dependencies: Iterable[Dependency]) =
-    this(Some(text), None, dependencies)
+    this(Some(text), dependencies.flatMap(_.vertices).toArray, dependencies)
 
   def this(dependencies: Iterable[Dependency]) =
-    this(None, None, new Graph[DependencyNode](dependencies))
+    this(None, dependencies)
     
   def collapseXNsubj =
     new DependencyGraph(this.text, this.nodes,
@@ -108,16 +111,14 @@ class DependencyGraph(
 
     writer.append("digraph g {\n")
 
-    if (this.nodes.isDefined) {
-      writer.append(indent + "graph [\n")
-      writer.append(indent * 2 + "fontname=\"Helvetica-Oblique\"\n")
-      writer.append(indent * 2 + "fontsize=\"12\"\n")
-      if (title.isDefined) {
-	    val cleanedTitle = title.get.replaceAll("\\n", "").replaceAll("\"", "'").replaceAll(";", ",")
-	    writer.append(indent * 2 + "label=\"" + cleanedTitle + "\"\n")
-	  }
-      writer.append(indent + "]\n\n")
+    writer.append(indent + "graph [\n")
+    writer.append(indent * 2 + "fontname=\"Helvetica-Oblique\"\n")
+    writer.append(indent * 2 + "fontsize=\"12\"\n")
+    if (title.isDefined) {
+      val cleanedTitle = title.get.replaceAll("\\n", "").replaceAll("\"", "'").replaceAll(";", ",")
+      writer.append(indent * 2 + "label=\"" + cleanedTitle + "\"\n")
     }
+    writer.append(indent + "]\n\n")
 
     writer.append(indent + "node [\n")
     writer.append(indent * 2 + "color=gray\n")
