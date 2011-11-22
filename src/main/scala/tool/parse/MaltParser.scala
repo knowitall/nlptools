@@ -56,6 +56,6 @@ class MaltParser(modelname: String = "engmalt.linear", logfile: String = null) e
   
   override def dependencyGraph(string: String, post: Boolean): DependencyGraph = {
     val (nodes, deps) = depHelper(string, post)
-    new DependencyGraph(string, nodes.toArray.sortBy(_._1).map(_._2), deps)
+    new DependencyGraph(string, nodes.toList.sortBy(_._1).map(_._2), deps)
   }
 }
