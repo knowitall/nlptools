@@ -58,6 +58,12 @@ class Pattern[T](val matchers: List[Matcher[T]]) extends Function[Graph[T], List
 
     rec(this.matchers, vertex, List(), List())
   }
+
+  def replaceMatcherAt(replacements: List[(Int, NodeMatcher[T])]) = 
+    new Pattern(
+      matchers.view.zipWithIndex.map {
+        case (matcher, i) => replacements.find(_._1 == i).map(_._2) getOrElse matcher
+      }.toList)
   
   def replaceMatcherAt(index: Int, replacement: NodeMatcher[T]) = 
     new Pattern(

@@ -175,20 +175,20 @@ class Graph[T] (
     toEdgeBipath(vertices).map(new Bipath(_))
   }
 
-  def edgeBipaths(start: T, end: T): List[Bipath[T]] = {
-    val vertexPaths = bipaths(start, end)
+  def bipaths(start: T, end: T): List[Bipath[T]] = {
+    val vertexPaths = vertexBipaths(start, end)
     vertexPaths.flatMap(np => toBipath(np))
   }
 
-  def edgeBipaths(vertices: Set[T]): Set[Bipath[T]] = {
-    val vertexPaths = bipaths(vertices)
+  def bipaths(vertices: Set[T], maxLength: Option[Int] = None): Set[Bipath[T]] = {
+    val vertexPaths = vertexBipaths(vertices, maxLength)
     vertexPaths.flatMap(np => toBipath(np))
   }
 
   /**
    * Find a path from vertex (start) to vertex (end).
    */
-  def bipaths(start: T, end: T): List[List[T]] = {
+  def vertexBipaths(start: T, end: T): List[List[T]] = {
     def bipaths(start: T, path: List[T]): List[List[T]] = {
       if (start.equals(end)) List(path)
       else neighbors(start).filter(nb => !path.contains(nb)).toList.flatMap(nb => bipaths(nb, nb :: path))
@@ -200,13 +200,14 @@ class Graph[T] (
   /**
    * Find a path that contains all vertices in (vertices).
    */
-  def bipaths(vertices: Set[T]): Set[List[T]] = {
-    def bipaths(start: T, path: List[T]): List[List[T]] = {
-      if (vertices.forall(path.contains(_))) List(path)
-      else neighbors(start).filter(nb => !path.contains(nb)).toList.flatMap(nb => bipaths(nb, nb :: path))
+  private def vertexBipaths(vertices: Set[T], maxLength: Option[Int] = None): Set[List[T]] = {
+    def bipaths(start: T, path: List[T], length: Int): List[List[T]] = {
+      if (maxLength.isDefined && length > maxLength.get) List()
+      else if (vertices.forall(path.contains(_))) List(path)
+      else neighbors(start).filter(nb => !path.contains(nb)).toList.flatMap(nb => bipaths(nb, nb :: path, length + 1))
     }
 
-    vertices.flatMap(start => bipaths(start, List(start)).map(_.reverse))
+    vertices.flatMap(start => bipaths(start, List(start), 0).map(_.reverse))
   }
 
   def contents(vertex: T)(implicit ord: Ordering[T]): List[String] = inferiors(vertex).toList.sorted.map(vertex => vertex.toString)
