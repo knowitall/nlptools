@@ -10,8 +10,7 @@ import opennlp.tools.tokenize._;
 
 class OpenNlpTokenizer(val model: TokenizerModel) extends Tokenizer {
   def this(modelName: String = "en-token.bin") =
-    this(new TokenizerModel(
-      classOf[OpenNlpTokenizer].getClassLoader.getResourceAsStream(modelName)))
+    this(new TokenizerModel(OpenNlpTokenizer.loadModel(modelName)))
 
   val tokenizer = new TokenizerME(model)
 
@@ -22,4 +21,10 @@ object OpenNlpTokenizer extends LineProcessor {
   val tokenizer = new OpenNlpTokenizer()
   override def process(sentence: String) = 
     tokenizer.tokenize(sentence).mkString(" ")
+
+  private def loadModel(name: String) = {
+    val resource = classOf[OpenNlpTokenizer].getClassLoader.getResourceAsStream(name)
+    if (resource == null) throw new IllegalArgumentException("could not find resource: " + name)
+    else resource
+  }
 }
