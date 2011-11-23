@@ -43,8 +43,10 @@ class DependencyNode(val text: String, val postag: String, val indices: SortedSe
     this(text, postag, SortedSet(index))
   
   override def compare(that: DependencyNode) = {
-	if (this.indices.exists(that.indices.contains)) throw new IllegalStateException("overlapping ranges cannot be compared")
-	else this.indices.max.compare(that.indices.max)
+    if (this == that) 0
+    else if (this.indices.exists(that.indices.contains)) 
+      throw new IllegalStateException("nonequal overlapping ranges cannot be compared: " + this.toFullString + " and " + that.toFullString)
+    else this.indices.max.compare(that.indices.max)
   }
   override def toString() = this.text
   def toFullString = this.text + "_" + this.postag + "_" + this.indices.mkString("_")

@@ -121,7 +121,7 @@ class DependencyGraph(
     }
     writer.append(indent + "]\n\n")
 
-    for (node <- this.nodes) {
+    for (node <- this.graph.vertices) {
       var parts: List[String] = List()
       if (filled contains node) {
         parts ::= "fillcolor=grey"
@@ -136,8 +136,9 @@ class DependencyGraph(
       }
 
       val brackets = "[" + parts.mkString(",") + "]"
-      writer.append(indent + quote(nodeString(node)) + " " + brackets)
+      writer.append(indent + quote(nodeString(node)) + " " + brackets + "\n")
     }
+    writer.append("\n")
     
     for (node <- filled) {
       writer.append(indent + quote(nodeString(node)) + " [style=filled,fillcolor=gray]\n")
@@ -152,7 +153,8 @@ class DependencyGraph(
       val color = dep.label match {
         case "neg" => Some("red")
         case "amod" | "advmod" => Some("lightblue")
-        case "dt" | "punc" => Some("grey")
+        case "det" | "punct" => Some("lightgrey")
+        case "aux" => Some("grey")
         case x if x startsWith "prep" => Some("blue")
         case _ => None
       }
