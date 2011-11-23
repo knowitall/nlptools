@@ -9,14 +9,14 @@ object DependencyPattern {
   import scala.util.parsing.combinator._
 
   object Parser extends RegexParsers {
-    def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(s, "") }
+    def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(Some(s), None) with MatchLabel }
     def simpleCaptureNodeMatcher = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher[DependencyNode](s) }
-    def postagCaptureNodeMatcher = "{" ~> """\w+""".r ~ ":" ~ """\w+""".r <~ "}" ^^ { case s~":"~postag => new CaptureNodeMatcher[DependencyNode](s) }
+    def postagCaptureNodeMatcher = "{" ~> """\w+""".r ~ ":" ~ """[^}\p{Space}]+""".r <~ "}" ^^ { case s~":"~postag => new CaptureNodeMatcher[DependencyNode](s, new DependencyNodeMatcher(None, Some(postag)) with MatchPostag) }
     def captureNodeMatcher[V]: Parser[CaptureNodeMatcher[DependencyNode]] = simpleCaptureNodeMatcher | postagCaptureNodeMatcher
     def nodeMatcher[V]: Parser[NodeMatcher[DependencyNode]] = (captureNodeMatcher | simpleNodeMatcher) ^^ { s => s.asInstanceOf[NodeMatcher[DependencyNode]] }
     
-    def upEdgeMatcher = "<" ~> """\w+""".r <~ "<" ^^ { s => new DependencyEdgeMatcher(s, Direction.Up) }
-    def downEdgeMatcher = ">" ~> """\w+""".r <~ ">" ^^ { s => new DependencyEdgeMatcher(s, Direction.Down) }
+    def upEdgeMatcher = "<" ~> """[^<]+""".r <~ "<" ^^ { s => new DependencyEdgeMatcher(s, Direction.Up) }
+    def downEdgeMatcher = ">" ~> """[^>]+""".r <~ ">" ^^ { s => new DependencyEdgeMatcher(s, Direction.Down) }
     def edgeMatcher[V]: Parser[EdgeMatcher[DependencyNode]] = (upEdgeMatcher | downEdgeMatcher) ^^ { s => s.asInstanceOf[EdgeMatcher[DependencyNode]] }
     
     // def chain = nodeMatcher ~! edgeMatcher ^^ { case n ~ e => List(n, e) }
@@ -31,7 +31,6 @@ object DependencyPattern {
       this.parse(s) match {
         case Success(matchers, _) => new Pattern[DependencyNode](matchers)
         case e: NoSuccess =>
-          System.err.println(e)
           throw new IllegalArgumentException("improper pattern syntax: " + s)
       }
     }
@@ -43,7 +42,7 @@ object DependencyPattern {
    */
   def create(bipath: Bipath[DependencyNode]) = new Pattern[DependencyNode](
     bipath.path.map(dedge => new DependencyEdgeMatcher(dedge)),
-    new DependencyNodeMatcher(bipath.path.head.start) :: bipath.path.map(dedge => new DependencyNodeMatcher(dedge.end)))
+    new DependencyNodeMatcher(bipath.path.head.start) with MatchLabel :: bipath.path.map(dedge => new DependencyNodeMatcher(dedge.end) with MatchLabel))
 
   def deserialize(string: String): Pattern[DependencyNode] = {
     Parser(string)
@@ -60,22 +59,25 @@ class DependencyEdgeMatcher(val label: String, val dir: Direction) extends EdgeM
   override def toString = symbol + label + symbol
 }
 
-abstract class AbstractDependencyNodeMatcher(val label: String, val postag: String) 
+abstract class AbstractDependencyNodeMatcher(val label: Option[String], val postag: Option[String]) 
 extends NodeMatcher[DependencyNode] {
   override def matches(node: DependencyNode) = true
-  override def toString = label
+  override def toString = label.getOrElse(postag.getOrElse(""))
 }
 
-class DependencyNodeMatcher(label: String, postag: String) 
-extends AbstractDependencyNodeMatcher(label, postag) with MatchLabel {
-  def this(node: DependencyNode) = this(node.text, node.postag)
+class DependencyNodeMatcher(text: Option[String], postag: Option[String]) 
+extends AbstractDependencyNodeMatcher(text, postag) {
+  if (!text.isDefined && !postag.isDefined)
+    throw new IllegalArgumentException("either text or postag must be defined.")
   
+  def this(node: DependencyNode) = this(Some(node.text), Some(node.postag))
 }
 
 trait MatchLabel extends AbstractDependencyNodeMatcher {
-  override def matches(node: DependencyNode) = super.matches(node) && node.text == label
+  override def matches(node: DependencyNode) = super.matches(node) && node.text == label.getOrElse(throw new IllegalArgumentException("text must be defined"))
 }
 
 trait MatchPostag extends AbstractDependencyNodeMatcher {
-  override def matches(node: DependencyNode) = super.matches(node) && node.text == label
+  override def matches(node: DependencyNode) = 
+    super.matches(node) && node.postag == postag.getOrElse(throw new IllegalArgumentException("postag must be defined"))
 }
