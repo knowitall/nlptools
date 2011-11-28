@@ -11,7 +11,7 @@ object DependencyPattern {
   object Parser extends RegexParsers {
     def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(Some(s), None) with MatchLabel }
     def simpleCaptureNodeMatcher = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher[DependencyNode](s) }
-    def postagCaptureNodeMatcher = "{" ~> """\w+""".r ~ ":" ~ """[^}\p{Space}]+""".r <~ "}" ^^ { case s~":"~postag => new CaptureNodeMatcher[DependencyNode](s, new DependencyNodeMatcher(None, Some(postag)) with MatchPostag) }
+    def postagCaptureNodeMatcher = "{" ~> """\w+""".r ~ ":" ~ """[^}\p{Space}]+""".r <~ "}" ^^ { case s~":"~postag => new CaptureNodeMatcher[DependencyNode](s, new DependencyNodeMatcher(None, Some(postag)) with MatchPostag) { override def toString = "{" + this.alias + ":" + this.matcher.asInstanceOf[DependencyNodeMatcher].postag.get + "}"} }
     def captureNodeMatcher[V]: Parser[CaptureNodeMatcher[DependencyNode]] = simpleCaptureNodeMatcher | postagCaptureNodeMatcher
     def nodeMatcher[V]: Parser[NodeMatcher[DependencyNode]] = (captureNodeMatcher | simpleNodeMatcher) ^^ { s => s.asInstanceOf[NodeMatcher[DependencyNode]] }
     
@@ -30,8 +30,8 @@ object DependencyPattern {
     def apply(s: String): Pattern[DependencyNode] = {
       this.parse(s) match {
         case Success(matchers, _) => new Pattern[DependencyNode](matchers)
-        case e: NoSuccess =>
-          throw new IllegalArgumentException("improper pattern syntax: " + s)
+        case fail: Failure =>
+          throw new IllegalArgumentException("improper pattern syntax. " + fail.msg + ": " + s)
       }
     }
   }
