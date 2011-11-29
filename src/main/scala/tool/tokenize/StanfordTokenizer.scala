@@ -4,7 +4,7 @@ package tokenize
 
 import common.main.LineProcessor
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 
 import edu.stanford.nlp.ling._;
 import edu.stanford.nlp.process._;

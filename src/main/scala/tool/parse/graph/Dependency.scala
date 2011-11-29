@@ -30,7 +30,7 @@ extends Edge[DependencyNode](source, dest, label) {
 }
 
 object Dependency {
-  val Serialized = new Regex("""(.*)\(\s*(.*?_.*?_.*?),\s*(.*?_.*?_.*?)\s*\)""")
+  val Serialized = new Regex("""(.+)\(\s*(.*?_.*?_.*?),\s*(.*?_.*?_.*?)\s*\)""")
   def deserialize(string: String) = {
     val Serialized(label, source, dest) = string
     new Dependency(

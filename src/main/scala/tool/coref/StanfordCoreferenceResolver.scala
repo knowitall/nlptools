@@ -4,7 +4,7 @@ package coref
 
 import common.ling.Word
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 
 import edu.stanford.nlp.pipeline.Annotation
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;

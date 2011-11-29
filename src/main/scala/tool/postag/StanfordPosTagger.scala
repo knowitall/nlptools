@@ -4,7 +4,7 @@ package postag
 
 import common.main.LineProcessor
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 
 import edu.stanford.nlp.ling.CoreLabel
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;

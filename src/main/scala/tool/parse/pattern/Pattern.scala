@@ -26,7 +26,7 @@ class Pattern[T](val matchers: List[Matcher[T]]) extends Function[Graph[T], List
   }
 
   def this(edgeMatchers: List[EdgeMatcher[T]], nodeMatchers: List[NodeMatcher[T]]) = {
-    this(pimp.Iterables.interleave(nodeMatchers, edgeMatchers).toList)
+    this(enrich.Iterables.interleave(nodeMatchers, edgeMatchers).toList)
   }
   
   def apply(graph: Graph[T]): List[Match[T]] = {
@@ -58,6 +58,9 @@ class Pattern[T](val matchers: List[Matcher[T]]) extends Function[Graph[T], List
 
     rec(this.matchers, vertex, List(), List())
   }
+  
+  def edgeMatchers = matchers.collect { case m: EdgeMatcher[_] => m }
+  def nodeMatchers = matchers.collect { case m: NodeMatcher[_] => m }
 
   def replaceMatcherAt(replacements: List[(Int, NodeMatcher[T])]) = 
     new Pattern(
@@ -89,6 +92,7 @@ abstract class Matcher[T]
   */
 trait EdgeMatcher[T] extends Matcher[T] {
   def matches(edge: DirectedEdge[T]): Boolean
+  def canMatch(edge: Graph.Edge[T]): Boolean = this.matches(new UpEdge(edge)) || this.matches(new DownEdge(edge))
 }
 
 /**

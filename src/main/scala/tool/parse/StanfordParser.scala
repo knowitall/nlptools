@@ -8,7 +8,7 @@ import collection._
 import java.io.ObjectInputStream
 import java.util.Arrays
 import edu.stanford.nlp.trees.PennTreebankLanguagePack
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 import edu.stanford.nlp.ling.CoreLabel
 import edu.stanford.nlp.ling.CoreLabel
 import scala.io.Source
