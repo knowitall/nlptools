@@ -33,27 +33,27 @@ class Pattern[T](val matchers: List[Matcher[T]]) extends Function[Graph[T], List
     graph.vertices.toList.flatMap(apply(graph, _).toList)
   }
 
-  def apply(graph: Graph[T], vertex: T): Option[Match[T]] = {
+  def apply(graph: Graph[T], vertex: T): List[Match[T]] = {
     def rec(matchers: List[Matcher[T]], 
       vertex: T, 
       edges: List[DirectedEdge[T]],
-      groups: List[(String, T)]): Option[Match[T]] = matchers match {
+      groups: List[(String, T)]): List[Match[T]] = matchers match {
 
       case (m: CaptureNodeMatcher[_]) :: xs =>
         if (m.matches(vertex)) rec(xs, vertex, edges, (m.alias, vertex) :: groups)
-        else None
+        else List()
       case (m: NodeMatcher[_]) :: xs => 
         if (m.matches(vertex)) rec(xs, vertex, edges, groups)
-        else None
+        else List()
       case (m: EdgeMatcher[_]) :: xs => 
         // only consider edges that have not been used
         val uniqueEdges = graph.dedges(vertex)--edges.flatMap(e => List(e, e.flip))
         // search for an edge that matches
-        uniqueEdges.find(m.matches(_)).flatMap { dedge =>
+        uniqueEdges.filter(m.matches(_)).flatMap { dedge =>
           // we found one, so recurse
           rec(xs, dedge.end, dedge :: edges, groups)
-        }
-      case _ => Some(new Match(this, new Bipath(edges.reverse), groups.toMap))
+        }(scala.collection.breakOut)
+      case _ => List(new Match(this, new Bipath(edges.reverse), groups.toMap))
     }
 
     rec(this.matchers, vertex, List(), List())
