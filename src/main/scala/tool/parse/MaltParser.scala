@@ -2,16 +2,15 @@ package edu.washington.cs.knowitall
 package tool
 package parse
 
-import stem.MorphaStemmer
-import tokenize.OpenNlpTokenizer
-import postag.OpenNlpPosTagger
+import scala.collection.JavaConversions._
 
 import edu.stanford.nlp.ling.CoreLabel
 import edu.stanford.nlp.parser.maltparser.MaltParserInterface
-import graph._
-import opennlp.tools.postag.POSTagger
-import scala.collection.JavaConversions._
-import edu.stanford.nlp.ling.CoreLabel
+import graph.DependencyGraph
+import graph.DependencyNode
+import postag.OpenNlpPosTagger
+import stem.MorphaStemmer
+import tokenize.OpenNlpTokenizer
 
 object MaltParser extends DependencyParserMain {
   var model = "engmalt.linear"

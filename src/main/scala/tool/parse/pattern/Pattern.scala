@@ -8,7 +8,6 @@ import common._
 import graph._
 import collection._
 
-
 /**
   * Represents a pattern with which graphs can be searched.  
   * A pattern will start and end with a node matcher, and every

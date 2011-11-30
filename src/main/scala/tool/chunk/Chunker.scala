@@ -2,7 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package chunk
 
-import edu.washington.cs.knowitall._
 import common.main.LineProcessor
 
 abstract class Chunker(val postagger: postag.PosTagger) {

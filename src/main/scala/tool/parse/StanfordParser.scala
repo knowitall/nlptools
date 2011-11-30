@@ -2,16 +2,13 @@ package edu.washington.cs.knowitall
 package tool
 package parse
 
-import graph._
-import edu.stanford.nlp.parser.lexparser.LexicalizedParser
-import collection._
-import java.io.ObjectInputStream
-import java.util.Arrays
-import edu.stanford.nlp.trees.PennTreebankLanguagePack
 import scala.collection.JavaConversions._
-import edu.stanford.nlp.ling.CoreLabel
-import edu.stanford.nlp.ling.CoreLabel
-import scala.io.Source
+
+import edu.stanford.nlp.parser.lexparser.LexicalizedParser
+import edu.stanford.nlp.trees.PennTreebankLanguagePack
+import graph.Dependency
+import graph.DependencyGraph
+import graph.DependencyNode
 
 object StanfordParser extends DependencyParserMain {
   lazy val parser = new StanfordParser
