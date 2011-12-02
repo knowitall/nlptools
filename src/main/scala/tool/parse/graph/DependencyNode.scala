@@ -17,7 +17,7 @@ object DependencyNode {
     val postag = if (nodes.forall(_.postag.equals(nodes.head.postag))) 
           nodes.head.postag
         else
-          sorted.map(_.postag).mkString(" ")
+          sorted.map(_.postag).head
     val indices = sorted.map(_.indices).reduce(_ ++ _)
     new DependencyNode(text, postag, indices)
   }
@@ -59,6 +59,10 @@ class DependencyNode(val text: String, val postag: String, val indices: SortedSe
     case _ => false
   }
   override def hashCode() = this.text.hashCode * 37 + this.postag.hashCode * 37 + this.indices.hashCode
+
+  def isProperNoun = postag == "NNP" || postag == "NNPS"
+  def isCommonNoun = postag == "NN" || postag == "NNS"
+  def isAdjective = postag == "JJ" || postag == "JJS"
 
   def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, indices)
   def serialize = {

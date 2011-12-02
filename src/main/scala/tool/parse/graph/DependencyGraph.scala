@@ -85,8 +85,13 @@ class DependencyGraph(
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(map.values))
   }
   
-  def collapseNN =
-    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(_.label.equals("nn")))
+  def collapseNN = {
+    def pred(edge: Edge[DependencyNode]) = { edge.label.equals("nn") && 
+      (edge.source.isProperNoun && edge.dest.isProperNoun || edge.source.isCommonNoun && edge.dest.isCommonNoun)
+    }
+
+    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred(_)))
+  }
   
   def dot(title: String): String = dot(title, Set.empty, Set.empty)
   
