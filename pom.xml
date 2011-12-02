@@ -84,25 +84,25 @@
       <groupId>edu.stanford</groupId>
       <artifactId>stanford-parse-models</artifactId>
       <version>2011-09-16</version>
-      <scope>provided</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>edu.stanford</groupId>
       <artifactId>stanford-postag-models</artifactId>
       <version>2011-09-16</version>
-      <scope>provided</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>edu.stanford</groupId>
       <artifactId>stanford-ner-models</artifactId>
       <version>2011-09-16</version>
-      <scope>provided</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>edu.stanford</groupId>
       <artifactId>stanford-dcoref-models</artifactId>
       <version>2011-09-16</version>
-      <scope>provided</scope>
+      <scope>runtime</scope>
     </dependency>
     <!-- These are included in stanford-models
   <dependency>
@@ -121,25 +121,25 @@
       <groupId>edu.washington.cs.knowitall</groupId>
       <artifactId>opennlp-postag-models</artifactId>
       <version>1.5</version>
-      <scope>provided</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>edu.washington.cs.knowitall</groupId>
       <artifactId>opennlp-parse-models</artifactId>
       <version>1.5</version>
-      <scope>provided</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>edu.washington.cs.knowitall</groupId>
       <artifactId>opennlp-tokenize-models</artifactId>
       <version>1.5</version>
-      <scope>provided</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>edu.washington.cs.knowitall</groupId>
       <artifactId>opennlp-sent-models</artifactId>
       <version>1.5</version>
-      <scope>provided</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>uk.ac.man.mib</groupId>
