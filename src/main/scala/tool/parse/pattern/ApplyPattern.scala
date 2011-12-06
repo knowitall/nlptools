@@ -28,7 +28,7 @@ object ApplyPattern {
           println("pattern: " + p)
           for (line <- sentenceSource.getLines) {
             val Array(text, deps) = line.split("\t")
-            val graph = new DependencyGraph(Dependencies.deserialize(deps))
+            val graph = DependencyGraph(Dependencies.deserialize(deps))
             for (m <- p(graph.graph)) {
               println(m)
             }

@@ -13,6 +13,14 @@ class DependencyGraph(
     val dependencies: List[Dependency],
     val graph: Graph[DependencyNode]
   ) {
+
+  // check that the nodes match the nodes in the dependencies
+  for (vertex <- graph.vertices) {
+    nodes.filter(node => vertex.indices superset node.indices).map(_.text) match {
+      case Nil => throw new IllegalArgumentException("no node at index: " + vertex.indices + " (" + vertex + ")")
+      case vs => require(vs.mkString(" ") == vertex.text, "text at index " + vertex.indices + " does not match: " + vertex.text + " != " + vs.mkString(" "))
+    }
+  }
   
   // constructors
   
@@ -22,15 +30,6 @@ class DependencyGraph(
   def this(text: String, nodes: List[DependencyNode], dependencies: Iterable[Dependency]) {
     this(Some(text), nodes, dependencies)
   }
-
-  def this(text: Option[String], dependencies: Iterable[Dependency]) =
-    this(text, dependencies.flatMap(_.vertices).toSet.toList.sorted, dependencies)
-
-  def this(text: String, dependencies: Iterable[Dependency]) =
-    this(Some(text), dependencies.flatMap(_.vertices).toSet.toList.sorted, dependencies)
-
-  def this(dependencies: Iterable[Dependency]) =
-    this(None, dependencies)
 
   def collapseXNsubj =
     new DependencyGraph(this.text, this.nodes, this.dependencies,
@@ -190,5 +189,50 @@ class DependencyGraph(
 
     val start = graph.vertices.find(node => graph.incoming(node).isEmpty).get
     print(start, 0)
+  }
+}
+
+object DependencyGraph {
+  private def apply(text: Option[String], dependencies: Iterable[Dependency]): DependencyGraph = {
+    val vertices = SortedSet(dependencies.flatMap(_.vertices).toSeq :_*).toList
+    val graph = new Graph[DependencyNode](vertices, dependencies)
+    val nodes = inferCollapsedNodes(vertices, graph)
+    new DependencyGraph(text, nodes, dependencies.toList, graph)
+  }
+
+  def apply(text: String, dependencies: Iterable[Dependency]): DependencyGraph =
+    apply(Some(text), dependencies)
+
+  def apply(dependencies: Iterable[Dependency]): DependencyGraph =
+    apply(None, dependencies)
+
+  private def inferCollapsedNodes(nodes: List[DependencyNode], graph: Graph[DependencyNode]): List[DependencyNode] = {
+    /** at present, only infer prepositions.  Any outgoing "prep_.*" edge 
+     *  means that a preposition can be inferred.  You can't restrict that
+     *  the edge goes to `y` because "son of Graham Bell" has the prep_of
+     *  edge between "son" and "Bell". */
+    def infer(x: DependencyNode, y: DependencyNode): Option[DependencyNode] = {
+      println("infer: " + x + ", " + y + ": " + graph.outgoing(x))
+      graph.outgoing(x).find { edge => 
+       edge.label.startsWith("prep_")
+      }.map(_.label.dropWhile(_ != '_').tail).map(text => new DependencyNode(text, "IN", Interval.between(x.indices, y.indices)))
+    }
+
+    // recurse over the nodes, looking for gaps to infer
+    def rec(nodes: List[DependencyNode]): List[DependencyNode] = nodes match {
+      case x :: y :: tail => 
+        // no gap
+        if (x.indices borders y.indices) x :: rec(y :: tail) 
+        // a gap of 1, let's see if we can infer
+        else if (x.indices.distance(y.indices) == 1) infer(x, y) match {
+          case None => x :: rec(y :: tail)
+          case Some(z) => x :: z :: rec(y :: tail)
+        }
+        /* the gap is too large */
+        else x :: rec(y :: tail)
+      case tail => tail
+    }
+
+    rec(nodes)
   }
 }

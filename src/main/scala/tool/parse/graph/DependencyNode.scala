@@ -49,7 +49,7 @@ class DependencyNode(val text: String, val postag: String, val indices: Interval
       throw new IllegalStateException("intersecting intervals cannot be compared: " + this.toFullString + " and " + that.toFullString)
     else this.indices.max.compare(that.indices.max)
   }
-  override def toString() = this.text
+  override def toString() = toFullString //this.text
   def toFullString = this.text + "_" + this.postag + "_" + this.indices.mkString("_")
   
   def canEqual(that: Any) = that.isInstanceOf[DependencyNode]
