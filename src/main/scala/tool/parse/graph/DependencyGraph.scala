@@ -4,8 +4,8 @@ package parse
 package graph
 
 import Graph._
-
 import scala.collection._
+import collection.immutable.Interval
 
 class DependencyGraph(
     val text: Option[String],
@@ -31,7 +31,7 @@ class DependencyGraph(
 
   def this(dependencies: Iterable[Dependency]) =
     this(None, dependencies)
-    
+
   def collapseXNsubj =
     new DependencyGraph(this.text, this.nodes, this.dependencies,
       new Graph[DependencyNode](graph.edges.map { dep =>
@@ -50,7 +50,7 @@ class DependencyGraph(
         if (nodes.forall(_.postag.equals(nodes.head.postag))) 
           nodes.head.postag
         else
-          sorted.map(_.postag).mkString(" of "), sorted.map(_.indices) reduce (_ ++ _))
+          sorted.map(_.postag).mkString(" of "), Interval.union(sorted.map(_.indices)))
     }
       
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred(_))(merge))
@@ -86,7 +86,9 @@ class DependencyGraph(
   }
   
   def collapseNN = {
-    def pred(edge: Edge[DependencyNode]) = { edge.label.equals("nn") && 
+    def pred(edge: Edge[DependencyNode]) = { println(edge.source.indices + " & " + edge.dest.indices + ":" + edge.source.indices.borders(edge.dest.indices))
+      edge.label.equals("nn") && 
+      edge.source.indices.borders(edge.dest.indices) &&
       (edge.source.isProperNoun && edge.dest.isProperNoun || edge.source.isCommonNoun && edge.dest.isCommonNoun)
     }
 

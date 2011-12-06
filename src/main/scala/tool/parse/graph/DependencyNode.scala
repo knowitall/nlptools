@@ -3,8 +3,9 @@ package tool
 package parse
 package graph
 
-import stem.Stemmer
 import scala.collection.immutable.SortedSet
+import collection.immutable.Interval
+import tool.stem.Stemmer
 
 object DependencyNode {
   def fromLists(tokens: Iterable[String], postag: Iterable[String]) =
@@ -18,7 +19,7 @@ object DependencyNode {
           nodes.head.postag
         else
           sorted.map(_.postag).head
-    val indices = sorted.map(_.indices).reduce(_ ++ _)
+    val indices = Interval.union(sorted.map(_.indices))
     new DependencyNode(text, postag, indices)
   }
 
@@ -38,14 +39,14 @@ object DependencyNode {
   }
 }
 
-class DependencyNode(val text: String, val postag: String, val indices: SortedSet[Int]) extends Ordered[DependencyNode] {
+class DependencyNode(val text: String, val postag: String, val indices: Interval) extends Ordered[DependencyNode] {
   def this(text: String, postag: String, index: Int) = 
-    this(text, postag, SortedSet(index))
+    this(text, postag, Interval.singleton(index))
   
   override def compare(that: DependencyNode) = {
     if (this == that) 0
-    else if (this.indices.exists(that.indices.contains)) 
-      throw new IllegalStateException("nonequal overlapping ranges cannot be compared: " + this.toFullString + " and " + that.toFullString)
+    else if (this.indices intersects that.indices) 
+      throw new IllegalStateException("intersecting intervals cannot be compared: " + this.toFullString + " and " + that.toFullString)
     else this.indices.max.compare(that.indices.max)
   }
   override def toString() = this.text
@@ -66,7 +67,7 @@ class DependencyNode(val text: String, val postag: String, val indices: SortedSe
 
   def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, indices)
   def serialize = {
-    if (indices.size > 1) throw new IllegalStateException("cannot serialize node spanning multiple indices")
-    text.replaceAll("[_(),]", "") + "_" + postag + "_" + indices.head;
+    if (indices.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple indices")
+    text.replaceAll("[_(),]", "") + "_" + postag + "_" + indices.start;
   }
 }
