@@ -85,7 +85,7 @@ class DependencyGraph(
   }
   
   def collapseNN = {
-    def pred(edge: Edge[DependencyNode]) = { println(edge.source.indices + " & " + edge.dest.indices + ":" + edge.source.indices.borders(edge.dest.indices))
+    def pred(edge: Edge[DependencyNode]) = { 
       edge.label.equals("nn") && 
       edge.source.indices.borders(edge.dest.indices) &&
       (edge.source.isProperNoun && edge.dest.isProperNoun || edge.source.isCommonNoun && edge.dest.isCommonNoun)
@@ -212,7 +212,6 @@ object DependencyGraph {
      *  the edge goes to `y` because "son of Graham Bell" has the prep_of
      *  edge between "son" and "Bell". */
     def infer(x: DependencyNode, y: DependencyNode): Option[DependencyNode] = {
-      println("infer: " + x + ", " + y + ": " + graph.outgoing(x))
       graph.outgoing(x).find { edge => 
        edge.label.startsWith("prep_")
       }.map(_.label.dropWhile(_ != '_').tail).map(text => new DependencyNode(text, "IN", Interval.between(x.indices, y.indices)))
