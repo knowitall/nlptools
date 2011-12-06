@@ -16,9 +16,9 @@ class DependencyGraph(
 
   // check that the nodes match the nodes in the dependencies
   for (vertex <- graph.vertices) {
-    nodes.filter(node => vertex.indices superset node.indices).map(_.text) match {
-      case Nil => throw new IllegalArgumentException("no node at index: " + vertex.indices + " (" + vertex + ")")
-      case vs => require(vs.mkString(" ") == vertex.text, "text at index " + vertex.indices + " does not match: " + vertex.text + " != " + vs.mkString(" "))
+    nodes.find(node => vertex.indices == node.indices).map(_.text) match {
+      case None => if (vertex.indices.length == 1) throw new IllegalArgumentException("no node at index: " + vertex.indices + " (" + vertex + ")")
+      case Some(v) => require(v == vertex.text, "text at index " + vertex.indices + " does not match: " + vertex.text + " != " + v)
     }
   }
   
@@ -45,11 +45,12 @@ class DependencyGraph(
     def merge(nodes: Traversable[DependencyNode]) = {
       if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
       val sorted = nodes.toList.sorted.view
+      sorted.sliding(2).foreach(l => require((l.head.indices distance l.last.indices) == 2, "two nodes to merge don't have a distance of 2 (distance is "+(l.head.indices distance l.last.indices)+"): " + l.mkString(", ")))
       new DependencyNode(sorted.map(_.text).mkString(" of "), 
         if (nodes.forall(_.postag.equals(nodes.head.postag))) 
           nodes.head.postag
         else
-          sorted.map(_.postag).mkString(" of "), Interval.union(sorted.map(_.indices)))
+          sorted.map(_.postag).mkString(" of "), Interval.span(sorted.map(_.indices)))
     }
       
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred(_))(merge))
@@ -93,6 +94,8 @@ class DependencyGraph(
 
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred(_)))
   }
+
+  def normalize = collapseNN.collapseNNPOf
   
   def dot(title: String): String = dot(title, Set.empty, Set.empty)
   
@@ -223,7 +226,7 @@ object DependencyGraph {
         // no gap
         if (x.indices borders y.indices) x :: rec(y :: tail) 
         // a gap of 1, let's see if we can infer
-        else if (x.indices.distance(y.indices) == 1) infer(x, y) match {
+        else if (x.indices.distance(y.indices) == 2) infer(x, y) match {
           case None => x :: rec(y :: tail)
           case Some(z) => x :: z :: rec(y :: tail)
         }
