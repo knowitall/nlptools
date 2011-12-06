@@ -193,7 +193,7 @@ class DependencyGraph(
 }
 
 object DependencyGraph {
-  private def apply(text: Option[String], dependencies: Iterable[Dependency]): DependencyGraph = {
+  def apply(text: Option[String], dependencies: Iterable[Dependency]): DependencyGraph = {
     val vertices = SortedSet(dependencies.flatMap(_.vertices).toSeq :_*).toList
     val graph = new Graph[DependencyNode](vertices, dependencies)
     val nodes = inferCollapsedNodes(vertices, graph)
