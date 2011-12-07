@@ -81,17 +81,27 @@ class DependencyGraph(
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(groupsToCollapse))
   }
   
-  def collapseNN = {
-    def pred(edge: Edge[DependencyNode]) = { 
-      edge.label.equals("nn") && 
-      edge.source.indices.borders(edge.dest.indices) &&
-      (edge.source.isProperNoun && edge.dest.isProperNoun || edge.source.isCommonNoun && edge.dest.isCommonNoun)
+  def normalize = simplifyGraphPostags.collapseNounGroups.collapseNNPOf
+
+  def simplifyGraphPostags = {
+    def simplifyPostag(postag: String) = postag match {
+      // obvious winners
+      case "JJS" => "JJ"
+      case "NNS" => "NN"
+      case "NNPS" => "NNP"
+      // not as clear
+      
+      /* VB - Verb, base form
+         VBD - Verb, past tense
+         VBG - Verb, gerund or present participle
+         VBN - Verb, past participle
+         VBP - Verb, non-3rd person singular present
+         VBZ - Verb, 3rd person singular present */
+      case "VB" | "VBD" | "VBG" | "VBN" | "VBP" | "VBZ" => "VB"
     }
-
-    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred(_)))
+    def mapPostags(f: String=>String) = graph.map(v => new DependencyNode(v.text, f(v.postag), v.indices))
+    new DependencyGraph(this.text, this.nodes, this.dependencies, mapPostags(simplifyPostag))
   }
-
-  def normalize = collapseNN.collapseNNPOf
   
   def dot(title: String): String = dot(title, Set.empty, Set.empty)
   
