@@ -40,7 +40,7 @@ class DependencyGraph(
       }))
   
   def collapseNNPOf = {
-    def pred(edge: Edge[DependencyNode]) =
+    def pred(edge: Edge[DependencyNode]) = (edge.source.indices distance edge.dest.indices) == 2 &&
       edge.label.equals("prep_of") && edge.source.postag == "NNP" && edge.dest.postag == "NNP"
     def merge(nodes: Traversable[DependencyNode]) = {
       if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
