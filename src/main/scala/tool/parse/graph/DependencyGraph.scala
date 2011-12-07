@@ -58,31 +58,27 @@ class DependencyGraph(
   
   def collapseNounGroups = {
     def pred(dedge: DirectedEdge[DependencyNode]) = dedge.edge.label.equals("nn")
-    var groups: Set[Set[DependencyNode]] = Set()
-    for (dep <- graph.edges) {
-      if (dep.label.equals("nn")) {
-        groups += graph.connected(dep.source, pred(_))
-      }
-    }
+    // get components connect by nn edges
+    val groups: Set[Set[DependencyNode]] = (for (dep <- graph.edges; if dep.label == "nn") yield {
+      graph.connected(dep.source, pred(_))
+    })(scala.collection.breakOut)
     
+    // segment ordered dependency nodes by POS tag
     def splitByPos(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
         case x :: xs => nodes.takeWhile(_.postag.equals(x.postag)) :: 
           splitByPos(nodes.dropWhile(_.postag.equals(x.postag)))
         case Nil => Nil
     }
     
-    var map: Map[DependencyNode, Set[DependencyNode]] = Map()
-    for (group <- groups) {
+    val groupsToCollapse: Set[Set[DependencyNode]] = (for {
+      // for each connect nn component
+      group <- groups
+      // split the component by POS tag
       val nodes = group.toList.sorted
-      val sets = splitByPos(nodes).map(new mutable.HashSet[DependencyNode]() ++ _)
-      for (set <- sets) {
-        for (node <- set) {
-          map += node -> set
-        }
-      }
-    }
+      set <- splitByPos(nodes).map(_.toSet)
+    } yield(set))(scala.collection.breakOut)
     
-    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(map.values))
+    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(groupsToCollapse))
   }
   
   def collapseNN = {
