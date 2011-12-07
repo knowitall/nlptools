@@ -29,10 +29,8 @@ object DependencyGraphSpec extends Specification {
     val dependencies = Dependencies.deserialize("nsubjpass(born_VBN_5, Graham_NNP_0); nn(California_NNP_3, Southern_NNP_2); prep_of(Graham_NNP_0, California_NNP_3); auxpass(born_VBN_5, was_VBD_4); prep_in(born_VBN_5, Germany_NNP_7)")
     val dgraph = DependencyGraph(dependencies).normalize
 
-    println(dgraph.graph.vertices.mkString(", "))
-
     "prep_of between NNPs are collapsed " in {
-      dgraph.graph.vertices.find(_.text == "Graham of Southern California") must beSome[DependencyNode]
+      dgraph.graph.vertices.map(_.text) must contain("Graham of Southern California")
     }
   }
 
@@ -42,12 +40,22 @@ object DependencyGraphSpec extends Specification {
     val dgraph = DependencyGraph(dependencies).normalize
 
     "prep_of between NNPs are collapsed " in {
-      // dgraph.graph.vertices.find(_.text == "Graham of Southern California") must beSome[DependencyNode]
+      dgraph.graph.vertices.map(_.text) must contain("Federal Courts")
+      dgraph.graph.vertices.map(_.text) must contain("United States of America")
+      dgraph.graph.vertices.map(_.text) must contain("State of California")
+      dgraph.graph.vertices.map(_.text) must contain("State Courts")
+      dgraph.graph.vertices.map(_.text) must contain("Los Angeles County")
     }
   }
 
+  val testNNPOfCollapse3 = {
+    // pathological nn edges (nn components with non-adjacent nodes)
+    val dependencies = Dependencies.deserialize("nsubj(relays_VBZ_1, Paul_NNP_0); prep_to(relays_VBZ_1, us_PRP_3); det(will_NN_6, the_DT_4); amod(will_NN_6, good_JJ_5); dobj(relays_VBZ_1, will_NN_6); poss(Father_NNP_10, our_PRP$_8); amod(Father_NNP_10, heavenly_JJ_9); prep_of(will_NN_6, Father_NNP_10); det(Jesus_NNP_14, the_DT_12); nn(Jesus_NNP_14, Lord_NNP_13); prep_of(will_NN_6, Jesus_NNP_14); conj_and(Father_NNP_10, Jesus_NNP_14); punct(relays_VBZ_1, _,_15); xcomp(relays_VBZ_1, saying_VBG_16); punct(BE_VB_19, _,_17); nsubj(BE_VB_19, PEACE_NNP_18); nsubj(LOVE_JJ_25, PEACE_NNP_18); parataxis(saying_VBG_16, BE_VB_19); det(BRETHREN_NN_22, THE_DT_21); prep_to(BE_VB_19, BRETHREN_NN_22); punct(BE_VB_19, _,_23); parataxis(saying_VBG_16, LOVE_JJ_25); conj_and(BE_VB_19, LOVE_JJ_25); nn(FATHER_NNP_32, FAITH_NNP_27); punct(FAITH_NNP_27, _,_28); nn(GOD_NNP_30, FROM_NNP_29); conj(FAITH_NNP_27, GOD_NNP_30); det(FATHER_NNP_32, THE_DT_31); prep_with(LOVE_JJ_25, FATHER_NNP_32); det(CHRIST-Eph_NNP_37, THE_DT_34); nn(CHRIST-Eph_NNP_37, LORD_NNP_35); nn(CHRIST-Eph_NNP_37, JESUS_NNP_36); prep_with(LOVE_JJ_25, CHRIST-Eph_NNP_37); conj_and(FATHER_NNP_32, CHRIST-Eph_NNP_37); num(CHRIST-Eph_NNP_37, 6:23_CD_38); punct(relays_VBZ_1, ._._39)")
+    val dgraph = DependencyGraph(dependencies).normalize
+  }
 
   testPrepositionInferral
   testNNPOfCollapse
   testNNPOfCollapse2
+  testNNPOfCollapse3
 }

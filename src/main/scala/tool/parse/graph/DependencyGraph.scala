@@ -65,9 +65,19 @@ class DependencyGraph(
     
     // segment ordered dependency nodes by POS tag
     def splitByPos(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
-        case x :: xs => nodes.takeWhile(_.postag.equals(x.postag)) :: 
-          splitByPos(nodes.dropWhile(_.postag.equals(x.postag)))
+      case x :: xs => nodes.takeWhile(_.postag.equals(x.postag)) :: 
+        splitByPos(nodes.dropWhile(_.postag.equals(x.postag)))
+      case Nil => Nil
+    }
+
+    def splitByAdjacency(nodes: List[DependencyNode]): List[List[DependencyNode]] = {
+      def rec(nodes: List[DependencyNode], result: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
+        case x :: Nil => (x :: result) :: Nil
+        case x :: y :: xs => if (x.indices borders y.indices) rec(y :: xs, x :: result) else (x :: result) :: rec(y :: xs, Nil)
         case Nil => Nil
+      }
+
+      rec(nodes, Nil)
     }
     
     val groupsToCollapse: Set[Set[DependencyNode]] = (for {
@@ -75,10 +85,15 @@ class DependencyGraph(
       group <- groups
       // split the component by POS tag
       val nodes = group.toList.sorted
-      set <- splitByPos(nodes).map(_.toSet)
+      set <- splitByPos(nodes).flatMap(splitByAdjacency).map(_.toSet)
     } yield(set))(scala.collection.breakOut)
     
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(groupsToCollapse))
+  }
+
+  def collapseDeterminers = {
+    def pred(edge: Edge[DependencyNode]) = (edge.source.indices borders edge.dest.indices) && edge.label.equals("det")
+    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred _))
   }
   
   def normalize = simplifyGraphPostags.collapseNounGroups.collapseNNPOf
