@@ -58,6 +58,9 @@ class Graph[T] (
     rec(Set(v), Set(v))
   }
 
+  def map[U](f: T=>U) = new Graph(
+    this.edges.map(edge => new Edge(f(edge.source), f(edge.dest), edge.label)))
+
   def collapse(collapsable: E => Boolean)(implicit merge: Traversable[T] => T): G = {
     // find nn edges
     val targetEdges = edges.filter(collapsable)
