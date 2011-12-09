@@ -240,7 +240,7 @@ object DependencyGraph {
     def infer(x: DependencyNode, y: DependencyNode): Option[DependencyNode] = {
       graph.outgoing(x).find { edge => 
        edge.label.startsWith("prep_")
-      }.map(_.label.dropWhile(_ != '_').tail).map(text => new DependencyNode(text, "IN", Interval.between(x.indices, y.indices)))
+      }.map(_.label.dropWhile(_ != '_').tail).map(text => new DependencyNode(text.replaceAll("_", " "), "IN", Interval.between(x.indices, y.indices)))
     }
 
     // recurse over the nodes, looking for gaps to infer

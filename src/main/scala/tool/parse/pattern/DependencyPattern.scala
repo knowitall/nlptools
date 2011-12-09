@@ -5,6 +5,13 @@ package pattern
 
 import graph._
 
+class DependencyPattern(matchers: List[Matcher[DependencyNode]]) extends Pattern[DependencyNode](matchers) {
+  def prepCount = (0 /: depEdgeMatchers) ((acc, m) => if (m.label.startsWith("prep")) 1 + acc else acc)
+
+  def depEdgeMatchers = matchers.collect{case m: DependencyEdgeMatcher => m}
+  def depNodeMatchers = matchers.collect{case m: DependencyNodeMatcher => m}
+}
+
 object DependencyPattern {
   import scala.util.parsing.combinator._
 
