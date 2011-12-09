@@ -5,13 +5,6 @@ package pattern
 
 import graph._
 
-class DependencyPattern(matchers: List[Matcher[DependencyNode]]) extends Pattern[DependencyNode](matchers) {
-  def prepCount = (0 /: depEdgeMatchers) ((acc, m) => if (m.label.startsWith("prep")) 1 + acc else acc)
-
-  def depEdgeMatchers = matchers.collect{case m: DependencyEdgeMatcher => m}
-  def depNodeMatchers = matchers.collect{case m: DependencyNodeMatcher => m}
-}
-
 object DependencyPattern {
   import scala.util.parsing.combinator._
 
@@ -62,7 +55,10 @@ class DependencyEdgeMatcher(val label: String, val dir: Direction) extends EdgeM
   override def matches(edge: DirectedEdge[DependencyNode]) =
     edge.dir == dir && edge.edge.label == label
     
-  def symbol = dir match { case Direction.Up => "<" case Direction.Down => ">" }
+  def symbol = dir match { 
+    case Direction.Up => "<" 
+    case Direction.Down => ">" 
+  }
   override def toString = symbol + label + symbol
 }
 
