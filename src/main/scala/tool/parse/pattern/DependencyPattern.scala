@@ -5,6 +5,11 @@ package pattern
 
 import graph._
 
+class DependencyPattern(matchers: List[Matcher[DependencyNode]]) extends Pattern[DependencyNode](matchers) {
+  def depEdgeMatchers = matchers.collect { case m: DependencyEdgeMatcher => m }
+  def depNodeMatchers = matchers.collect { case m: DependencyNodeMatcher => m }
+}
+
 object DependencyPattern {
   import scala.util.parsing.combinator._
 
@@ -29,7 +34,7 @@ object DependencyPattern {
 
     def apply(s: String): Pattern[DependencyNode] = {
       this.parse(s) match {
-        case Success(matchers, _) => new Pattern[DependencyNode](matchers)
+        case Success(matchers, _) => new DependencyPattern(matchers)
         case fail: Failure =>
           throw new IllegalArgumentException("improper pattern syntax. " + fail.msg + ": " + s)
       }
@@ -55,17 +60,33 @@ class DependencyEdgeMatcher(val label: String, val dir: Direction) extends EdgeM
   override def matches(edge: DirectedEdge[DependencyNode]) =
     edge.dir == dir && edge.edge.label == label
     
+  override def flip = new DependencyEdgeMatcher(label, dir.flip)
+    
   def symbol = dir match { 
     case Direction.Up => "<" 
     case Direction.Down => ">" 
   }
   override def toString = symbol + label + symbol
+  
+  def canEqual(that: Any) = that.isInstanceOf[DependencyEdgeMatcher]
+  override def equals(that: Any) = that match {
+    case that: DependencyEdgeMatcher => (that canEqual this) && this.label == that.label && this.dir == that.dir
+    case _ => false
+  }
+  override def hashCode = this.label.hashCode + 39 * this.dir.hashCode
 }
 
-abstract class AbstractDependencyNodeMatcher(val label: Option[String], val postag: Option[String]) 
+abstract class AbstractDependencyNodeMatcher(val text: Option[String], val postag: Option[String]) 
 extends NodeMatcher[DependencyNode] {
   override def matches(node: DependencyNode) = true
-  override def toString = label.getOrElse(postag.getOrElse(""))
+  override def toString = text.getOrElse(postag.getOrElse(""))
+  
+  def canEqual(that: Any) = that.isInstanceOf[DependencyNodeMatcher]
+  override def equals(that: Any) = that match {
+    case that: DependencyNodeMatcher => (that canEqual this) && this.text == that.text && this.postag == that.postag
+    case _ => false
+  }
+  override def hashCode = text.hashCode + 39 * postag.hashCode
 }
 
 class DependencyNodeMatcher(text: Option[String], postag: Option[String]) 
@@ -77,7 +98,7 @@ extends AbstractDependencyNodeMatcher(text, postag) {
 }
 
 trait MatchLabel extends AbstractDependencyNodeMatcher {
-  override def matches(node: DependencyNode) = super.matches(node) && node.text == label.getOrElse(throw new IllegalArgumentException("text must be defined"))
+  override def matches(node: DependencyNode) = super.matches(node) && node.text == text.getOrElse(throw new IllegalArgumentException("text must be defined"))
 }
 
 trait MatchPostag extends AbstractDependencyNodeMatcher {

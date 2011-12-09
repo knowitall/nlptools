@@ -92,6 +92,7 @@ abstract class Matcher[T]
 trait EdgeMatcher[T] extends Matcher[T] {
   def matches(edge: DirectedEdge[T]): Boolean
   def canMatch(edge: Graph.Edge[T]): Boolean = this.matches(new UpEdge(edge)) || this.matches(new DownEdge(edge))
+  def flip: EdgeMatcher[T]
 }
 
 /**
@@ -104,6 +105,13 @@ trait NodeMatcher[T] extends Matcher[T] {
 class TrivialNodeMatcher[T] extends NodeMatcher[T] {
   override def matches(edge: T) = true
   override def toString = ".*"
+  
+  def canEqual(that: Any) = that.isInstanceOf[TrivialNodeMatcher[_]]
+  override def equals(that: Any) = that match {
+    case that: TrivialNodeMatcher[_] => that canEqual this
+    case _ => false
+  }
+  override def hashCode = toString.hashCode
 }
 
 /**
@@ -120,4 +128,11 @@ extends NodeMatcher[T] {
 
   override def matches(node: T) = matcher.matches(node)
   override def toString = "{" + alias + "}"
+  
+  def canEqual(that: Any) = that.isInstanceOf[CaptureNodeMatcher[_]]
+  override def equals(that: Any) = that match {
+    case that: CaptureNodeMatcher[_] => (that canEqual this) && this.alias == that.alias && this.matcher == that.matcher
+    case _ => false
+  }
+  override def hashCode = alias.hashCode + 39*matcher.hashCode
 }

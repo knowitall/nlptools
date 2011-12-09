@@ -7,13 +7,16 @@ import Graph._
 
 sealed trait Direction {
   def name: String
+  def flip: Direction
 }
 object Direction {
   case object Up extends Direction {
     override def name = "Up"
+    override def flip = Down
   }
   case object Down extends Direction {
     override def name = "Down"
+    override def flip = Up
   }
 }
 
