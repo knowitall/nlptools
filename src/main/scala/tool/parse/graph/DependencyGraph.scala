@@ -56,12 +56,23 @@ class DependencyGraph(
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred(_))(merge))
   }
   
-  def collapseNounGroups = {
+  def collapseNounGroups(dividors: List[String] = List.empty) = {
+    val lowerCaseDividors = dividors.map(_.toLowerCase)
+    
     def pred(dedge: DirectedEdge[DependencyNode]) = dedge.edge.label.equals("nn")
     // get components connect by nn edges
+    
     val groups: Set[Set[DependencyNode]] = (for (dep <- graph.edges; if dep.label == "nn") yield {
       graph.connected(dep.source, pred(_))
     })(scala.collection.breakOut)
+    
+    def splitByDividor(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
+      case x :: xs if lowerCaseDividors.contains(x.text.toLowerCase) => List(x) :: splitByDividor(xs)
+      case x :: xs => 
+        val (part, rest) = nodes.span(node => !lowerCaseDividors.contains(node.text.toLowerCase))
+        part :: splitByDividor(rest)
+      case Nil => Nil
+    }
     
     // segment ordered dependency nodes by POS tag
     def splitByPos(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
@@ -80,13 +91,21 @@ class DependencyGraph(
       rec(nodes, Nil)
     }
     
+    println(dividors)
+    println(splitByDividor(nodes))
+    
     val groupsToCollapse: Set[Set[DependencyNode]] = (for {
       // for each connect nn component
       group <- groups
       // split the component by POS tag
       val nodes = group.toList.sorted
-      set <- splitByPos(nodes).flatMap(splitByAdjacency).map(_.toSet)
-    } yield(set))(scala.collection.breakOut)
+      dividorSplit <- splitByDividor(nodes)
+      posSplit <- splitByPos(dividorSplit)
+      part <- splitByAdjacency(posSplit)
+    } yield(part.toSet))(scala.collection.breakOut)
+    
+    println(groupsToCollapse)
+    println()
     
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(groupsToCollapse))
   }
@@ -96,7 +115,7 @@ class DependencyGraph(
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred _))
   }
   
-  def normalize = collapseNounGroups.collapseNNPOf
+  def normalize = collapseNounGroups().collapseNNPOf
 
   def simplifyGraphPostags = {
     def simplifyPostag(postag: String) = postag match {
