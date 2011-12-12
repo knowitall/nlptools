@@ -91,9 +91,6 @@ class DependencyGraph(
       rec(nodes, Nil)
     }
     
-    println(dividors)
-    println(splitByDividor(nodes))
-    
     val groupsToCollapse: Set[Set[DependencyNode]] = (for {
       // for each connect nn component
       group <- groups
@@ -103,9 +100,6 @@ class DependencyGraph(
       posSplit <- splitByPos(dividorSplit)
       part <- splitByAdjacency(posSplit)
     } yield(part.toSet))(scala.collection.breakOut)
-    
-    println(groupsToCollapse)
-    println()
     
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(groupsToCollapse))
   }
