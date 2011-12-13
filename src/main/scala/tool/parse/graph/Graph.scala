@@ -213,8 +213,6 @@ class Graph[T] (
     vertices.flatMap(start => bipaths(start, List(start), 0).map(_.reverse))
   }
 
-  def contents(vertex: T)(implicit ord: Ordering[T]): List[String] = inferiors(vertex).toList.sorted.map(vertex => vertex.toString)
-
   def print() {
     def print(vertex: T, indent: Int) {
       println(" " * indent + vertex)
