@@ -7,6 +7,7 @@ import spiaotools.SentParDetector
 import common.main.LineProcessor
 import opennlp.tools.sentdetect._
 
+/** A heuristic-based sentencer. */
 class PiaoSentencer() extends Sentencer {
   val sentencer = new SentParDetector
   def sentences(document: String) = 

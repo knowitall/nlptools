@@ -5,8 +5,15 @@ package parse
 import graph._
 import common.main._
 
+/** A trait for a tool that produces dependencies, such as the 
+  * Stanford dependency parser. */
 trait DependencyParser {
   def dependencies(string: String): Iterable[Dependency]
+
+  /**
+    * Create a graph of the dependencies.  This has more information than
+    * creating a DependencyGraph from an `Iterable[Dependency]` because it
+    * will have the source text. */
   def dependencyGraph(string: String): DependencyGraph = {
     val dependencies = this.dependencies(string)
     val nodes = dependencies.toList.flatMap(dep => List(dep.source, dep.dest)).sorted

@@ -11,6 +11,10 @@ import edu.stanford.nlp.process._;
 
 import java.util.regex._
 
+/* The PennTokenizer was used to tokenize the Penn Treebank.  
+ * The following is a translation from a sed file.  This algorithm
+ * is entirely deterministic.  It is composed of regular expression
+ * replacements. */
 class PennTokenizer extends Tokenizer {
   val replacements = List(
     // attempt to get correct directional quotes

@@ -10,10 +10,9 @@ import graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode
 
-object StanfordParser extends DependencyParserMain {
-  lazy val parser = new StanfordParser
-}
-
+/*
+ * Subclasses of BaseStanfordParser must perform an optional post-processing step that applies
+ * Stanford's CC-compressed algorithm on the graph. */
 abstract class BaseStanfordParser extends DependencyParser {
   override def dependencies(string: String): Iterable[Dependency] = dependencies(string, true)
   def dependencies(string: String, post: Boolean): Iterable[Dependency]
@@ -29,6 +28,11 @@ abstract class BaseStanfordParser extends DependencyParser {
     dep.filter(_.gov.index > 0).map(d => convertDependency(nodes, d))
   }
 }
+
+object StanfordParser extends DependencyParserMain {
+  lazy val parser = new StanfordParser
+}
+
 
 class StanfordParser(lp : LexicalizedParser) extends BaseStanfordParser with ConstituencyParser {
   def this() = this(new LexicalizedParser("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"))

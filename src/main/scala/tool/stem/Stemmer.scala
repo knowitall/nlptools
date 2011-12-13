@@ -4,6 +4,7 @@ package stem
 
 import common.main.LineProcessor
 
+/** A stemmer takes a string token and produces a normalized form. */
 abstract class Stemmer {
   def stem(word: String): String
   def normalize(word: String) = Stemmer.normalize(word)

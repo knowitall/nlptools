@@ -5,6 +5,8 @@ package pattern
 
 import graph._
 
+/**
+  * A pattern over a graph of dependencies. */
 class DependencyPattern(matchers: List[Matcher[DependencyNode]]) extends Pattern[DependencyNode](matchers) {
   def depEdgeMatchers = matchers.collect { case m: DependencyEdgeMatcher => m }
   def depNodeMatchers = matchers.collect { case m: DependencyNodeMatcher => m }
@@ -13,6 +15,8 @@ class DependencyPattern(matchers: List[Matcher[DependencyNode]]) extends Pattern
 object DependencyPattern {
   import scala.util.parsing.combinator._
 
+  /**
+    * A parser combinator for deserializing patterns over graphs of dependencies. */
   object Parser extends RegexParsers {
     def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(Some(s), None) with MatchLabel }
     def simpleCaptureNodeMatcher = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher[DependencyNode](s) }
@@ -24,9 +28,7 @@ object DependencyPattern {
     def downEdgeMatcher = ">" ~> """[^>]+""".r <~ ">" ^^ { s => new DependencyEdgeMatcher(s, Direction.Down) }
     def edgeMatcher[V]: Parser[EdgeMatcher[DependencyNode]] = (upEdgeMatcher | downEdgeMatcher) ^^ { s => s.asInstanceOf[EdgeMatcher[DependencyNode]] }
     
-    // def chain = nodeMatcher ~! edgeMatcher ^^ { case n ~ e => List(n, e) }
     def chain[V]: Parser[List[Matcher[DependencyNode]]] = nodeMatcher ~ edgeMatcher ~ chain ^^ { case n ~ e ~ ch => n :: e :: ch } | nodeMatcher ^^ { List(_) }
-    // def expr = chain ~ nodeMatcher ^^ { case ch ~ n => ch ::: List(n)}
     
     def parse(s: String) = {
       parseAll(chain, s)
@@ -54,20 +56,24 @@ object DependencyPattern {
   }
 }
 
+/**
+  * Match a `DirectedEdge[DependencyNode]`. */
 class DependencyEdgeMatcher(val label: String, val dir: Direction) extends EdgeMatcher[DependencyNode] {
   def this(dedge: DirectedEdge[DependencyNode]) = this(dedge.edge.label, dedge.dir)
-  
+
   override def matches(edge: DirectedEdge[DependencyNode]) =
     edge.dir == dir && edge.edge.label == label
-    
+
   override def flip = new DependencyEdgeMatcher(label, dir.flip)
-    
+ 
+  /** symbolic representation used in serialization. */
   def symbol = dir match { 
     case Direction.Up => "<" 
     case Direction.Down => ">" 
   }
+
+  // extend Object
   override def toString = symbol + label + symbol
-  
   def canEqual(that: Any) = that.isInstanceOf[DependencyEdgeMatcher]
   override def equals(that: Any) = that match {
     case that: DependencyEdgeMatcher => (that canEqual this) && this.label == that.label && this.dir == that.dir
@@ -79,8 +85,9 @@ class DependencyEdgeMatcher(val label: String, val dir: Direction) extends EdgeM
 abstract class AbstractDependencyNodeMatcher(val text: Option[String], val postag: Option[String]) 
 extends NodeMatcher[DependencyNode] {
   override def matches(node: DependencyNode) = true
-  override def toString = text.getOrElse(postag.getOrElse(""))
   
+  // extend Object
+  override def toString = text.getOrElse(postag.getOrElse(""))
   def canEqual(that: Any) = that.isInstanceOf[DependencyNodeMatcher]
   override def equals(that: Any) = that match {
     case that: DependencyNodeMatcher => (that canEqual this) && this.text == that.text && this.postag == that.postag
@@ -89,6 +96,8 @@ extends NodeMatcher[DependencyNode] {
   override def hashCode = text.hashCode + 39 * postag.hashCode
 }
 
+/**
+  * Match a `DependencyNode`. */
 class DependencyNodeMatcher(text: Option[String], postag: Option[String]) 
 extends AbstractDependencyNodeMatcher(text, postag) {
   if (!text.isDefined && !postag.isDefined)
@@ -97,10 +106,14 @@ extends AbstractDependencyNodeMatcher(text, postag) {
   def this(node: DependencyNode) = this(Some(node.text), Some(node.postag))
 }
 
+/**
+  * Mix-in to match the text of the `DependencyNode`. */
 trait MatchLabel extends AbstractDependencyNodeMatcher {
   override def matches(node: DependencyNode) = super.matches(node) && node.text == text.getOrElse(throw new IllegalArgumentException("text must be defined"))
 }
 
+/**
+  * Mix-in to match the postag of the `DependencyNode`. */
 trait MatchPostag extends AbstractDependencyNodeMatcher {
   override def matches(node: DependencyNode) = 
     super.matches(node) && node.postag == postag.getOrElse(throw new IllegalArgumentException("postag must be defined"))

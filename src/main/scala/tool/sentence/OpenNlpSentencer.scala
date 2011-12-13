@@ -5,6 +5,7 @@ package sentence
 import common.main.LineProcessor
 import opennlp.tools.sentdetect._
 
+/** A max-ent sentencer. */
 class OpenNlpSentencer(val model: SentenceModel) extends Sentencer {
   val sentencer = new SentenceDetectorME(model)
 

@@ -8,25 +8,30 @@ import Graph._
 import stem.Stemmer
 import scala.util.matching.Regex
 
+/*
+ * A representation for an edge in the graph of dependencies. */
 class Dependency(
     source: DependencyNode, 
     dest: DependencyNode, 
     label: String) 
 extends Edge[DependencyNode](source, dest, label) {
+  // extend Object
   override def toString() = this.label + "(" + this.source + " -> " + this.dest + ")"
-  def nodes = Set(source, dest)
-  def otherNode(node: DependencyNode) = 
-    if (source == dest) throw new IllegalStateException("source == dest")
-    else if (source == node) dest
-    else source
-  def lemmatize(stemmer: Stemmer) = new Dependency(source.lemmatize(stemmer), dest.lemmatize(stemmer), label)
-  def serialize = label + "(" + source.serialize + ", " + dest.serialize + ")"
   override def equals(other: Any) =
     other != null && other.isInstanceOf[Dependency] &&
       other.asInstanceOf[Dependency].source.equals(source) &&
       other.asInstanceOf[Dependency].dest.equals(dest) &&
       other.asInstanceOf[Dependency].label == label
   override def hashCode() = 37 * (this.source.hashCode + this.dest.hashCode * 37) + label.hashCode
+
+  def nodes = Set(source, dest)
+  def otherNode(node: DependencyNode) = 
+    if (source == dest) throw new IllegalStateException("source == dest")
+    else if (source == node) dest
+    else source
+
+  def lemmatize(stemmer: Stemmer) = new Dependency(source.lemmatize(stemmer), dest.lemmatize(stemmer), label)
+  def serialize = label + "(" + source.serialize + ", " + dest.serialize + ")"
 }
 
 object Dependency {

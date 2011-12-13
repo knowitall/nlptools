@@ -14,7 +14,11 @@ import collection._
   * matcher (necessarily) alternates between a NodeMatcher and
   * and EdgeMatcher.
   */
-class Pattern[T](val matchers: List[Matcher[T]]) extends Function[Graph[T], List[Match[T]]] {
+class Pattern[T](
+  /** a list of matchers, alternating between `NodeMatcher`s and `EdgeMatcher`s. */
+  val matchers: List[Matcher[T]]
+) extends Function[Graph[T], List[Match[T]]] {
+
   // ensure that the matchers alternate
   matchers.view.zipWithIndex.foreach { case(m, i) => 
     (m, (i%2)) match {
@@ -27,11 +31,17 @@ class Pattern[T](val matchers: List[Matcher[T]]) extends Function[Graph[T], List
   def this(edgeMatchers: List[EdgeMatcher[T]], nodeMatchers: List[NodeMatcher[T]]) = {
     this(enrich.Iterables.interleave(nodeMatchers, edgeMatchers).toList)
   }
+
+  // extend Object
+  override def toString = {
+    matchers.view.map(_.toString).mkString(" ") }
   
+  /** Find all matches of this pattern in the graph. */
   def apply(graph: Graph[T]): List[Match[T]] = {
     graph.vertices.toList.flatMap(apply(graph, _).toList)
   }
 
+  /** Find all matches of this pattern in the graph starting at `vertex`. */
   def apply(graph: Graph[T], vertex: T): List[Match[T]] = {
     def rec(matchers: List[Matcher[T]], 
       vertex: T, 
@@ -58,7 +68,9 @@ class Pattern[T](val matchers: List[Matcher[T]]) extends Function[Graph[T], List
     rec(this.matchers, vertex, List(), List())
   }
   
+  /** A list of just the edge matchers, in order. */
   def edgeMatchers = matchers.collect { case m: EdgeMatcher[_] => m }
+  /** A list of just the node matchers, in order. */
   def nodeMatchers = matchers.collect { case m: NodeMatcher[_] => m }
 
   def replaceMatcherAt(replacements: List[(Int, NodeMatcher[T])]) = 
@@ -72,18 +84,23 @@ class Pattern[T](val matchers: List[Matcher[T]]) extends Function[Graph[T], List
       matchers.view.zipWithIndex.map {
         case (matcher, i) => if (i == index) replacement else matcher 
       }.toList)
-  
-  override def toString = {
-    matchers.view.map(_.toString).mkString(" ")
-  }
 }
 
-class Match[T](val pattern: Pattern[T], 
+/** A representation of a match of a pattern in a graph. */
+class Match[T](
+  /** the pattern that was applied */
+  val pattern: Pattern[T], 
+  /** the matched path through the graph */
   val bipath: Bipath[T], 
-  val groups: Map[String, T]) {
+  /** the pattern groups in the match */
+  val groups: Map[String, T]
+) {
+  // extend Object
   override def toString = bipath.toString + ": " + groups.toString
 }
 
+/**
+  * Abstract superclass for all matchers. */
 abstract class Matcher[T]
 
 /**
@@ -102,10 +119,13 @@ trait NodeMatcher[T] extends Matcher[T] {
   def matches(node: T): Boolean
 }
 
+/**
+  * Always match any node. */
 class TrivialNodeMatcher[T] extends NodeMatcher[T] {
   override def matches(edge: T) = true
+
+  // extend Object
   override def toString = ".*"
-  
   def canEqual(that: Any) = that.isInstanceOf[TrivialNodeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: TrivialNodeMatcher[_] => that canEqual this
@@ -127,8 +147,9 @@ extends NodeMatcher[T] {
   def this(alias: String) = this(alias, new TrivialNodeMatcher)
 
   override def matches(node: T) = matcher.matches(node)
-  override def toString = "{" + alias + "}"
   
+  // extend Object
+  override def toString = "{" + alias + "}"
   def canEqual(that: Any) = that.isInstanceOf[CaptureNodeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: CaptureNodeMatcher[_] => (that canEqual this) && this.alias == that.alias && this.matcher == that.matcher

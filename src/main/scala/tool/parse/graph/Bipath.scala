@@ -5,6 +5,9 @@ package graph
 
 import Graph._
 
+/**
+  * A representation of a path through a graph.  The path is represented
+  * by a list of directed edges. */
 class Bipath[T](val path: List[DirectedEdge[T]]) {
   // extend Object
   override def toString = "[" + path.mkString(", ") + "]";
@@ -14,9 +17,13 @@ class Bipath[T](val path: List[DirectedEdge[T]]) {
     case _ => false
   }
 
+  /** the undirected edges of the path */
   def edges = path.foldRight[Set[Edge[T]]](Set()) { case (item, set) => set + item.edge }
+  /** the unique vertices along the path */
   def nodes = path.head.start :: path.map(_.end)
+  /** the first vertex in the path */
   def start = path.head.start
+  /** collapse edges in the path that match `pred` */
   def collapse(pred: Edge[T]=>Boolean, merge: (T, T) => T) = {
     if (path.forall(dep => pred(dep.edge))) {
       this

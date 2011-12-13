@@ -10,6 +10,7 @@ trait ConstituencyParser {
   def parse(string: String): ParseTree
 }
 
+/** A representation of the constituency parse. */
 abstract class ParseTree(val token: String, var index: Int, val children: Array[ParseTree]) extends Iterable[ParseTree] {
 
   /** Prints the tree in Penn treebank format. */

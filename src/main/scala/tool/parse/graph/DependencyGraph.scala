@@ -7,10 +7,17 @@ import Graph._
 import scala.collection._
 import collection.immutable.Interval
 
+/** A representation of a graph over dependencies.  
+  * This richer representation may include the text of the original sentence,
+  * the original nodes (before collapsing), and the original dependencies. */
 class DependencyGraph(
+    /** the text of the source sentence */
     val text: Option[String],
+    /** the `DependencyNode`s from the parser */
     val nodes: List[DependencyNode], 
+    /** the `Dependency`s from the parser */
     val dependencies: List[Dependency],
+    /** a graph representation dependencies */
     val graph: Graph[DependencyNode]
   ) {
 
@@ -245,6 +252,7 @@ object DependencyGraph {
   def apply(dependencies: Iterable[Dependency]): DependencyGraph =
     apply(None, dependencies)
 
+  /** expand prep nodes that were compressed by Stanford into `DependencyNode`s. */
   private def inferCollapsedNodes(nodes: List[DependencyNode], graph: Graph[DependencyNode]): List[DependencyNode] = {
     /** at present, only infer prepositions.  Any outgoing "prep_.*" edge 
      *  means that a preposition can be inferred.  You can't restrict that

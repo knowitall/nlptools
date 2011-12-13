@@ -8,6 +8,7 @@ import graph._
 import scala.io.Source
 import scopt.OptionParser
 
+/** An executable that applies a pattern to a sentence. */
 object ApplyPattern {
   def main(args: Array[String]) {
     val parser = new OptionParser("applypat") {

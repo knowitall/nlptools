@@ -6,11 +6,14 @@ package graph
 import scala.collection._
 import Graph._
 
+/* A graph representation where data is stored in vertices and edges are
+ * represented with adjacency lists. */
 class Graph[T] (
     val vertices: Set[T], 
     val edges: Set[Edge[T]]
   ) {
 
+  // shorthands
   type G = Graph[T]
   type E = Edge[T]
 
@@ -58,9 +61,11 @@ class Graph[T] (
     rec(Set(v), Set(v))
   }
 
+  /* create a new graph where a function is applied to all nodes. */
   def map[U](f: T=>U) = new Graph(
     this.edges.map(edge => new Edge(f(edge.source), f(edge.dest), edge.label)))
 
+  /* collapse all edges where the supplied predicate is true. */
   def collapse(collapsable: E => Boolean)(implicit merge: Traversable[T] => T): G = {
     // find nn edges
     val targetEdges = edges.filter(collapsable)
@@ -90,8 +95,10 @@ class Graph[T] (
     collapseGroups(map.values)(merge)
   }
 
+  /* collapse edges between all supplied vertices. */
   def collapse(set: Set[T])(implicit merge: Traversable[T] => T) = collapseGroups(Iterable(set))
   
+  /* collapse edges between all vertices in a single set. */
   def collapseGroups(groups: Iterable[Set[T]])(implicit merge: Traversable[T] => T) = {
     // convert collapsed vertices to a single Vertex
     val transformed = groups.flatMap { vertices =>
@@ -113,29 +120,36 @@ class Graph[T] (
     new Graph(newedges)
   }
 
+  /* all edges leaving or coming into this vertex. */
   def edges(vertex: T): Set[E] = outgoing(vertex) union incoming(vertex)
 
+  /* all `DirectedEdge`s leaving or coming into this vertex. */
   def dedges(vertex: T): Set[DirectedEdge[T]] = 
     outgoing(vertex).map(new DownEdge(_): DirectedEdge[T]).union(
       incoming(vertex).map(new UpEdge(_): DirectedEdge[T])).toSet
-    
+  
+  /** all vertices seperated from `v` by a single edge that
+    * satisfied `pred`. */
   def neighbors(v: T, pred: DirectedEdge[T]=>Boolean): Set[T] =
     dedges(v).withFilter(pred).map { _ match { 
       case out: DownEdge[_] =>  out.end
       case in: UpEdge[_] =>  in.end
     }}
 
+  /** all vertices seperated from `v`. */
   def neighbors(v: T): Set[T] = predecessors(v) union successors(v)
 
+  /** all vertices before incoming edges to `v`. */
   def predecessors(v: T) = incoming(v).map(edge => edge.source)
 
+  /** all vertices after outgoing edges to `v`. */
   def successors(v: T) = outgoing(v).map(edge => edge.dest)
 
-  /* Iteratively expand a vertex to all vertices beneath it. 
-   * 
-   * @param  vertex  the seed vertex
-   * @return  the set of vertices beneath `vertex`
-   */
+  /** Iteratively expand a vertex to all vertices beneath it. 
+    * 
+    * @param  vertex  the seed vertex
+    * @return  the set of vertices beneath `vertex`
+    */
   def inferiors(v: T, cond: E=>Boolean = (x=>true)): Set[T] = {
     def conditional(dedge: DirectedEdge[T]) = dedge match {
       case down: DownEdge[_] => cond(down.edge)
@@ -144,11 +158,11 @@ class Graph[T] (
     connected(v, conditional)
   }
 
-  /* Iteratively expand a vertex to all vertices above it. 
-   * 
-   * @param  vertex  the seed vertex 
-   * @return  the set of vertices beneath `vertex`
-   */
+  /** Iteratively expand a vertex to all vertices above it. 
+    * 
+    * @param  vertex  the seed vertex 
+    * @return  the set of vertices beneath `vertex`
+    */
   def superiors(v: T, cond: E=>Boolean = (x=>true)): Set[T] = {
     def conditional(dedge: DirectedEdge[T]) = dedge match {
       case up: UpEdge[_] => cond(up.edge)
@@ -189,8 +203,8 @@ class Graph[T] (
   }
 
   /**
-   * Find a path from vertex (start) to vertex (end).
-   */
+    * Find a path from vertex (start) to vertex (end).
+    */
   def vertexBipaths(start: T, end: T): List[List[T]] = {
     def bipaths(start: T, path: List[T]): List[List[T]] = {
       if (start.equals(end)) List(path)
@@ -201,8 +215,8 @@ class Graph[T] (
   }
 
   /**
-   * Find a path that contains all vertices in (vertices).
-   */
+    * Find a path that contains all vertices in (vertices).
+    */
   private def vertexBipaths(vertices: Set[T], maxLength: Option[Int] = None): Set[List[T]] = {
     def bipaths(start: T, path: List[T], length: Int): List[List[T]] = {
       if (maxLength.isDefined && length > maxLength.get) List()

@@ -4,6 +4,7 @@ package sentence
 
 import common.main.LineProcessor
 
+/** A sentencer breaks text into sentences. */
 abstract class Sentencer {
   def sentences(document: String): Iterable[String]
 }
