@@ -33,6 +33,20 @@ class Graph[T] (
   def this(vertices: Iterable[T], edges: Iterable[Edge[T]]) = 
     this(vertices.toSet, edges.toSet)
 
+  // extend Object
+  override def toString = {
+    val builder = new java.lang.StringBuilder
+    this.print(builder)
+    builder.toString
+  }
+  def canEqual(that: Any) = that.isInstanceOf[Graph[_]]
+  override def equals(that: Any) = that match {
+    case that: Graph[_] => (that canEqual this) && 
+      that.vertices == this.vertices &&
+      that.edges == this.edges
+    case _ => false
+  }
+
   /* Expand a set of verticess to all neighbors along immediate edges
    * that satisfy the supplied predicate. 
    * 
@@ -227,15 +241,17 @@ class Graph[T] (
     vertices.flatMap(start => bipaths(start, List(start), 0).map(_.reverse))
   }
 
-  def print() {
+  def print(writer: java.lang.Appendable): Unit = {
     def print(vertex: T, indent: Int) {
-      println(" " * indent + vertex)
+      writer.append(" " * indent + vertex + "\n")
       outgoing(vertex).foreach { edge => print(edge.dest, indent + 2) }
     }
 
     val start = vertices.find(vertex => incoming(vertex).isEmpty).get
     print(start, 0)
   }
+
+  def print(): Unit = print(System.out)
 }
 
 object Graph {
