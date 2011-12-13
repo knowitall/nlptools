@@ -6,6 +6,14 @@ package graph
 import Graph._
 
 class Bipath[T](val path: List[DirectedEdge[T]]) {
+  // extend Object
+  override def toString = "[" + path.mkString(", ") + "]";
+  def canEqual(that: Any) = that.isInstanceOf[Bipath[_]]
+  override def equals(that: Any) = that match {
+    case that: Bipath[_] => (that canEqual this) && that.path == this.path
+    case _ => false
+  }
+
   def edges = path.foldRight[Set[Edge[T]]](Set()) { case (item, set) => set + item.edge }
   def nodes = path.head.start :: path.map(_.end)
   def start = path.head.start
@@ -42,16 +50,4 @@ class Bipath[T](val path: List[DirectedEdge[T]]) {
       new Bipath(array.filter(dep => !pred(dep.edge)).toList)
     }
   }
-  /*
-  def collapseNN = {
-    collapse(_.label.equals("nn"))
-  }
-  def collapseHeuristic = {
-    collapse(
-      edge => 
-        edge.label == "nn" && edge.source.pos.equals(edge.dest.pos) ||
-        edge.label == "prep_of" && edge.source.pos.equals("NNP") && edge.dest.pos.equals("NNP"))
-  }
-  */
-  override def toString = "[" + path.mkString(", ") + "]";
 }
