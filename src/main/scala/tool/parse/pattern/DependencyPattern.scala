@@ -18,7 +18,7 @@ object DependencyPattern {
   /**
     * A parser combinator for deserializing patterns over graphs of dependencies. */
   object Parser extends RegexParsers {
-    def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(Some(s), None) with MatchLabel }
+    def simpleNodeMatcher = """\w+""".r ^^ { s => new DependencyNodeMatcher(Some(s), None) with MatchText }
     def simpleCaptureNodeMatcher = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher[DependencyNode](s) }
     def postagCaptureNodeMatcher = "{" ~> """\w+""".r ~ ":" ~ """[^}\p{Space}]+""".r <~ "}" ^^ { case s~":"~postag => new CaptureNodeMatcher[DependencyNode](s, new DependencyNodeMatcher(None, Some(postag)) with MatchPostag) { override def toString = "{" + this.alias + ":" + this.matcher.asInstanceOf[DependencyNodeMatcher].postag.get + "}"} }
     def captureNodeMatcher[V]: Parser[CaptureNodeMatcher[DependencyNode]] = simpleCaptureNodeMatcher | postagCaptureNodeMatcher
@@ -49,7 +49,7 @@ object DependencyPattern {
    */
   def create(bipath: Bipath[DependencyNode]) = new Pattern[DependencyNode](
     bipath.path.map(dedge => new DependencyEdgeMatcher(dedge)),
-    new DependencyNodeMatcher(bipath.path.head.start) with MatchLabel :: bipath.path.map(dedge => new DependencyNodeMatcher(dedge.end) with MatchLabel))
+    new DependencyNodeMatcher(bipath.path.head.start) with MatchText :: bipath.path.map(dedge => new DependencyNodeMatcher(dedge.end) with MatchText))
 
   def deserialize(string: String): Pattern[DependencyNode] = {
     Parser(string)
@@ -108,7 +108,7 @@ extends AbstractDependencyNodeMatcher(text, postag) {
 
 /**
   * Mix-in to match the text of the `DependencyNode`. */
-trait MatchLabel extends AbstractDependencyNodeMatcher {
+trait MatchText extends AbstractDependencyNodeMatcher {
   override def matches(node: DependencyNode) = super.matches(node) && node.text == text.getOrElse(throw new IllegalArgumentException("text must be defined"))
 }
 
