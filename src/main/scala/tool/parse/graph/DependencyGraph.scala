@@ -226,16 +226,6 @@ class DependencyGraph(
       println(key + ": " + graph.outgoing(key).map(edge => edge.label + "(" + edge.dest + ")").mkString(", "))
     }
   }
-
-  def print() {
-    def print(node: DependencyNode, indent: Int) {
-      println(" " * indent + node)
-      graph.outgoing(node).foreach { edge => print(edge.dest, indent + 2) }
-    }
-
-    val start = graph.vertices.find(node => graph.incoming(node).isEmpty).get
-    print(start, 0)
-  }
 }
 
 object DependencyGraph {
