@@ -35,16 +35,6 @@ object DependencyNode {
 
     new DependencyNode(text, postag, indices)
   }
-
-  // TODO: rewrite using foldl
-  def nodes(dependencies: Iterable[Dependency]) = {
-    var ns: Set[DependencyNode] = Set()
-    for (dep <- dependencies) {
-      ns += dep.source
-      ns += dep.dest
-    }
-    ns
-  }
   
   def deserialize(string: String) = {
     val Array(text, postag, index) = string.split("_")

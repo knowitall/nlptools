@@ -32,7 +32,7 @@ class DependencyGraph(
   // constructors
   
   def this(text: Option[String], nodes: List[DependencyNode], dependencies: Iterable[Dependency]) =
-    this(text, nodes, dependencies.toList, new Graph[DependencyNode](DependencyNode.nodes(dependencies), dependencies))
+    this(text, nodes, dependencies.toList, new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
     
   def this(text: String, nodes: List[DependencyNode], dependencies: Iterable[Dependency]) {
     this(Some(text), nodes, dependencies)
