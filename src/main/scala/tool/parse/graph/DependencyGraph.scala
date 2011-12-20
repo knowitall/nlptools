@@ -118,14 +118,31 @@ class DependencyGraph(
   
   def normalize = collapseNounGroups().collapseNNPOf
 
-  def simplifyGraphPostags = {
+  def mapPostags(f: String=>String): DependencyGraph = {
+    def mapPostags(f: String=>String) = 
+      graph.map(v => new DependencyNode(v.text, f(v.postag), v.indices))
+
+    new DependencyGraph(
+      this.text, 
+      this.nodes, 
+      this.dependencies, mapPostags(f))
+  }
+
+  def simplifyPostags = {
     def simplifyPostag(postag: String) = postag match {
       // obvious winners
       case "JJS" => "JJ"
       case "NNS" => "NN"
       case "NNPS" => "NNP"
-      // not as clear
-      
+      // others can stay the same
+      case x => x
+    }
+
+    mapPostags(simplifyPostag)
+  }
+
+  def simplifyVBPostags = {
+    def simplifyPostag(postag: String) = postag match {
       /* VB - Verb, base form
          VBD - Verb, past tense
          VBG - Verb, gerund or present participle
@@ -136,8 +153,8 @@ class DependencyGraph(
       // others can stay the same
       case x => x
     }
-    def mapPostags(f: String=>String) = graph.map(v => new DependencyNode(v.text, f(v.postag), v.indices))
-    new DependencyGraph(this.text, this.nodes, this.dependencies, mapPostags(simplifyPostag))
+
+    mapPostags(simplifyPostag)
   }
   
   def dot(title: String): String = dot(title, Set.empty, Set.empty)
