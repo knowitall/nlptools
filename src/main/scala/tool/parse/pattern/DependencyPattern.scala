@@ -52,9 +52,17 @@ object DependencyPattern {
     new DependencyNodeMatcher(bipath.path.head.start) with MatchText :: bipath.path.map(dedge => new DependencyNodeMatcher(dedge.end) with MatchText))
 
   def deserialize(string: String): Pattern[DependencyNode] = {
-    Parser(string)
+    try {
+      Parser(string)
+    }
+    catch {
+      case e => throw new DependencyPatternSerializationException("could not deserialize pattern: " + string, e)
+    }
   }
 }
+
+class DependencyPatternSerializationException(message: String, cause: Throwable)
+extends RuntimeException(message, cause)
 
 /**
   * Match a `DirectedEdge[DependencyNode]`. */
