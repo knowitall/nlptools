@@ -36,14 +36,20 @@ extends Edge[DependencyNode](source, dest, label) {
 
 object Dependency {
   val Serialized = new Regex("""(\p{Graph}+)\(\s*(\p{Graph}*?_\p{Graph}*?_\p{Graph}*?),\s*(\p{Graph}*?_\p{Graph}*?_\p{Graph}*?)\s*\)""")
-  def deserialize(string: String) = {
+  def deserialize(string: String) = try {
     val Serialized(label, source, dest) = string
     new Dependency(
         DependencyNode.deserialize(source), 
         DependencyNode.deserialize(dest), 
         label)
   }
+  catch {
+    case e => throw new DependencySerializationException("could not deserialize dependency: " + string, e)
+  }
 }
+
+class DependencySerializationException(message: String, cause: Throwable) 
+extends RuntimeException(message, cause)
 
 object Dependencies {
   def serialize(deps: Iterable[Dependency]) = deps.map(_.serialize).mkString("; ")
