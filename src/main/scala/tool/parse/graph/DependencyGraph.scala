@@ -149,7 +149,7 @@ class DependencyGraph(
          VBN - Verb, past participle
          VBP - Verb, non-3rd person singular present
          VBZ - Verb, 3rd person singular present */
-      case "VB" | "VBD" | "VBG" | "VBN" | "VBP" | "VBZ" => "VB"
+      case "VB" | "VBD" | "VBG" | "VBN" | "VBP" | "VBZ" => "VERB"
       // others can stay the same
       case x => x
     }
