@@ -48,22 +48,23 @@ class Pattern[T](
     def rec(matchers: List[Matcher[T]], 
       vertex: T, 
       edges: List[DirectedEdge[T]],
-      nodeGroups: List[(String, T)],
-      edgeGroups: List[(String, DirectedEdge[T])]): List[Match[T]] = matchers match {
+      nodeGroups: List[(String, Match.NodeGroup[T])],
+      edgeGroups: List[(String, Match.EdgeGroup[T])]): List[Match[T]] = matchers match {
 
       case (m: CaptureNodeMatcher[_]) :: xs =>
-        if (m.matches(vertex)) rec(xs, vertex, edges, (m.alias, vertex) :: nodeGroups, edgeGroups)
-        else List()
-      case (m: NodeMatcher[_]) :: xs => 
+        m.matchText(vertex).map(text => rec(xs, vertex, edges, (m.alias, Match.NodeGroup(vertex, text)) :: nodeGroups, edgeGroups)).getOrElse(List())
+      case (m: NodeMatcher[_]) :: xs if m.matches(vertex) => 
         if (m.matches(vertex)) rec(xs, vertex, edges, nodeGroups, edgeGroups)
         else List()
       case (m: EdgeMatcher[_]) :: xs => 
         // only consider edges that have not been used
         val uniqueEdges = graph.dedges(vertex)--edges.flatMap(e => List(e, e.flip))
         // search for an edge that matches
-        uniqueEdges.filter(m.matches(_)).flatMap { dedge =>
+        uniqueEdges.flatMap { edge => 
+          m.matchText(edge).map(text => (edge, text))
+        }.flatMap { case (dedge, matchText) =>
           val groups = m match {
-            case m: CaptureEdgeMatcher[_] => (m.alias, dedge) :: edgeGroups
+            case m: CaptureEdgeMatcher[_] => (m.alias, Match.EdgeGroup(dedge, matchText)) :: edgeGroups
             case _ => edgeGroups
           }
           // we found one, so recurse
@@ -100,11 +101,22 @@ class Match[T](
   /** the matched path through the graph */
   val bipath: Bipath[T], 
   /** the pattern groups in the match */
-  val nodeGroups: Map[String, T],
-  val edgeGroups: Map[String, DirectedEdge[T]]
+  val nodeGroups: Map[String, Match.NodeGroup[T]],
+  val edgeGroups: Map[String, Match.EdgeGroup[T]]
 ) {
   // extend Object
   override def toString = bipath.toString + ": " + nodeGroups.toString + " and " + edgeGroups.toString
+
+  def groups: Map[String, Match.Group] = nodeGroups ++ edgeGroups
+
+}
+
+object Match {
+  sealed abstract class Group(matchText: String) {
+    def text = matchText
+  }
+  case class NodeGroup[T](node: T, matchText: String) extends Group(matchText)
+  case class EdgeGroup[T](dedge: DirectedEdge[T], matchText: String) extends Group(matchText)
 }
 
 /**
@@ -115,13 +127,20 @@ abstract class Matcher[T]
   * Trait to match dependency graph edges. 
   */
 trait EdgeMatcher[T] extends Matcher[T] {
-  def matches(edge: DirectedEdge[T]): Boolean
+  def apply(edge: DirectedEdge[T]) = this.matchText(edge)
+
+  def matches(edge: DirectedEdge[T]) = this.matchText(edge).isDefined
+  def matchText(edge: DirectedEdge[T]): Option[String]
+
   def canMatch(edge: Graph.Edge[T]): Boolean = this.matches(new UpEdge(edge)) || this.matches(new DownEdge(edge))
   def flip: EdgeMatcher[T]
 }
 
 class DirectedEdgeMatcher[T](val direction: Direction, val matcher: EdgeMatcher[T]) extends EdgeMatcher[T] {
-  def matches(edge: DirectedEdge[T]) = edge.dir == direction && matcher.matches(edge)
+  def matchText(edge: DirectedEdge[T]) = 
+    if (edge.dir == direction) matcher.matchText(edge)
+    else None
+
   def flip: EdgeMatcher[T] = new DirectedEdgeMatcher(direction.flip, matcher)
  
   /** symbolic representation used in serialization. */
@@ -141,12 +160,12 @@ class DirectedEdgeMatcher[T](val direction: Direction, val matcher: EdgeMatcher[
 }
 
 class TrivialEdgeMatcher[T] extends EdgeMatcher[T] {
-  def matches(edge: DirectedEdge[T]) = true
+  def matchText(edge: DirectedEdge[T]) = Some(edge.label)
   def flip = this
 }
 
 class CaptureEdgeMatcher[T](val alias: String, val matcher: EdgeMatcher[T]) extends EdgeMatcher[T] {
-  override def matches(edge: DirectedEdge[T]) = matcher.matches(edge)
+  override def matchText(edge: DirectedEdge[T]) = matcher.matchText(edge)
   override def flip = new CaptureEdgeMatcher(alias, matcher.flip)
   
   // extend Object
@@ -167,13 +186,16 @@ class CaptureEdgeMatcher[T](val alias: String, val matcher: EdgeMatcher[T]) exte
   * Trait to match dependency graph nodes. 
   */
 trait NodeMatcher[T] extends Matcher[T] {
-  def matches(node: T): Boolean
+  def apply(node: T) = this.matchText(node)
+
+  def matches(node: T) = this.matchText(node).isDefined
+  def matchText(node: T): Option[String]
 }
 
 /**
   * Always match any node. */
 class TrivialNodeMatcher[T] extends NodeMatcher[T] {
-  override def matches(edge: T) = true
+  override def matchText(node: T) = Some(node.text)
 
   // extend Object
   override def toString = ".*"
@@ -197,7 +219,7 @@ extends NodeMatcher[T] {
     */
   def this(alias: String) = this(alias, new TrivialNodeMatcher)
 
-  override def matches(node: T) = matcher.matches(node)
+  override def matchText(node: T) = matcher.matchText(node)
   
   // extend Object
   override def toString = "{"+alias+"}"

@@ -108,8 +108,9 @@ object DependencyEdgeMatcher {
 /**
   * Match a `DirectedEdge[DependencyNode]`. */
 class LabelEdgeMatcher(val label: String) extends DependencyEdgeMatcher {
-  override def matches(edge: DirectedEdge[DependencyNode]) =
-    label == edge.edge.label
+  override def matchText(edge: DirectedEdge[DependencyNode]) =
+    if (label == edge.edge.label) Some(label)
+    else None
 
   override def flip = this
 
@@ -126,8 +127,10 @@ class LabelEdgeMatcher(val label: String) extends DependencyEdgeMatcher {
 /**
   * Match a `DirectedEdge[DependencyNode]`. */
 class RegexEdgeMatcher(val labelRegex: Regex) extends DependencyEdgeMatcher {
-  override def matches(edge: DirectedEdge[DependencyNode]) =
-    labelRegex.pattern.matcher(edge.edge.label).matches
+  override def matchText(edge: DirectedEdge[DependencyNode]) = edge.edge.label match {
+    case labelRegex(group) => Some(group)
+    case _ => None
+  }
 
   override def flip = this
 
@@ -161,6 +164,8 @@ class DependencyNodeMatcher(text: Option[String], postag: Option[String])
 extends AbstractDependencyNodeMatcher(text, postag) {
   if (!text.isDefined && !postag.isDefined)
     throw new IllegalArgumentException("either text or postag must be defined.")
+
+  def matchText(node: DependencyNode) = if (matches(node)) Some(node.text) else None
   
   def this(node: DependencyNode) = this(Some(node.text), Some(node.postag))
 }
