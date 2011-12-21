@@ -120,6 +120,26 @@ trait EdgeMatcher[T] extends Matcher[T] {
   def flip: EdgeMatcher[T]
 }
 
+class DirectedEdgeMatcher[T](val direction: Direction, val matcher: EdgeMatcher[T]) extends EdgeMatcher[T] {
+  def matches(edge: DirectedEdge[T]) = edge.dir == direction && matcher.matches(edge)
+  def flip: EdgeMatcher[T] = new DirectedEdgeMatcher(direction.flip, matcher)
+ 
+  /** symbolic representation used in serialization. */
+  def symbol = direction match { 
+    case Direction.Up => "<" 
+    case Direction.Down => ">" 
+  }
+
+  // extend Object
+  override def toString = symbol + matcher.toString + symbol
+  def canEqual(that: Any) = that.isInstanceOf[DirectedEdgeMatcher[_]]
+  override def equals(that: Any) = that match {
+    case that: DirectedEdgeMatcher[_] => (that canEqual this) && this.direction == that.direction && this.matcher == that.matcher
+    case _ => false
+  }
+  override def hashCode = direction.hashCode + 39*matcher.hashCode
+}
+
 class TrivialEdgeMatcher[T] extends EdgeMatcher[T] {
   def matches(edge: DirectedEdge[T]) = true
   def flip = this
@@ -130,7 +150,11 @@ class CaptureEdgeMatcher[T](val alias: String, val matcher: EdgeMatcher[T]) exte
   override def flip = new CaptureEdgeMatcher(alias, matcher.flip)
   
   // extend Object
-  override def toString = "{" + alias + "}"
+  override def toString = matcher match {
+    case _: TrivialEdgeMatcher[_] => "{"+alias+"}"
+    case d: DirectedEdgeMatcher[_] => d.symbol+"{"+alias+":"+d.matcher.toString+"}"+d.symbol
+    case m: EdgeMatcher[_] => "{"+alias+":"+m.toString+"}"
+  }
   def canEqual(that: Any) = that.isInstanceOf[CaptureEdgeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: CaptureNodeMatcher[_] => (that canEqual this) && this.alias == that.alias && this.matcher == that.matcher
@@ -176,7 +200,7 @@ extends NodeMatcher[T] {
   override def matches(node: T) = matcher.matches(node)
   
   // extend Object
-  override def toString = "{" + alias + "}"
+  override def toString = "{"+alias+"}"
   def canEqual(that: Any) = that.isInstanceOf[CaptureNodeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: CaptureNodeMatcher[_] => (that canEqual this) && this.alias == that.alias && this.matcher == that.matcher

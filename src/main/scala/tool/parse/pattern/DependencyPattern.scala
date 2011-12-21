@@ -29,24 +29,37 @@ object DependencyPattern {
     def captureNodeMatcher[V]: Parser[CaptureNodeMatcher[DependencyNode]] = simpleCaptureNodeMatcher | postagCaptureNodeMatcher
     def nodeMatcher[V]: Parser[NodeMatcher[DependencyNode]] = (captureNodeMatcher | simpleNodeMatcher) ^^ { s => s.asInstanceOf[NodeMatcher[DependencyNode]] }
     
-    def captureUpEdgeMatcherPostag = "<{" ~> """\w+""".r ~ ":" ~ """[^}\p{Space}]+""".r <~ "}<" ^^ { case alias~":"~regex =>
-      new CaptureEdgeMatcher(alias, new RegexDependencyEdgeMatcher(regex.r, Direction.Up))
+    def regexEdgeMatcher = "regex:" ~> """[^<>{}:\p{Space}]+""".r ^^ { case regex =>
+      new RegexEdgeMatcher(regex.r)
     }
-    def captureDownEdgeMatcherPostag = ">{" ~> """\w+""".r ~ ":" ~ """[^}\p{Space}]+""".r <~ "}>" ^^ { case alias~":"~regex =>
-      new CaptureEdgeMatcher(alias, new RegexDependencyEdgeMatcher(regex.r, Direction.Down))
-    }
-    def captureUpEdgeMatcher: Parser[EdgeMatcher[DependencyNode]] = "<{" ~> """\w+""".r <~ "}<" ^^ { case alias =>
-      new CaptureEdgeMatcher(alias, new TrivialEdgeMatcher)
-    }
-    def captureDownEdgeMatcher: Parser[EdgeMatcher[DependencyNode]] = "<{" ~> """\w+""".r <~ "}<" ^^ { case alias =>
-      new CaptureEdgeMatcher(alias, new TrivialEdgeMatcher)
-    }
-    def upEdgeMatcher = "<" ~> """[^{<][^<]*""".r <~ "<" ^^ { s => new DependencyEdgeMatcher(s, Direction.Up) }
-    def downEdgeMatcher = ">" ~> """[^{<][^>]*""".r <~ ">" ^^ { s => new DependencyEdgeMatcher(s, Direction.Down) }
+    def simpleEdgeMatcher = """[^<>{}:\p{Space}]+""".r ^^ { s => new LabelEdgeMatcher(s) }
+    def edgeMatcher: Parser[EdgeMatcher[DependencyNode]] = regexEdgeMatcher | simpleEdgeMatcher
 
-    def edgeMatcher[V]: Parser[EdgeMatcher[DependencyNode]] = (captureUpEdgeMatcherPostag | captureDownEdgeMatcherPostag | captureUpEdgeMatcher | captureDownEdgeMatcher | upEdgeMatcher | downEdgeMatcher) ^^ { s => s.asInstanceOf[EdgeMatcher[DependencyNode]] }
+    def trivialCaptureEdgeMatcher: Parser[EdgeMatcher[DependencyNode]] = "{" ~> """\w+""".r <~ "}" ^^ { case alias =>
+      new CaptureEdgeMatcher(alias, new TrivialEdgeMatcher)
+    }
+    def complexCaptureEdgeMatcher: Parser[EdgeMatcher[DependencyNode]] = "{" ~> """\w+""".r ~ ":" ~ edgeMatcher <~ "}" ^^ { 
+      case alias~":"~m =>
+      new CaptureEdgeMatcher(alias, m)
+    }
+    def captureEdgeMatcher: Parser[EdgeMatcher[DependencyNode]] = trivialCaptureEdgeMatcher | complexCaptureEdgeMatcher
+
+    def complexEdgeMatcher: Parser[EdgeMatcher[DependencyNode]] = edgeMatcher | captureEdgeMatcher
+
+    def upEdgeMatcher = "<" ~> complexEdgeMatcher <~ "<" ^^ { 
+      case c: CaptureEdgeMatcher[_] => new CaptureEdgeMatcher[DependencyNode](c.alias, new DirectedEdgeMatcher(Direction.Up, c.matcher))
+      case m => new DirectedEdgeMatcher(Direction.Up, m)
+    }
+    def downEdgeMatcher = ">" ~> complexEdgeMatcher <~ ">" ^^ {  
+      case c: CaptureEdgeMatcher[_] => new CaptureEdgeMatcher[DependencyNode](c.alias, new DirectedEdgeMatcher(Direction.Down, c.matcher))
+      case m => new DirectedEdgeMatcher(Direction.Down, m)
+    }
+
+    def directedEdgeMatcher = upEdgeMatcher | downEdgeMatcher
+
+    // def edgeMatcher[V]: Parser[EdgeMatcher[DependencyNode]] = (captureUpEdgeMatcherPostag | captureDownEdgeMatcherPostag | captureUpEdgeMatcher | captureDownEdgeMatcher | upEdgeMatcher | downEdgeMatcher) ^^ { s => s.asInstanceOf[EdgeMatcher[DependencyNode]] }
     
-    def chain[V]: Parser[List[Matcher[DependencyNode]]] = nodeMatcher ~ edgeMatcher ~ chain ^^ { case n ~ e ~ ch => n :: e :: ch } | nodeMatcher ^^ { List(_) }
+    def chain[V]: Parser[List[Matcher[DependencyNode]]] = nodeMatcher ~ directedEdgeMatcher ~ chain ^^ { case n ~ e ~ ch => n :: e :: ch } | nodeMatcher ^^ { List(_) }
     
     def parse(s: String) = {
       parseAll(chain, s)
@@ -84,54 +97,38 @@ extends RuntimeException(message, cause)
 
 /**
   * Match a `DirectedEdge[DependencyNode]`. */
-class DependencyEdgeMatcher(val label: String, val dir: Direction) extends EdgeMatcher[DependencyNode] {
-  def this(dedge: DirectedEdge[DependencyNode]) = this(dedge.edge.label, dedge.dir)
-
+class LabelEdgeMatcher(val label: String) extends EdgeMatcher[DependencyNode] {
   override def matches(edge: DirectedEdge[DependencyNode]) =
-    edge.dir == dir && label == edge.edge.label
+    label == edge.edge.label
 
-  override def flip = new DependencyEdgeMatcher(label, dir.flip)
- 
-  /** symbolic representation used in serialization. */
-  def symbol = dir match { 
-    case Direction.Up => "<" 
-    case Direction.Down => ">" 
-  }
+  override def flip = this
 
   // extend Object
-  override def toString = symbol + label + symbol
-  def canEqual(that: Any) = that.isInstanceOf[DependencyEdgeMatcher]
+  override def toString = label
+  def canEqual(that: Any) = that.isInstanceOf[LabelEdgeMatcher]
   override def equals(that: Any) = that match {
-    case that: DependencyEdgeMatcher => (that canEqual this) && this.label == that.label && this.dir == that.dir
+    case that: LabelEdgeMatcher => (that canEqual this) && this.label == that.label
     case _ => false
   }
-  override def hashCode = this.label.hashCode + 39 * this.dir.hashCode
+  override def hashCode = this.label.hashCode
 }
 
 /**
   * Match a `DirectedEdge[DependencyNode]`. */
-class RegexDependencyEdgeMatcher(val labelRegex: Regex, val dir: Direction) extends EdgeMatcher[DependencyNode] {
-  def this(dedge: DirectedEdge[DependencyNode]) = this(JPattern.quote(dedge.edge.label).r, dedge.dir)
-
+class RegexEdgeMatcher(val labelRegex: Regex) extends EdgeMatcher[DependencyNode] {
   override def matches(edge: DirectedEdge[DependencyNode]) =
-    edge.dir == dir && labelRegex.pattern.matcher(edge.edge.label).matches
+    labelRegex.pattern.matcher(edge.edge.label).matches
 
-  override def flip = new RegexDependencyEdgeMatcher(labelRegex, dir.flip)
- 
-  /** symbolic representation used in serialization. */
-  def symbol = dir match { 
-    case Direction.Up => "<" 
-    case Direction.Down => ">" 
-  }
+  override def flip = this
 
   // extend Object
-  override def toString = symbol + labelRegex + symbol
-  def canEqual(that: Any) = that.isInstanceOf[DependencyEdgeMatcher]
+  override def toString = "regex:"+labelRegex.toString
+  def canEqual(that: Any) = that.isInstanceOf[RegexEdgeMatcher]
   override def equals(that: Any) = that match {
-    case that: RegexDependencyEdgeMatcher => (that canEqual this) && this.labelRegex == that.labelRegex && this.dir == that.dir
+    case that: RegexEdgeMatcher => (that canEqual this) && this.labelRegex == that.labelRegex
     case _ => false
   }
-  override def hashCode = this.labelRegex.hashCode + 39 * this.dir.hashCode
+  override def hashCode = this.labelRegex.hashCode
 }
 
 abstract class AbstractDependencyNodeMatcher(val text: Option[String], val postag: Option[String]) 
