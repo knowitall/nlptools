@@ -10,8 +10,12 @@ import java.util.regex.{Pattern => JPattern}
 /**
   * A pattern over a graph of dependencies. */
 class DependencyPattern(matchers: List[Matcher[DependencyNode]]) extends Pattern[DependencyNode](matchers) {
-  def depEdgeMatchers = matchers.collect { case m: DependencyEdgeMatcher => m }
-  def depNodeMatchers = matchers.collect { case m: DependencyNodeMatcher => m }
+  def depEdgeMatchers: List[DependencyEdgeMatcher] = matchers.map {
+    case m: DirectedEdgeMatcher[_] => m.matcher
+  }.collect {
+    case m: DependencyEdgeMatcher => m
+  }
+  def depNodeMatchers: List[DependencyNodeMatcher] = matchers.collect { case m: DependencyNodeMatcher => m }
 }
 
 object DependencyPattern {
@@ -79,7 +83,7 @@ object DependencyPattern {
    * bidirectional path though the tree.
    */
   def create(bipath: Bipath[DependencyNode]) = new Pattern[DependencyNode](
-    bipath.path.map(dedge => new DependencyEdgeMatcher(dedge)),
+    bipath.path.map(dedge => DependencyEdgeMatcher(dedge)),
     new DependencyNodeMatcher(bipath.path.head.start) with MatchText :: bipath.path.map(dedge => new DependencyNodeMatcher(dedge.end) with MatchText))
 
   def deserialize(string: String): Pattern[DependencyNode] = {
@@ -95,9 +99,15 @@ object DependencyPattern {
 class DependencyPatternSerializationException(message: String, cause: Throwable)
 extends RuntimeException(message, cause)
 
+abstract class DependencyEdgeMatcher extends EdgeMatcher[DependencyNode]
+object DependencyEdgeMatcher {
+  def apply(dedge: DirectedEdge[DependencyNode]) = 
+    new DirectedEdgeMatcher(dedge.dir, new LabelEdgeMatcher(dedge.edge.label))
+}
+
 /**
   * Match a `DirectedEdge[DependencyNode]`. */
-class LabelEdgeMatcher(val label: String) extends EdgeMatcher[DependencyNode] {
+class LabelEdgeMatcher(val label: String) extends DependencyEdgeMatcher {
   override def matches(edge: DirectedEdge[DependencyNode]) =
     label == edge.edge.label
 
@@ -115,7 +125,7 @@ class LabelEdgeMatcher(val label: String) extends EdgeMatcher[DependencyNode] {
 
 /**
   * Match a `DirectedEdge[DependencyNode]`. */
-class RegexEdgeMatcher(val labelRegex: Regex) extends EdgeMatcher[DependencyNode] {
+class RegexEdgeMatcher(val labelRegex: Regex) extends DependencyEdgeMatcher {
   override def matches(edge: DirectedEdge[DependencyNode]) =
     labelRegex.pattern.matcher(edge.edge.label).matches
 
