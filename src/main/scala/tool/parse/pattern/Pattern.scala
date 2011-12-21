@@ -8,6 +8,8 @@ import common._
 import graph._
 import collection._
 
+import scala.util.matching.Regex
+
 /**
   * Represents a pattern with which graphs can be searched.  
   * A pattern will start and end with a node matcher, and every
@@ -46,26 +48,31 @@ class Pattern[T](
     def rec(matchers: List[Matcher[T]], 
       vertex: T, 
       edges: List[DirectedEdge[T]],
-      groups: List[(String, T)]): List[Match[T]] = matchers match {
+      nodeGroups: List[(String, T)],
+      edgeGroups: List[(String, DirectedEdge[T])]): List[Match[T]] = matchers match {
 
       case (m: CaptureNodeMatcher[_]) :: xs =>
-        if (m.matches(vertex)) rec(xs, vertex, edges, (m.alias, vertex) :: groups)
+        if (m.matches(vertex)) rec(xs, vertex, edges, (m.alias, vertex) :: nodeGroups, edgeGroups)
         else List()
       case (m: NodeMatcher[_]) :: xs => 
-        if (m.matches(vertex)) rec(xs, vertex, edges, groups)
+        if (m.matches(vertex)) rec(xs, vertex, edges, nodeGroups, edgeGroups)
         else List()
       case (m: EdgeMatcher[_]) :: xs => 
         // only consider edges that have not been used
         val uniqueEdges = graph.dedges(vertex)--edges.flatMap(e => List(e, e.flip))
         // search for an edge that matches
         uniqueEdges.filter(m.matches(_)).flatMap { dedge =>
+          val groups = m match {
+            case m: CaptureEdgeMatcher[_] => (m.alias, dedge) :: edgeGroups
+            case _ => edgeGroups
+          }
           // we found one, so recurse
-          rec(xs, dedge.end, dedge :: edges, groups)
+          rec(xs, dedge.end, dedge :: edges, nodeGroups, groups)
         }(scala.collection.breakOut)
-      case _ => List(new Match(this, new Bipath(edges.reverse), groups.toMap))
+      case _ => List(new Match(this, new Bipath(edges.reverse), nodeGroups.toMap, edgeGroups.toMap))
     }
 
-    rec(this.matchers, vertex, List(), List())
+    rec(this.matchers, vertex, List(), List(), List())
   }
   
   /** A list of just the edge matchers, in order. */
@@ -93,10 +100,11 @@ class Match[T](
   /** the matched path through the graph */
   val bipath: Bipath[T], 
   /** the pattern groups in the match */
-  val groups: Map[String, T]
+  val nodeGroups: Map[String, T],
+  val edgeGroups: Map[String, DirectedEdge[T]]
 ) {
   // extend Object
-  override def toString = bipath.toString + ": " + groups.toString
+  override def toString = bipath.toString + ": " + nodeGroups.toString + " and " + edgeGroups.toString
 }
 
 /**
@@ -110,6 +118,25 @@ trait EdgeMatcher[T] extends Matcher[T] {
   def matches(edge: DirectedEdge[T]): Boolean
   def canMatch(edge: Graph.Edge[T]): Boolean = this.matches(new UpEdge(edge)) || this.matches(new DownEdge(edge))
   def flip: EdgeMatcher[T]
+}
+
+class TrivialEdgeMatcher[T] extends EdgeMatcher[T] {
+  def matches(edge: DirectedEdge[T]) = true
+  def flip = this
+}
+
+class CaptureEdgeMatcher[T](val alias: String, val matcher: EdgeMatcher[T]) extends EdgeMatcher[T] {
+  override def matches(edge: DirectedEdge[T]) = matcher.matches(edge)
+  override def flip = new CaptureEdgeMatcher(alias, matcher.flip)
+  
+  // extend Object
+  override def toString = "{" + alias + "}"
+  def canEqual(that: Any) = that.isInstanceOf[CaptureEdgeMatcher[_]]
+  override def equals(that: Any) = that match {
+    case that: CaptureNodeMatcher[_] => (that canEqual this) && this.alias == that.alias && this.matcher == that.matcher
+    case _ => false
+  }
+  override def hashCode = alias.hashCode + 39*matcher.hashCode
 }
 
 /**
