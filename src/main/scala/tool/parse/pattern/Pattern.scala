@@ -160,7 +160,7 @@ class DirectedEdgeMatcher[T](val direction: Direction, val matcher: EdgeMatcher[
 }
 
 class TrivialEdgeMatcher[T] extends EdgeMatcher[T] {
-  def matchText(edge: DirectedEdge[T]) = Some(edge.label)
+  def matchText(edge: DirectedEdge[T]) = Some(edge.edge.label)
   def flip = this
 }
 
@@ -195,7 +195,7 @@ trait NodeMatcher[T] extends Matcher[T] {
 /**
   * Always match any node. */
 class TrivialNodeMatcher[T] extends NodeMatcher[T] {
-  override def matchText(node: T) = Some(node.text)
+  override def matchText(node: T) = Some(".*")
 
   // extend Object
   override def toString = ".*"
