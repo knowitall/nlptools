@@ -12,6 +12,7 @@ import java.util.regex.{Pattern => JPattern}
 class DependencyPattern(matchers: List[Matcher[DependencyNode]]) extends Pattern[DependencyNode](matchers) {
   def depEdgeMatchers: List[DependencyEdgeMatcher] = matchers.map {
     case m: DirectedEdgeMatcher[_] => m.matcher
+    case m => m
   }.collect {
     case m: DependencyEdgeMatcher => m
   }
