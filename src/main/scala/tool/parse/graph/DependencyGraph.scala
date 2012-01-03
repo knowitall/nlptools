@@ -116,7 +116,7 @@ class DependencyGraph(
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred _))
   }
   
-  def normalize = collapseNounGroups().collapseNNPOf
+  def normalize = collapseNounGroups().collapseNNPOf.simplifyPostags
 
   def mapPostags(f: String=>String): DependencyGraph = {
     def mapPostags(f: String=>String) = 
