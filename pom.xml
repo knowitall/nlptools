@@ -55,7 +55,7 @@
     </dependency>
     <dependency>
       <groupId>edu.washington.cs.knowitall</groupId>
-      <artifactId>scommonlib</artifactId>
+      <artifactId>common-scala</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <!-- Stemmers -->
