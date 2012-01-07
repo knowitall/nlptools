@@ -73,6 +73,8 @@ class DependencyNode(val text: String, val postag: String, val indices: Interval
 
   def isProperNoun = postag == "NNP" || postag == "NNPS"
   def isCommonNoun = postag == "NN" || postag == "NNS"
+  def isNoun = isProperNoun || isCommonNoun
+  def isVerb = postag.startsWith("VB")
   def isAdjective = postag == "JJ" || postag == "JJS"
 
   def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, indices)

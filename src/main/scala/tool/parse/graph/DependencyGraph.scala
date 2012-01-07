@@ -37,6 +37,13 @@ class DependencyGraph(
   def this(text: String, nodes: List[DependencyNode], dependencies: Iterable[Dependency]) {
     this(Some(text), nodes, dependencies)
   }
+  
+  def serialize = {
+    val extra = this.nodes filterNot (this.dependencies.flatMap(dep => Set(dep.source, dep.dest)).contains(_))
+    val deps = Dependencies.serialize(this.dependencies)
+    
+    Iterable(extra.map("("+_+")").mkString(", "), deps).mkString(", ")
+  }
 
   def collapseXNsubj =
     new DependencyGraph(this.text, this.nodes, this.dependencies,
@@ -248,9 +255,25 @@ class DependencyGraph(
 object DependencyGraph {
   def apply(text: Option[String], dependencies: Iterable[Dependency]): DependencyGraph = {
     val vertices = SortedSet(dependencies.flatMap(_.vertices).toSeq :_*).toList
-    val graph = new Graph[DependencyNode](vertices, dependencies)
-    val nodes = inferCollapsedNodes(vertices, graph)
-    new DependencyGraph(text, nodes, dependencies.toList, graph)
+    text match {
+      // use the text to fill in the missing nodes
+      case Some(text) =>
+        val dependencyNodes = dependencies.flatMap(dep => List(dep.source, dep.dest))
+        val nodes: List[DependencyNode] = text.split("\\s+").zipWithIndex.map { case (s, i) =>
+          dependencyNodes.find(dep => dep.indices.start == i) match {
+            case Some(node) => node
+            case None => new DependencyNode(s, null, Interval.singleton(i))
+          }
+        }(scala.collection.breakOut)
+        
+        val graph = new Graph[DependencyNode](vertices, dependencies)
+        new DependencyGraph(Some(text), nodes, dependencies.toList, graph)
+      // infer the missing nodes
+      case None =>
+        val graph = new Graph[DependencyNode](vertices, dependencies)
+        val nodes = inferCollapsedNodes(vertices, graph)
+        new DependencyGraph(text, nodes, dependencies.toList, graph)
+    }
   }
 
   def apply(text: String, dependencies: Iterable[Dependency]): DependencyGraph =
@@ -259,6 +282,20 @@ object DependencyGraph {
   def apply(dependencies: Iterable[Dependency]): DependencyGraph =
     apply(None, dependencies)
 
+  def deserialize(string: String) = {
+    def rec(string: String, nodes: List[DependencyNode]): (List[DependencyNode], List[Dependency]) = {
+      if (string.charAt(0) == '(') {
+        val pickled = string.drop(1).takeWhile(_ != ')')
+        val node = DependencyNode.deserialize(pickled)
+        rec(string.dropWhile(_ != ',').drop(1).dropWhile(_ == ' '), node :: nodes)
+      }
+      else (nodes.reverse, Dependencies.deserialize(string))
+    }
+    
+    val (nodes, deps) = rec(string, List())
+    new DependencyGraph(None, nodes, deps, new Graph[DependencyNode](nodes, deps))
+  }
+  
   /** expand prep nodes that were compressed by Stanford into `DependencyNode`s. */
   private def inferCollapsedNodes(nodes: List[DependencyNode], graph: Graph[DependencyNode]): List[DependencyNode] = {
     /** at present, only infer prepositions.  Any outgoing "prep_.*" edge 

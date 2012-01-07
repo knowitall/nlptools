@@ -70,6 +70,12 @@ object DependencyGraphSpec extends Specification {
       dgraphCollapseSome.graph.vertices.map(_.text) must contain("Barack Obama")
     }
   }
+  
+  "serializes ok" in {
+    val pickled = "(over_IN_2), nsubj(jumped_VBD_1, He_PRP_0); det(barrier_NN_4, the_DT_3); prep_over(jumped_VBD_1, barrier_NN_4)"
+    val graph = DependencyGraph.deserialize(pickled)
+    graph.serialize must_== pickled
+  }
 
   testPrepositionInferral
   testNNPOfCollapse
