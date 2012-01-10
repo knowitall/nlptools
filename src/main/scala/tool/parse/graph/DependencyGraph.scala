@@ -300,9 +300,15 @@ object DependencyGraph {
       else (nodes.reverse, Dependencies.deserialize(string))
     }
     
-    val (nodes, deps) = rec(string, List())
-    val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
-    new DependencyGraph(None, nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
+    try {
+      val (nodes, deps) = rec(string, List())
+      val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
+      new DependencyGraph(None, nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
+    }
+    catch {
+      case e => throw new DependencyGraph.SerializationException(
+                    "Could not deserialize graph: " + string, e)
+    }
   }
   
   /** expand prep nodes that were compressed by Stanford into `DependencyNode`s. */
@@ -334,4 +340,7 @@ object DependencyGraph {
 
     rec(nodes)
   }
+
+  class SerializationException(message: String, cause: Throwable) 
+  extends RuntimeException(message, cause)
 }
