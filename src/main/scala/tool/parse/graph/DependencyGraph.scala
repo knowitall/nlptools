@@ -42,7 +42,7 @@ class DependencyGraph(
     val extra = this.nodes filterNot (this.dependencies.flatMap(dep => Set(dep.source, dep.dest)).contains(_))
     val deps = Dependencies.serialize(this.dependencies)
     
-    Iterable(extra.map("("+_+")").mkString(", "), deps).mkString(", ")
+    Iterable(extra.map("("+_.serialize+")").mkString(", "), deps).mkString(", ")
   }
 
   def map(f: DependencyNode=>DependencyNode) = {
