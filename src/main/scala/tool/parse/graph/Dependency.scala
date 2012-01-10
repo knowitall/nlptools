@@ -30,6 +30,10 @@ extends Edge[DependencyNode](source, dest, label) {
     else if (source == node) dest
     else source
 
+  def mapNodes(f: DependencyNode=>DependencyNode) = {
+    new Dependency(f(source), f(dest), label)
+  }
+
   def lemmatize(stemmer: Stemmer) = new Dependency(source.lemmatize(stemmer), dest.lemmatize(stemmer), label)
   def serialize = label + "(" + source.serialize + ", " + dest.serialize + ")"
 }

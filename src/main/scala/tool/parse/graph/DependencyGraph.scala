@@ -45,6 +45,14 @@ class DependencyGraph(
     Iterable(extra.map("("+_+")").mkString(", "), deps).mkString(", ")
   }
 
+  def map(f: DependencyNode=>DependencyNode) = {
+    val nodes = this.nodes.map(f)
+    val graph = this.graph.map(f)
+    val deps = this.dependencies.map(_.mapNodes(f))
+
+    new DependencyGraph(text, nodes, deps, graph)
+  }
+
   def collapseXNsubj =
     new DependencyGraph(this.text, this.nodes, this.dependencies,
       new Graph[DependencyNode](graph.edges.map { dep =>
@@ -293,7 +301,8 @@ object DependencyGraph {
     }
     
     val (nodes, deps) = rec(string, List())
-    new DependencyGraph(None, nodes, deps, new Graph[DependencyNode](nodes, deps))
+    val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
+    new DependencyGraph(None, nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
   }
   
   /** expand prep nodes that were compressed by Stanford into `DependencyNode`s. */
