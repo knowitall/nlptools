@@ -21,16 +21,25 @@ object ParserSpeedTest {
       "With this sin of disobedience in him, Jonah still further flouts at God, by seeking to flee from Him.",
       "Annual spending for U.S. intelligence operations currently totals $ 47.5 billion , a figure that does not include expensive satellites that fall under the Pentagon 's budget .")
 
+    val examples = if (args.length == 0) {
+      println("Using built-in sentences.")
+      sentences 
+    }
+    else {
+      println("Using sentences from specified file.")
+      io.Source.fromFile(args(0)).getLines.toList
+    }
+
     println("dry run...")
     for (parser <- parsers) {
       println(parser.getClass.getSimpleName)
-      sentences.foreach { parser.dependencies(_) }
+      println(speedTest(examples.map{ sentence => () => parser.dependencies(sentence) }).toString)
     }
     
     println("timing...")
     for (parser <- parsers) {
       println(parser.getClass.getSimpleName)
-      speedTest(sentences.map{ sentence => () => parser.dependencies(sentence) })
+      println(speedTest(examples.map{ sentence => () => parser.dependencies(sentence) }).toString)
     }
   }
 }
