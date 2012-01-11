@@ -3,22 +3,38 @@ package tool
 package parse
 
 import scala.collection.JavaConversions._
-
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser
 import edu.stanford.nlp.trees.PennTreebankLanguagePack
 import graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode
+import edu.stanford.nlp.trees.GrammaticalStructure
 
 /*
  * Subclasses of BaseStanfordParser must perform an optional post-processing step that applies
  * Stanford's CC-compressed algorithm on the graph. */
 abstract class BaseStanfordParser extends DependencyParser {
-  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, true)
-  def dependencies(string: String, post: Boolean): Iterable[Dependency]
+  sealed abstract class CollapseType {
+    def collapse(gsf: GrammaticalStructure): Iterable[edu.stanford.nlp.trees.TypedDependency]
+  }
+  case object None extends CollapseType {
+    override def collapse(gsf: GrammaticalStructure) = gsf.typedDependencies(false)
+  }
+  case object CCCompressed extends CollapseType {
+    override def collapse(gsf: GrammaticalStructure) = gsf.typedDependenciesCCprocessed(false)
+  }
+  case object CollapsedTree extends CollapseType {
+    override def collapse(gsf: GrammaticalStructure) = gsf.typedDependenciesCollapsedTree()
+  }
+  case object Collapsed extends CollapseType {
+    override def collapse(gsf: GrammaticalStructure) = gsf.typedDependenciesCollapsed(false)
+  }
   
-  override def dependencyGraph(string: String) = dependencyGraph(string, true)
-  def dependencyGraph(string: String, post: Boolean): DependencyGraph
+  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, CCCompressed)
+  def dependencies(string: String, collapse: CollapseType): Iterable[Dependency]
+  
+  override def dependencyGraph(string: String) = dependencyGraph(string, CCCompressed)
+  def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
   
   def convertDependency(nodes: Map[Int, DependencyNode], dep: edu.stanford.nlp.trees.TypedDependency) = {
     new Dependency(nodes(dep.gov.index - 1), nodes(dep.dep.index - 1), dep.reln.toString)
@@ -39,23 +55,20 @@ class StanfordParser(lp : LexicalizedParser) extends BaseStanfordParser with Con
   private val tlp = new PennTreebankLanguagePack();
   private val gsf = tlp.grammaticalStructureFactory();
   
-  private def depHelper(string: String, post: Boolean): (Map[Int, DependencyNode], Iterable[Dependency]) = {
+  private def depHelper(string: String, collapser: CollapseType): (Map[Int, DependencyNode], Iterable[Dependency]) = {
     val tree = lp.apply(string)
     val nodes = tree.taggedYield().view.zipWithIndex.map {
       case (tw, i) => (i, new DependencyNode(tw.word, tw.tag, i)) 
     }.toMap
     
-    (nodes, post match {
-      case true => convertDependencies(nodes, gsf.newGrammaticalStructure(tree).typedDependenciesCCprocessed)
-      case false => convertDependencies(nodes, gsf.newGrammaticalStructure(tree).typedDependencies) 
-    })
+    (nodes, convertDependencies(nodes, collapser.collapse(gsf.newGrammaticalStructure(tree))))
   }
 
-  override def dependencies(string: String, post: Boolean): Iterable[Dependency] = 
-    depHelper(string, post)._2
+  override def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] = 
+    depHelper(string, collapse)._2
   
-  override def dependencyGraph(string: String, post: Boolean): DependencyGraph = {
-    val (nodes, deps) = depHelper(string, post)
+  override def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
+    val (nodes, deps) = depHelper(string, collapse)
     new DependencyGraph(string, nodes.toList.sortBy(_._1).map(_._2), deps)
   }
   

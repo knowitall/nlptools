@@ -31,7 +31,7 @@ class MaltParser(modelname: String = "engmalt.linear", logfile: String = null) e
   val tagger = new OpenNlpPosTagger
   val stemmer = MorphaStemmer.instance
   
-  private def depHelper(sentence: String, post: Boolean) = {
+  private def depHelper(sentence: String, collapser: CollapseType) = {
     val tokens = tokenizer.tokenize(sentence)
     val lemmas = tokens.map(stemmer.stem(_))
     val pos = tagger.postag(tokens)
@@ -43,18 +43,15 @@ class MaltParser(modelname: String = "engmalt.linear", logfile: String = null) e
     
     val gs = parser.parseToGrammaticalStructure(labels)
     
-    (nodes, post match {
-      case true => convertDependencies(nodes, gs.typedDependenciesCCprocessed)
-      case false => convertDependencies(nodes, gs.typedDependencies)
-    })
+    (nodes, convertDependencies(nodes, collapser.collapse(gs)))
   }
   
-  override def dependencies(sentence: String, post: Boolean) = {
-    depHelper(sentence, post)._2
+  override def dependencies(sentence: String, collapse: CollapseType) = {
+    depHelper(sentence, collapse)._2
   }
   
-  override def dependencyGraph(string: String, post: Boolean): DependencyGraph = {
-    val (nodes, deps) = depHelper(string, post)
+  override def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
+    val (nodes, deps) = depHelper(string, collapse)
     new DependencyGraph(string, nodes.toList.sortBy(_._1).map(_._2), deps)
   }
 }
