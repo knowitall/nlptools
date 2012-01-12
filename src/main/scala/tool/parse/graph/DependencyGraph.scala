@@ -40,9 +40,12 @@ class DependencyGraph(
   
   def serialize = {
     val extra = this.nodes filterNot (this.dependencies.flatMap(dep => Set(dep.source, dep.dest)).contains(_))
-    val deps = Dependencies.serialize(this.dependencies)
     
-    Iterable(extra.map("("+_.serialize+")").mkString(", "), deps).mkString(", ")
+    val pickledNodes = extra.map("("+_.serialize+")").mkString(", ")
+    val pickledDeps = Dependencies.serialize(this.dependencies)
+
+    if (pickledNodes.isEmpty) pickledDeps
+    else pickledNodes + ", " + pickledDeps
   }
 
   def map(f: DependencyNode=>DependencyNode) = {
