@@ -273,7 +273,7 @@ object DependencyGraph {
         val nodes: List[DependencyNode] = text.split("\\s+").zipWithIndex.map { case (s, i) =>
           dependencyNodes.find(dep => dep.indices.start == i) match {
             case Some(node) => node
-            case None => new DependencyNode(s, null, Interval.singleton(i))
+            case None => new DependencyNode(s, "none", Interval.singleton(i))
           }
         }(scala.collection.breakOut)
         
