@@ -8,7 +8,7 @@ import scala.collection.JavaConversions._
 
 import edu.stanford.nlp.pipeline.Annotation
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.ling.CorefCoreAnnotations._
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations._
 import edu.stanford.nlp.dcoref._
 import edu.stanford.nlp.util.CoreMap
 
