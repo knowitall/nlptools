@@ -79,25 +79,25 @@
     <dependency>
       <groupId>edu.stanford</groupId>
       <artifactId>stanford-parse-models</artifactId>
-      <version>2011-09-16</version>
+      <version>2011-12-16</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>edu.stanford</groupId>
       <artifactId>stanford-postag-models</artifactId>
-      <version>2011-09-16</version>
+      <version>2011-12-16</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>edu.stanford</groupId>
       <artifactId>stanford-ner-models</artifactId>
-      <version>2011-09-16</version>
+      <version>2011-12-16</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>edu.stanford</groupId>
       <artifactId>stanford-dcoref-models</artifactId>
-      <version>2011-09-16</version>
+      <version>2011-12-16</version>
       <scope>runtime</scope>
     </dependency>
     <!-- These are included in stanford-models
@@ -159,6 +159,7 @@
     <dependency>
       <groupId>edu.stanford</groupId>
       <artifactId>stanford-corenlp</artifactId>
+      <version>2012-01-08</version>
     </dependency>
     <dependency>
       <groupId>org.apache.opennlp</groupId>
