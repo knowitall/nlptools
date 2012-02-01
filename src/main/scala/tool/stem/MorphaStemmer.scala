@@ -4,7 +4,7 @@ package stem
 
 import java.io.StringReader
 
-import uk.ac.susx.informatics.{MorphaStemmer => Morpha}
+import uk.ac.susx.informatics.Morpha
 import common.main.LineProcessor
 
 class MorphaStemmer extends Stemmer {
