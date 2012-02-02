@@ -9,7 +9,10 @@ import java.util.regex.{Pattern => JPattern}
 
 /**
   * A pattern over a graph of dependencies. */
-class DependencyPattern(matchers: List[Matcher[DependencyNode]]) extends Pattern[DependencyNode](matchers) {
+class DependencyPattern(matchers: List[Matcher[DependencyNode]]) 
+extends Pattern[DependencyNode](matchers) {
+  require(matchers != null)
+  
   def depEdgeMatchers: List[DependencyEdgeMatcher] = matchers.map {
     case m: DirectedEdgeMatcher[_] => m.matcher
     case m => m

@@ -12,6 +12,8 @@ class Graph[T] (
     val vertices: Set[T], 
     val edges: Set[Edge[T]]
   ) {
+  require(vertices != null)
+  require(edges != null)
 
   // shorthands
   type G = Graph[T]

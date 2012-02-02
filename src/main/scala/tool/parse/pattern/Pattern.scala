@@ -20,6 +20,8 @@ class Pattern[T](
   /** a list of matchers, alternating between `NodeMatcher`s and `EdgeMatcher`s. */
   val matchers: List[Matcher[T]]
 ) extends Function[Graph[T], List[Match[T]]] {
+  
+  require(matchers != null)
 
   // ensure that the matchers alternate
   matchers.view.zipWithIndex.foreach { case(m, i) => 

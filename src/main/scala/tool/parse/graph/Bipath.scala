@@ -9,6 +9,8 @@ import Graph._
   * A representation of a path through a graph.  The path is represented
   * by a list of directed edges. */
 class Bipath[T](val path: List[DirectedEdge[T]]) {
+  require(path != null)
+  
   // extend Object
   override def toString = "[" + path.mkString(", ") + "]";
   def canEqual(that: Any) = that.isInstanceOf[Bipath[_]]

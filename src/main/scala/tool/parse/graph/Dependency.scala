@@ -15,6 +15,10 @@ class Dependency(
     dest: DependencyNode, 
     label: String) 
 extends Edge[DependencyNode](source, dest, label) {
+  require(source != null)
+  require(dest != null)
+  require(label != null)
+  
   // extend Object
   override def toString() = this.label + "(" + this.source + " -> " + this.dest + ")"
   override def equals(other: Any) =

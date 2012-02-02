@@ -46,6 +46,9 @@ object DependencyNode {
  * A representation for a node in the graph of dependencies.  A node
  * represents one or more adjacent tokens in the source sentence. */
 class DependencyNode(val text: String, val postag: String, val indices: Interval) extends Ordered[DependencyNode] {
+  require(text != null)
+  require(postag != null)
+  
   /* create a node with a single index */
   def this(text: String, postag: String, index: Int) = 
     this(text, postag, Interval.singleton(index))

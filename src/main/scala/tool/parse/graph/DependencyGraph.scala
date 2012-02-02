@@ -20,6 +20,11 @@ class DependencyGraph(
     /** a graph representation dependencies */
     val graph: Graph[DependencyNode]
   ) {
+  
+  require(text != null)
+  require(nodes != null)
+  require(dependencies != null)
+  require(graph != null)
 
   // check that the nodes match the nodes in the dependencies
   for (vertex <- graph.vertices) {

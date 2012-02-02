@@ -30,6 +30,8 @@ object Direction {
  * considering all edges from a vertex at once but still having
  * the information of whether the edges go up or down. */
 sealed abstract class DirectedEdge[T](val edge: Edge[T]) {
+  require(edge != null)
+  
   /* the direction across this edge */
   def dir: Direction
   /* the start vertex when traversing the edge in the `dir` direction */
