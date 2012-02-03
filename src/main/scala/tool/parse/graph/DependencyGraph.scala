@@ -274,7 +274,7 @@ object DependencyGraph {
       if (string.charAt(0) == '(') {
         val pickled = string.drop(1).takeWhile(_ != ')')
         val node = DependencyNode.deserialize(pickled)
-        rec(string.dropWhile(_ != ',').drop(1).dropWhile(_ == ' '), node :: nodes)
+        rec(string.drop(pickled.length + 2 /* 2 for the () */).dropWhile(_ != ',').drop(1).dropWhile(_ == ' '), node :: nodes)
       }
       else (nodes.reverse, Dependencies.deserialize(string))
     }
