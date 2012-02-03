@@ -3,7 +3,6 @@ package tool
 package parse
 
 import scala.collection.JavaConversions._
-
 import edu.stanford.nlp.ling.CoreLabel
 import edu.stanford.nlp.parser.maltparser.MaltParserInterface
 import graph.DependencyGraph
@@ -11,6 +10,7 @@ import graph.DependencyNode
 import postag.OpenNlpPosTagger
 import stem.MorphaStemmer
 import tokenize.OpenNlpTokenizer
+import tool.parse.BaseStanfordParser.CollapseType
 
 object MaltParser extends DependencyParserMain {
   var model = "engmalt.linear"

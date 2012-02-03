@@ -9,11 +9,28 @@ import graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode
 import edu.stanford.nlp.trees.GrammaticalStructure
+import tool.parse.BaseStanfordParser._
 
 /*
  * Subclasses of BaseStanfordParser must perform an optional post-processing step that applies
  * Stanford's CC-compressed algorithm on the graph. */
 abstract class BaseStanfordParser extends DependencyParser {
+  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, CCCompressed)
+  def dependencies(string: String, collapse: CollapseType): Iterable[Dependency]
+  
+  override def dependencyGraph(string: String) = dependencyGraph(string, CCCompressed)
+  def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
+  
+  def convertDependency(nodes: Map[Int, DependencyNode], dep: edu.stanford.nlp.trees.TypedDependency) = {
+    new Dependency(nodes(dep.gov.index - 1), nodes(dep.dep.index - 1), dep.reln.toString)
+  }
+  def convertDependencies(nodes: Map[Int, DependencyNode], dep: Iterable[edu.stanford.nlp.trees.TypedDependency]) = {
+    // filter out the dependency from the root
+    dep.filter(_.gov.index > 0).map(d => convertDependency(nodes, d))
+  }
+}
+
+object BaseStanfordParser {
   sealed abstract class CollapseType {
     def collapse(gsf: GrammaticalStructure): Iterable[edu.stanford.nlp.trees.TypedDependency]
   }
@@ -28,20 +45,6 @@ abstract class BaseStanfordParser extends DependencyParser {
   }
   case object Collapsed extends CollapseType {
     override def collapse(gsf: GrammaticalStructure) = gsf.typedDependenciesCollapsed(false)
-  }
-  
-  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, CCCompressed)
-  def dependencies(string: String, collapse: CollapseType): Iterable[Dependency]
-  
-  override def dependencyGraph(string: String) = dependencyGraph(string, CCCompressed)
-  def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
-  
-  def convertDependency(nodes: Map[Int, DependencyNode], dep: edu.stanford.nlp.trees.TypedDependency) = {
-    new Dependency(nodes(dep.gov.index - 1), nodes(dep.dep.index - 1), dep.reln.toString)
-  }
-  def convertDependencies(nodes: Map[Int, DependencyNode], dep: Iterable[edu.stanford.nlp.trees.TypedDependency]) = {
-    // filter out the dependency from the root
-    dep.filter(_.gov.index > 0).map(d => convertDependency(nodes, d))
   }
 }
 
