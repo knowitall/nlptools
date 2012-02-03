@@ -269,35 +269,6 @@ class DependencyGraph(
 }
 
 object DependencyGraph {
-  def apply(text: Option[String], dependencies: Iterable[Dependency]): DependencyGraph = {
-    val vertices = SortedSet(dependencies.flatMap(_.vertices).toSeq :_*).toList
-    text match {
-      // use the text to fill in the missing nodes
-      case Some(text) =>
-        val dependencyNodes = dependencies.flatMap(dep => List(dep.source, dep.dest))
-        val nodes: List[DependencyNode] = text.split("\\s+").zipWithIndex.map { case (s, i) =>
-          dependencyNodes.find(dep => dep.indices.start == i) match {
-            case Some(node) => node
-            case None => new DependencyNode(s, "none", Interval.singleton(i))
-          }
-        }(scala.collection.breakOut)
-        
-        val graph = new Graph[DependencyNode](vertices, dependencies)
-        new DependencyGraph(Some(text), nodes, dependencies.toList, graph)
-      // infer the missing nodes
-      case None =>
-        val graph = new Graph[DependencyNode](vertices, dependencies)
-        val nodes = inferCollapsedNodes(vertices, graph)
-        new DependencyGraph(text, nodes, dependencies.toList, graph)
-    }
-  }
-
-  def apply(text: String, dependencies: Iterable[Dependency]): DependencyGraph =
-    apply(Some(text), dependencies)
-
-  def apply(dependencies: Iterable[Dependency]): DependencyGraph =
-    apply(None, dependencies)
-
   def deserialize(string: String) = {
     def rec(string: String, nodes: List[DependencyNode]): (List[DependencyNode], List[Dependency]) = {
       if (string.charAt(0) == '(') {
