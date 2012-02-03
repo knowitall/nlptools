@@ -83,6 +83,6 @@ class DependencyNode(val text: String, val postag: String, val indices: Interval
   def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, indices)
   def serialize = {
     if (indices.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple indices")
-    text.replaceAll("[_(),]", "") + "_" + postag + "_" + indices.start;
+    text.replaceAll("[_()]", "") + "_" + postag + "_" + indices.start;
   }
 }
