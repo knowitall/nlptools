@@ -30,8 +30,7 @@ abstract class DependencyParserMain extends common.main.LineProcessor {
   }
 
   override def process(line : String) = {
-    val deps = parser.dependencies(line)
-    Dependencies.serialize(deps)
+    parser.dependencyGraph(line).serialize
   }
 
   override def exit(ns: Long) {
