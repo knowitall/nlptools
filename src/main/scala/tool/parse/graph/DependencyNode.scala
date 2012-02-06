@@ -37,9 +37,16 @@ object DependencyNode {
   }
   
   def deserialize(string: String) = {
-    val Array(text, postag, index) = string.split("_")
+    val Array(text, postag, index) = try (string.split("_"))
+    catch {
+      case e => throw new SerializationException("could not deserialize dependency node: " + string, e);
+    }
+    
     new DependencyNode(text, postag, index.toInt)
   }
+  
+  class SerializationException(message: String, cause: Throwable) 
+  extends RuntimeException(message, cause)
 }
 
 /*

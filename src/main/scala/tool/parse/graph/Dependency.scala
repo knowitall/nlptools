@@ -52,12 +52,14 @@ object Dependency {
         label)
   }
   catch {
-    case e => throw new DependencySerializationException("could not deserialize dependency: " + string, e)
+    case e => throw new Dependency.SerializationException("could not deserialize dependency: " + string, e)
   }
+  
+  
+  class SerializationException(message: String, cause: Throwable) 
+  extends RuntimeException(message, cause)
 }
 
-class DependencySerializationException(message: String, cause: Throwable) 
-extends RuntimeException(message, cause)
 
 object Dependencies {
   def serialize(deps: Iterable[Dependency]) = deps.map(_.serialize).mkString("; ")
