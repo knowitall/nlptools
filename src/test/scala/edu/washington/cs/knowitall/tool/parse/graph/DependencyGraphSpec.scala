@@ -61,8 +61,33 @@ object DependencyGraphSpec extends Specification {
     }
   }
   
-  "serializes ok" in {
+  "serializes ok without extra nodes" in {
+    val pickled = "nsubj(jumped_VBD_1, He_PRP_0); det(barrier_NN_4, the_DT_3); prep_over(jumped_VBD_1, barrier_NN_4)"
+    DependencyGraph.deserialize(pickled).serialize must_== pickled
+  }
+  
+  "deserializes ok" in {
     val pickled = "(over_IN_2), nsubj(jumped_VBD_1, He_PRP_0); det(barrier_NN_4, the_DT_3); prep_over(jumped_VBD_1, barrier_NN_4)"
+    DependencyGraph.deserialize(pickled) must throwA[DependencyGraph.SerializationException].not
+  }
+  
+  "deserializes ok with unicode" in {
+    val pickled = "(on_IN_1), (by_IN_9), (to_TO_14), (after_IN_17), (of_IN_20), nsubj(words_NNS_7, Peace_NNP_0); nn(^Y_NNP_3, Earth_NNP_2); prep_on(Peace_NNP_0, ^Y_NNP_3); cop(words_NNS_7, were_VBD_4); det(words_NNS_7, the_DT_5); amod(words_NNS_7, first_JJ_6); partmod(words_NNS_7, spoken_VBN_8); det(angel_NN_11, the_DT_10); agent(spoken_VBN_8, angel_NN_11); nsubj(appeared_VBD_13, who_WP_12); rcmod(angel_NN_11, appeared_VBD_13); det(shepherds_NNS_16, the_DT_15); prep_to(appeared_VBD_13, shepherds_NNS_16); det(birth_NN_19, the_DT_18); prep_after(appeared_VBD_13, birth_NN_19); prep_of(birth_NN_19, Jesus_NNP_21); punct(words_NNS_7, ._._22)"
+    DependencyGraph.deserialize(pickled) must throwA[DependencyGraph.SerializationException].not
+  }
+  
+  "deserializes ok with commas" in {
+    val pickled = "(''_''_4), (,_,_6), (,_,_8), (with_IN_23), (on_IN_26), (!_._29), det(writing_NN_1, The_DT_0); nsubj(saying_VBG_3, writing_NN_1); aux(saying_VBG_3, is_VBZ_2); dobj(saying_VBG_3, Dad_NNP_5); appos(Dad_NNP_5, mom_NN_7); dep(saying_VBG_3, look_VB_9); nsubj(!_NNS_15, I_PRP_10); cop(!_NNS_15, 'm_VBP_11); amod(!_NNS_15, good_JJ_12); amod(!_NNS_15, left_JJ_13); nn(!_NNS_15, hand_NN_14); nsubj(is_VBZ_17, that_WDT_16); rcmod(!_NNS_15, is_VBZ_17); dobj(telling_VBG_21, what_WP_18); nsubj(telling_VBG_21, you_PRP_19); aux(telling_VBG_21, were_VBD_20); ccomp(is_VBZ_17, telling_VBG_21); dobj(telling_VBG_21, us_PRP_22); det(sunshine_NN_25, a_DT_24); prep_with(telling_VBG_21, sunshine_NN_25); poss(face_NN_28, your_PRP$_27); prep_on(sunshine_NN_25, face_NN_28)"
+    DependencyGraph.deserialize(pickled) must throwA[DependencyGraph.SerializationException].not
+  }
+  
+  "deserializes ok with commas" in {
+    val pickled = "(By_IN_0), (to_TO_7), (and_CC_12), (of_IN_14), (of_IN_18), (of_IN_22), (or_CC_24), (of_IN_28), (of_IN_31), (in_IN_34), (,_,_38), (._._40), prepc_by(hereby_VB_5, using_VBG_1); det(Site_NN_3, this_DT_2); dobj(using_VBG_1, Site_NN_3); nsubj(hereby_VB_5, you_PRP_4); dobj(hereby_VB_5, consent_NN_6); det(jurisdiction_NN_11, the_DT_8); amod(jurisdiction_NN_11, exclusive_JJ_9); amod(jurisdiction_NN_11, personal_JJ_10); prep_to(hereby_VB_5, jurisdiction_NN_11); prep_to(hereby_VB_5, venue_NN_13); conj_and(jurisdiction_NN_11, venue_NN_13); det(Courts_NNPS_17, the_DT_15); nn(Courts_NNPS_17, Federal_NNP_16); prep_of(venue_NN_13, Courts_NNPS_17); det(States_NNPS_21, the_DT_19); nn(States_NNPS_21, United_NNP_20); prep_of(Courts_NNPS_17, States_NNPS_21); prep_of(States_NNPS_21, America_NNP_23); det(Courts_NNPS_27, the_DT_25); nn(Courts_NNPS_27, State_NNP_26); prep_of(Courts_NNPS_17, Courts_NNPS_27); conj_or(States_NNPS_21, Courts_NNPS_27); det(State_NN_30, the_DT_29); prep_of(Courts_NNPS_27, State_NN_30); prep_of(State_NN_30, California_NNP_32); partmod(venue_NN_13, located_VBN_33); nn(County_NNP_37, Los_NNP_35); nn(County_NNP_37, Angeles_NNP_36); prep_in(located_VBN_33, County_NNP_37); appos(County_NNP_37, California_NNP_39)"
+    DependencyGraph.deserialize(pickled) must throwA[DependencyGraph.SerializationException].not
+  }
+  
+  "deserializes ok with missing text" in {
+    val pickled = "(''_''_4), (_,_6), (_,_8), (with_IN_23), (on_IN_26), (!_._29), det(writing_NN_1, The_DT_0); nsubj(saying_VBG_3, writing_NN_1); aux(saying_VBG_3, is_VBZ_2); dobj(saying_VBG_3, Dad_NNP_5); appos(Dad_NNP_5, mom_NN_7); dep(saying_VBG_3, look_VB_9); nsubj(!_NNS_15, I_PRP_10); cop(!_NNS_15, 'm_VBP_11); amod(!_NNS_15, good_JJ_12); amod(!_NNS_15, left_JJ_13); nn(!_NNS_15, hand_NN_14); nsubj(is_VBZ_17, that_WDT_16); rcmod(!_NNS_15, is_VBZ_17); dobj(telling_VBG_21, what_WP_18); nsubj(telling_VBG_21, you_PRP_19); aux(telling_VBG_21, were_VBD_20); ccomp(is_VBZ_17, telling_VBG_21); dobj(telling_VBG_21, us_PRP_22); det(sunshine_NN_25, a_DT_24); prep_with(telling_VBG_21, sunshine_NN_25); poss(face_NN_28, your_PRP$_27); prep_on(sunshine_NN_25, face_NN_28)"
     val graph = DependencyGraph.deserialize(pickled)
     graph.serialize must_== pickled
   }
