@@ -31,4 +31,10 @@ object DependencySpec extends Specification {
       Dependencies.deserialize(Dependencies.serialize(deps)) must_== deps
     }
   }
+  
+  "dependency nodes" should {
+    "remove nongraphical characters when serialized" in {
+      new DependencyNode("asdf", "NN", 1).serialize must_== "asdf_NN_1"
+    }
+  }
 }
