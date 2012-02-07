@@ -243,7 +243,7 @@ class DependencyGraph(
     }
     writer.append(indent + "]\n\n")
 
-    for (node <- this.graph.vertices) {
+    for (node <- this.graph.vertices.toSeq.sorted) {
       var parts: List[String] = List()
       if (filled contains node) {
         parts ::= "fillcolor=grey"
@@ -262,16 +262,16 @@ class DependencyGraph(
     }
     writer.append("\n")
     
-    for (node <- filled) {
+    for (node <- filled.toSeq.sorted) {
       writer.append(indent + quote(nodeString(node)) + " [style=filled,fillcolor=gray]\n")
     }
 
-    for (node <- dotted.flatMap(_.vertices)) {
+    for (node <- dotted.flatMap(_.vertices).toList.sorted) {
       writer.append(indent + quote(nodeString(node)) + " [style=filled]\n");
     }
     
     writer.append("\n")
-    for (dep <- graph.edges) {
+    for (dep <- graph.edges.toSeq.sortBy(edge => (edge.source.indices.head, edge.dest.indices.head, edge.label))) {
       val color = dep.label match {
         case "neg" => Some("red")
         case "amod" | "advmod" => Some("lightblue")
