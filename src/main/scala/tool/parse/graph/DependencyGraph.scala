@@ -140,9 +140,10 @@ class DependencyGraph(
     }
     
     // segment ordered dependency nodes by POS tag
+    def postagEqual(a: String, b: String) = a == b || a.startsWith("NNP") && b.startsWith("NNP")
     def splitByPos(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
-      case x :: xs => nodes.takeWhile(_.postag.equals(x.postag)) :: 
-        splitByPos(nodes.dropWhile(_.postag.equals(x.postag)))
+      case x :: xs => nodes.takeWhile(node => postagEqual(node.postag, x.postag)) :: 
+        splitByPos(nodes.dropWhile(node => postagEqual(node.postag, x.postag)))
       case Nil => Nil
     }
     
