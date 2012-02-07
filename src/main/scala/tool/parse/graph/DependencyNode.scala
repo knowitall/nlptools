@@ -29,7 +29,32 @@ object DependencyNode {
       Interval.union(sorted.map(_.indices))
     }
     catch {
-      case e: IllegalArgumentException => 
+      case e => 
+        throw new IllegalArgumentException("A set of non-adjacent intervals cannot be merged: " + e.toString)
+    }
+
+    new DependencyNode(text, postag, indices)
+  }
+    
+  /**
+    * Merge nodes, keeping the postag of the superior node of the set.
+    * 
+    * @throws  IllegalArgumentException  there is no superior of the set
+    * @return  the superior node of the set
+    */
+  implicit def directedMerge(graph: Graph[DependencyNode])(nodes: Traversable[DependencyNode]) = {
+    if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
+    val sorted = nodes.toList.sorted
+    val text = sorted.map(_.text).mkString(" ")
+    val postag = graph.superior(nodes.toSet).postag
+
+    // union the intervals, or throw a more informative exception if they are
+    // not adjacent
+    val indices = try {
+      Interval.union(sorted.map(_.indices))
+    }
+    catch {
+      case e => 
         throw new IllegalArgumentException("A set of non-adjacent intervals cannot be merged: " + e.toString)
     }
 

@@ -86,16 +86,51 @@ class DependencyGraph(
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred(_))(merge))
   }
   
+  /**
+    * Find components that are connected by the predicate.  
+    * Then, split components into subcomponents in which
+    * all vertices correspond to adjacent words in the
+    * source sentence. 
+    */
+  def adjacentComponents(pred: Edge[DependencyNode]=>Boolean): Set[Set[DependencyNode]] = {
+    def splitByAdjacency(nodes: List[DependencyNode]): List[List[DependencyNode]] = {
+      def rec(nodes: List[DependencyNode], result: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
+        case x :: Nil => (x :: result) :: Nil
+        case x :: y :: xs => if (x.indices borders y.indices) rec(y :: xs, x :: result) else (x :: result) :: rec(y :: xs, Nil)
+        case Nil => Nil
+      }
+
+      rec(nodes, Nil)
+    }
+    
+    val groups: Set[Set[DependencyNode]] = (for (dep <- graph.edges; if pred(dep)) yield {
+      graph.connected(dep.source, dedge=>pred(dedge.edge))
+    })(scala.collection.breakOut)
+    
+    
+    (for {
+      // for each connect nn component
+      group <- groups
+      // split the component by POS tag
+      val nodes = group.toList.sorted
+      part <- splitByAdjacency(nodes)
+      if part.size > 1
+    } yield(part.toSet))(scala.collection.breakOut)
+  }
+  
+  def collapseAdjacentGroups(pred: Edge[DependencyNode]=>Boolean)
+      (implicit merge: Traversable[DependencyNode]=>DependencyNode) = {
+    val components = adjacentComponents(edge => pred(edge))
+    val graph = this.graph.collapseGroups(components)(merge)
+    new DependencyGraph(this.text, this.nodes, this.dependencies, graph)
+  }
+  
   def collapseNounGroups(dividors: List[String] = List.empty) = {
     val lowerCaseDividors = dividors.map(_.toLowerCase)
     
-    def pred(dedge: DirectedEdge[DependencyNode]) = dedge.edge.label.equals("nn")
-    // get components connect by nn edges
-    
-    val groups: Set[Set[DependencyNode]] = (for (dep <- graph.edges; if dep.label == "nn") yield {
-      graph.connected(dep.source, pred(_))
-    })(scala.collection.breakOut)
-    
+    def pred(edge: Edge[DependencyNode]) = edge.label == "nn"
+    val groups = adjacentComponents(pred)
+      
     def splitByDividor(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
       case x :: xs if lowerCaseDividors.contains(x.text.toLowerCase) => List(x) :: splitByDividor(xs)
       case x :: xs => 
@@ -110,16 +145,6 @@ class DependencyGraph(
         splitByPos(nodes.dropWhile(_.postag.equals(x.postag)))
       case Nil => Nil
     }
-
-    def splitByAdjacency(nodes: List[DependencyNode]): List[List[DependencyNode]] = {
-      def rec(nodes: List[DependencyNode], result: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
-        case x :: Nil => (x :: result) :: Nil
-        case x :: y :: xs => if (x.indices borders y.indices) rec(y :: xs, x :: result) else (x :: result) :: rec(y :: xs, Nil)
-        case Nil => Nil
-      }
-
-      rec(nodes, Nil)
-    }
     
     val groupsToCollapse: Set[Set[DependencyNode]] = (for {
       // for each connect nn component
@@ -127,19 +152,24 @@ class DependencyGraph(
       // split the component by POS tag
       val nodes = group.toList.sorted
       dividorSplit <- splitByDividor(nodes)
-      posSplit <- splitByPos(dividorSplit)
-      part <- splitByAdjacency(posSplit)
+      part <- splitByPos(dividorSplit)
+      if part.size > 1
     } yield(part.toSet))(scala.collection.breakOut)
     
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(groupsToCollapse))
   }
 
-  def collapseDeterminers = {
-    def pred(edge: Edge[DependencyNode]) = (edge.source.indices borders edge.dest.indices) && edge.label.equals("det")
-    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred _))
+  def directedAdjacentCollapse(labels: Set[String]): DependencyGraph = {
+    def pred(edge: Edge[DependencyNode]) = labels.contains(edge.label)
+    this.collapseAdjacentGroups(pred)(DependencyNode.directedMerge(this.graph))
   }
   
-  def normalize = collapseNounGroups().collapseNNPOf.simplifyPostags
+  def directedAdjacentCollapse(label: String): DependencyGraph = directedAdjacentCollapse(Set(label))
+
+  def collapseWeakLeaves = 
+    directedAdjacentCollapse(Set("det", "aux", "amod", "num", "quantmod", "advmod"))
+  
+  def normalize = collapseNounGroups().collapseNNPOf.simplifyPostags.collapseWeakLeaves
 
   def mapPostags(f: String=>String): DependencyGraph = {
     def mapPostags(f: String=>String) = 

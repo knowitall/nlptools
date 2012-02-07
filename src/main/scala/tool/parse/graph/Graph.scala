@@ -85,6 +85,7 @@ class Graph[T] (
   def collapse(collapsable: E => Boolean)(implicit merge: Traversable[T] => T): G = {
     // find nn edges
     val targetEdges = edges.filter(collapsable)
+    println(targetEdges)
 
     // collapse edges by building a map from collapsed vertices
     // to collections of joined vertices
@@ -135,7 +136,7 @@ class Graph[T] (
 
     new Graph(newedges)
   }
-
+  
   /* all edges leaving or coming into this vertex. */
   def edges(vertex: T): Set[E] = outgoing(vertex) union incoming(vertex)
 
@@ -241,6 +242,50 @@ class Graph[T] (
     }
 
     vertices.flatMap(start => bipaths(start, List(start), 0).map(_.reverse))
+  }
+  
+  /**
+    * Test if the two nodes border each other.
+    */
+  def areNeighbors(a: T, b: T): Boolean =
+    this.neighbors(a).contains(b)
+  
+  /**
+    * Test if the nodes are connected.  In other words, for each node,
+    * there exists another node in the set that is its neighbor.
+    */
+  def areConnected(vertices: Iterable[T]): Boolean = 
+    vertices.forall(v => vertices.exists(w => this.areNeighbors(v, w)))
+  
+  /**
+    * Find the node which is most superior.
+    * 
+    * @throws  IllegalArgumentException  nodes are not connected or no one superior
+    */
+  def superior(vertices: Set[T]): T = {
+    require(vertices.size > 0, "vertices must not be empty")
+    require(this.areConnected(vertices), "vertices are not connected")
+   
+    // go down through the vertices to the bottom
+    def sink(v: T): T = {
+      val children = this.successors(v)
+      val targets = children intersect vertices
+      
+      if (targets.size == 0) v
+      else sink(targets.head)
+    }
+    
+    // go back up, making sure there is only one option
+    def climb(v: T): T = {
+      val parents = this.predecessors(v)
+      val targets = parents intersect vertices
+      
+      if (targets.size == 0) v
+      else if (targets.size == 1) climb(targets.head)
+      else throw new IllegalArgumentException("there is no single superior")
+    }
+    
+    climb(sink(vertices.head))
   }
 
   def print(writer: java.lang.Appendable): Unit = {

@@ -37,6 +37,15 @@ object DependencyGraphSpec extends Specification {
       dgraph.graph.vertices.map(_.text) must contain("Los Angeles County")
     }
   }
+  
+  def testCollapseDirected = {
+    val pickled = "nsubj(seem_VBP_1, I_PRP_0); aux(lived_VBN_4, to_TO_2); aux(lived_VBN_4, have_VB_3); xcomp(seem_VBP_1, lived_VBN_4); det(life_NN_7, a_DT_5); amod(life_NN_7, good_JJ_6); dobj(lived_VBN_4, life_NN_7); punct(seem_VBP_1, ._._8)"
+    val dgraph = DependencyGraph.deserialize(pickled)
+    val collapsed = dgraph.directedAdjacentCollapse("aux")
+    "two aux edges are collapsed into a single node" in {
+        collapsed.graph.vertices.map(_.text) must contain("to have lived")
+    }
+  }
 
   {
     // pathological nn edges (nn components with non-adjacent nodes)
@@ -94,4 +103,5 @@ object DependencyGraphSpec extends Specification {
 
   testNNPOfCollapse
   testNNPOfCollapse2
+  testCollapseDirected
 }
