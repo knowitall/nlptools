@@ -22,13 +22,13 @@ object DependencySpec extends Specification {
 
   val deps = List(
     new Dependency(nodes(0), nodes(1), "one"),
+    new Dependency(nodes(0), nodes(4), "four"),
     new Dependency(nodes(1), nodes(2), "two"),
-    new Dependency(nodes(2), nodes(3), "three"),
-    new Dependency(nodes(0), nodes(4), "four"))
+    new Dependency(nodes(2), nodes(3), "three"))
 
   "dependencies" should {
     "serialize correcty" in {
-      Dependencies.deserialize(Dependencies.serialize(deps)) must_== deps
+      Dependencies.deserialize(Dependencies.serialize(deps)) must haveTheSameElementsAs(deps)
     }
   }
   

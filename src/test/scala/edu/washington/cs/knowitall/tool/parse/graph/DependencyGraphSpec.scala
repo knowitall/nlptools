@@ -71,7 +71,7 @@ object DependencyGraphSpec extends Specification {
   }
   
   "serializes ok without extra nodes" in {
-    val pickled = "nsubj(jumped_VBD_1, He_PRP_0); det(barrier_NN_4, the_DT_3); prep_over(jumped_VBD_1, barrier_NN_4)"
+    val pickled = "nsubj(jumped_VBD_1, He_PRP_0); prep_over(jumped_VBD_1, barrier_NN_4); det(barrier_NN_4, the_DT_3)"
     DependencyGraph.deserialize(pickled).serialize must_== pickled
   }
   
@@ -96,9 +96,13 @@ object DependencyGraphSpec extends Specification {
   }
   
   "deserializes ok with missing text" in {
-    val pickled = "(''_''_4), (_,_6), (_,_8), (with_IN_23), (on_IN_26), (!_._29), det(writing_NN_1, The_DT_0); nsubj(saying_VBG_3, writing_NN_1); aux(saying_VBG_3, is_VBZ_2); dobj(saying_VBG_3, Dad_NNP_5); appos(Dad_NNP_5, mom_NN_7); dep(saying_VBG_3, look_VB_9); nsubj(!_NNS_15, I_PRP_10); cop(!_NNS_15, 'm_VBP_11); amod(!_NNS_15, good_JJ_12); amod(!_NNS_15, left_JJ_13); nn(!_NNS_15, hand_NN_14); nsubj(is_VBZ_17, that_WDT_16); rcmod(!_NNS_15, is_VBZ_17); dobj(telling_VBG_21, what_WP_18); nsubj(telling_VBG_21, you_PRP_19); aux(telling_VBG_21, were_VBD_20); ccomp(is_VBZ_17, telling_VBG_21); dobj(telling_VBG_21, us_PRP_22); det(sunshine_NN_25, a_DT_24); prep_with(telling_VBG_21, sunshine_NN_25); poss(face_NN_28, your_PRP$_27); prep_on(sunshine_NN_25, face_NN_28)"
+    val pickled = "(''_''_4), (_,_6), (_,_8), (with_IN_23), (on_IN_26), (!_._29), det(writing_NN_1, The_DT_0); nsubj(saying_VBG_3, writing_NN_1); aux(saying_VBG_3, is_VBZ_2); dobj(saying_VBG_3, Dad_NNP_5); dep(saying_VBG_3, look_VB_9); appos(Dad_NNP_5, mom_NN_7); nsubj(!_NNS_15, I_PRP_10); cop(!_NNS_15, 'm_VBP_11); amod(!_NNS_15, good_JJ_12); amod(!_NNS_15, left_JJ_13); nn(!_NNS_15, hand_NN_14); rcmod(!_NNS_15, is_VBZ_17); nsubj(is_VBZ_17, that_WDT_16); ccomp(is_VBZ_17, telling_VBG_21); dobj(telling_VBG_21, what_WP_18); nsubj(telling_VBG_21, you_PRP_19); aux(telling_VBG_21, were_VBD_20); dobj(telling_VBG_21, us_PRP_22); prep_with(telling_VBG_21, sunshine_NN_25); det(sunshine_NN_25, a_DT_24); prep_on(sunshine_NN_25, face_NN_28); poss(face_NN_28, your_PRP$_27)"
+    val pickledOld = "(''_''_4), (_,_6), (_,_8), (with_IN_23), (on_IN_26), (!_._29), det(writing_NN_1, The_DT_0); nsubj(saying_VBG_3, writing_NN_1); aux(saying_VBG_3, is_VBZ_2); dobj(saying_VBG_3, Dad_NNP_5); appos(Dad_NNP_5, mom_NN_7); dep(saying_VBG_3, look_VB_9); nsubj(!_NNS_15, I_PRP_10); cop(!_NNS_15, 'm_VBP_11); amod(!_NNS_15, good_JJ_12); amod(!_NNS_15, left_JJ_13); nn(!_NNS_15, hand_NN_14); nsubj(is_VBZ_17, that_WDT_16); rcmod(!_NNS_15, is_VBZ_17); dobj(telling_VBG_21, what_WP_18); nsubj(telling_VBG_21, you_PRP_19); aux(telling_VBG_21, were_VBD_20); ccomp(is_VBZ_17, telling_VBG_21); dobj(telling_VBG_21, us_PRP_22); det(sunshine_NN_25, a_DT_24); prep_with(telling_VBG_21, sunshine_NN_25); poss(face_NN_28, your_PRP$_27); prep_on(sunshine_NN_25, face_NN_28)"
     val graph = DependencyGraph.deserialize(pickled)
+    val graphOld = DependencyGraph.deserialize(pickledOld)
+    
     graph.serialize must_== pickled
+    graph.graph must_== graphOld.graph
   }
 
   testNNPOfCollapse

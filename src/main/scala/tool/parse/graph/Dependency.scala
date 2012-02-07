@@ -4,9 +4,9 @@ package parse
 package graph
 
 import Graph._
-
 import stem.Stemmer
 import scala.util.matching.Regex
+import scala.collection.immutable.SortedSet
 
 /*
  * A representation for an edge in the graph of dependencies. */
@@ -14,7 +14,8 @@ class Dependency(
     source: DependencyNode, 
     dest: DependencyNode, 
     label: String) 
-extends Edge[DependencyNode](source, dest, label) {
+extends Edge[DependencyNode](source, dest, label) 
+with Ordered[Dependency] {
   require(source != null)
   require(dest != null)
   require(label != null)
@@ -27,6 +28,13 @@ extends Edge[DependencyNode](source, dest, label) {
       other.asInstanceOf[Dependency].dest.equals(dest) &&
       other.asInstanceOf[Dependency].label == label
   override def hashCode() = 37 * (this.source.hashCode + this.dest.hashCode * 37) + label.hashCode
+  
+  // extend Ordered
+  def compare(that: Dependency) = {
+    def tuplize(dep: Dependency) =
+      (dep.source.indices.start, dep.dest.indices.start, dep.label)
+    implicitly[Ordering[(Int, Int, String)]].compare(tuplize(this), tuplize(that))
+  }
 
   def nodes = Set(source, dest)
   def otherNode(node: DependencyNode) = 
@@ -62,6 +70,7 @@ object Dependency {
 
 
 object Dependencies {
-  def serialize(deps: Iterable[Dependency]) = deps.map(_.serialize).mkString("; ")
-  def deserialize(string: String) = string.split("""\s*(?:;|\n)\s*""").map(Dependency.deserialize(_)).toList;
+  def serialize(deps: Iterable[Dependency]) = (deps.iterator).map(_.serialize).mkString("; ")
+  def deserialize(string: String): SortedSet[Dependency] = string.split("""\s*(?:;|\n)\s*""").
+      map(Dependency.deserialize(_))(scala.collection.breakOut);
 }

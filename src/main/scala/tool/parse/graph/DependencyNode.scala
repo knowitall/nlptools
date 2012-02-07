@@ -90,7 +90,7 @@ class DependencyNode(val text: String, val postag: String, val indices: Interval
     if (this == that) 0
     else if (this.indices intersects that.indices) 
       throw new IllegalStateException("intersecting intervals cannot be compared: " + this.toFullString + " and " + that.toFullString)
-    else this.indices.max.compare(that.indices.max)
+    else this.indices.compare(that.indices)
   }
 
   // extend Object

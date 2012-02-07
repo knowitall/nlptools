@@ -10,13 +10,13 @@ import collection.immutable.Interval
 /** A representation of a graph over dependencies.  
   * This richer representation may include the text of the original sentence,
   * the original nodes (before collapsing), and the original dependencies. */
-class DependencyGraph(
+class DependencyGraph (
     /** the text of the source sentence */
     val text: Option[String],
     /** the `DependencyNode`s from the parser */
-    val nodes: List[DependencyNode], 
+    val nodes: SortedSet[DependencyNode], 
     /** the `Dependency`s from the parser */
-    val dependencies: List[Dependency],
+    val dependencies: SortedSet[Dependency],
     /** a graph representation dependencies */
     val graph: Graph[DependencyNode]
   ) {
@@ -36,17 +36,17 @@ class DependencyGraph(
   
   // constructors
   
-  def this(text: Option[String], nodes: List[DependencyNode], dependencies: Iterable[Dependency]) =
-    this(text, nodes, dependencies.toList, new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
+  def this(text: Option[String], nodes: Iterable[DependencyNode], dependencies: Iterable[Dependency]) =
+    this(text, SortedSet[DependencyNode]() ++ nodes, SortedSet[Dependency]() ++ dependencies, new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
     
-  def this(text: String, nodes: List[DependencyNode], dependencies: Iterable[Dependency]) {
-    this(Some(text), nodes, dependencies)
+  def this(text: String, nodes: Iterable[DependencyNode], dependencies: Iterable[Dependency]) {
+    this(Some(text), SortedSet[DependencyNode]() ++ nodes, SortedSet[Dependency]() ++ dependencies)
   }
   
   def serialize = {
     val extra = this.nodes filterNot (this.dependencies.flatMap(dep => Set(dep.source, dep.dest)).contains(_))
     
-    val pickledNodes = extra.map("("+_.serialize+")").mkString(", ")
+    val pickledNodes = (extra.iterator).map("("+_.serialize+")").mkString(", ")
     val pickledDeps = Dependencies.serialize(this.dependencies)
 
     if (pickledNodes.isEmpty) pickledDeps
@@ -301,17 +301,17 @@ class DependencyGraph(
 
 object DependencyGraph {
   def deserialize(string: String) = {
-    def rec(string: String, nodes: List[DependencyNode]): (List[DependencyNode], List[Dependency]) = {
+    def rec(string: String, nodes: SortedSet[DependencyNode]): (SortedSet[DependencyNode], SortedSet[Dependency]) = {
       if (string.charAt(0) == '(') {
         val pickled = string.drop(1).takeWhile(_ != ')')
         val node = DependencyNode.deserialize(pickled)
-        rec(string.drop(pickled.length + 2 /* 2 for the () */).dropWhile(_ != ',').drop(1).dropWhile(_ == ' '), node :: nodes)
+        rec(string.drop(pickled.length + 2 /* 2 for the () */).dropWhile(_ != ',').drop(1).dropWhile(_ == ' '), nodes + node)
       }
-      else (nodes.reverse, Dependencies.deserialize(string))
+      else (nodes, Dependencies.deserialize(string))
     }
     
     try {
-      val (nodes, deps) = rec(string, List())
+      val (nodes, deps) = rec(string, SortedSet[DependencyNode]())
       val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
       new DependencyGraph(None, nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
     }
