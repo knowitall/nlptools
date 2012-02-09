@@ -85,7 +85,6 @@ class Graph[T] (
   def collapse(collapsable: E => Boolean)(implicit merge: Traversable[T] => T): G = {
     // find nn edges
     val targetEdges = edges.filter(collapsable)
-    println(targetEdges)
 
     // collapse edges by building a map from collapsed vertices
     // to collections of joined vertices

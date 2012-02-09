@@ -136,8 +136,6 @@ object GraphSpec extends Specification {
     }
 
     "have inferiors of {"+(vertices.keySet-"Meower").mkString(", ")+"}" in {
-      println(graph.inferiors(vertex))
-      println(vertices.keySet - "Meower")
       graph.inferiors(vertex) must haveTheSameElementsAs(vertices.values.toSet-vertices("Meower"))
     }
   }
