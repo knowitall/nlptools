@@ -157,10 +157,18 @@ class Graph[T] (
   def neighbors(v: T): Set[T] = predecessors(v) union successors(v)
 
   /** all vertices before incoming edges to `v`. */
-  def predecessors(v: T) = incoming(v).map(edge => edge.source)
+  def predecessors(v: T): Set[T] = incoming(v).map(edge => edge.source)
+  
+  /** all vertices before incoming edges to `v` that satisfy the supplied predicate. */
+  def predecessors(v: T, pred: Edge[T]=>Boolean): Set[T] = 
+    neighbors(v, (dedge: DirectedEdge[T]) => dedge.dir == Direction.Up && pred(dedge.edge))
 
   /** all vertices after outgoing edges to `v`. */
-  def successors(v: T) = outgoing(v).map(edge => edge.dest)
+  def successors(v: T): Set[T] = outgoing(v).map(edge => edge.dest)
+  
+  /** all vertices after outgoing edges to `v` that satisfy the supplied predicate. */
+  def successors(v: T, pred: Edge[T]=>Boolean): Set[T] = 
+    neighbors(v, (dedge: DirectedEdge[T]) => dedge.dir == Direction.Down && pred(dedge.edge))
 
   /** Iteratively expand a vertex to all vertices beneath it. 
     * 
