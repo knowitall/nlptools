@@ -12,7 +12,7 @@ import collection.immutable.Interval
   * the original nodes (before collapsing), and the original dependencies. */
 class DependencyGraph (
     /** the text of the source sentence */
-    val text: Option[String],
+    val text: String,
     /** the `DependencyNode`s from the parser */
     val nodes: SortedSet[DependencyNode], 
     /** the `Dependency`s from the parser */
@@ -35,13 +35,32 @@ class DependencyGraph (
   }
   
   // constructors
+
+  def this(text: String,
+      nodes: SortedSet[DependencyNode], 
+      dependencies: SortedSet[Dependency]) =
+    this(nodes.iterator.map(_.text).mkString(" "),
+        SortedSet[DependencyNode]() ++ nodes, 
+        SortedSet[Dependency]() ++ dependencies,
+        new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
   
-  def this(text: Option[String], nodes: Iterable[DependencyNode], dependencies: Iterable[Dependency]) =
-    this(text, SortedSet[DependencyNode]() ++ nodes, SortedSet[Dependency]() ++ dependencies, new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
-    
-  def this(text: String, nodes: Iterable[DependencyNode], dependencies: Iterable[Dependency]) {
-    this(Some(text), SortedSet[DependencyNode]() ++ nodes, SortedSet[Dependency]() ++ dependencies)
-  }
+  def this(text: String, 
+      nodes: Iterable[DependencyNode], 
+      dependencies: Iterable[Dependency]) =
+    this(text, 
+      SortedSet[DependencyNode]() ++ nodes, 
+      SortedSet[Dependency]() ++ dependencies)
+
+  def this(nodes: SortedSet[DependencyNode], 
+      dependencies: SortedSet[Dependency]) =
+    this(nodes.iterator.map(_.text).mkString(" "),
+        SortedSet[DependencyNode]() ++ nodes, 
+        SortedSet[Dependency]() ++ dependencies)
+
+  def this(nodes: Iterable[DependencyNode], 
+      dependencies: Iterable[Dependency]) =
+    this(SortedSet[DependencyNode]() ++ nodes, 
+        SortedSet[Dependency]() ++ dependencies)
   
   def serialize = {
     val extra = this.nodes filterNot (this.dependencies.flatMap(dep => Set(dep.source, dep.dest)).contains(_))
@@ -211,19 +230,41 @@ class DependencyGraph (
     mapPostags(simplifyPostag)
   }
   
-  def dot(title: String): String = dot(title, Set.empty, Set.empty)
-  
-  def dot(title: String, filled: Set[DependencyNode], dotted: Set[Edge[DependencyNode]]): String = {
+  def dot(title: String=this.text): String = {
     val buffer = new StringBuffer(4092)
-    printDOT(buffer, Some(title), filled, dotted)
+    printDot(buffer, title)
+    buffer.toString
+  }
+  
+  def dotWithHighlights(title: String, specialNodes: Set[DependencyNode], specialEdges: Set[Edge[DependencyNode]]): String = {
+    val buffer = new StringBuffer(4092)
+    printDotWithHighlights(buffer, title, specialNodes, specialEdges)
     buffer.toString
   }
 
-  def printDOT(writer: java.lang.Appendable, title: Option[String] = this.text) {
-    printDOT(writer, title, Set.empty, Set.empty)
+  def dot(title: String, 
+      nodeStyle: Map[DependencyNode, String], 
+      edgeStyle: Map[Edge[DependencyNode], String]): String = {
+    val buffer = new StringBuffer(4092)
+    printDot(buffer, title, nodeStyle, edgeStyle)
+    buffer.toString
   }
 
-  def printDOT(writer: java.lang.Appendable, title: Option[String], filled: Set[DependencyNode], dotted: Set[Edge[DependencyNode]]) {
+  def printDot(writer: java.lang.Appendable, title: String = this.text) {
+    printDot(writer, title, Map.empty, Map.empty)
+  }
+
+  def printDotWithHighlights(writer: java.lang.Appendable, title: String, specialNodes: Set[DependencyNode], specialEdges: Set[Edge[DependencyNode]]) {
+    val filledNodes = specialNodes zip Stream.continually("style=filled,fillcolor=lightgray") 
+
+    val nodeStyle = filledNodes
+    val edgeStyle = (specialEdges zip Stream.continually("style=filled")) ++ 
+      ((this.graph.edges -- specialEdges) zip Stream.continually("style=dotted,color=gray"))
+
+    printDot(writer, title, nodeStyle.toMap, edgeStyle.toMap)
+  }
+
+  def printDot(writer: java.lang.Appendable, title: String, nodeStyle: Map[DependencyNode, String], edgeStyle: Map[Edge[DependencyNode], String]) {
     def quote(string: String) = "\"" + string + "\""
     def nodeString(node: DependencyNode) = 
       if (graph.vertices.filter(_.text.equals(node.text)).size > 1) 
@@ -238,24 +279,14 @@ class DependencyGraph (
     writer.append(indent + "graph [\n")
     writer.append(indent * 2 + "fontname=\"Helvetica-Oblique\"\n")
     writer.append(indent * 2 + "fontsize=\"12\"\n")
-    if (title.isDefined) {
-      val cleanedTitle = title.get.replaceAll("\\n", "").replaceAll("\"", "'").replaceAll(";", ",")
-      writer.append(indent * 2 + "label=\"" + cleanedTitle + "\"\n")
-    }
+    val cleanedTitle = title.replaceAll("\\n", "").replaceAll("\"", "'").replaceAll(";", ",")
+    writer.append(indent * 2 + "label=\"" + cleanedTitle + "\"\n")
     writer.append(indent + "]\n\n")
 
     for (node <- this.graph.vertices.toSeq.sorted) {
       var parts: List[String] = List()
-      if (filled contains node) {
-        parts ::= "fillcolor=grey"
-        parts ::= "style=filled"
-      }
-
-      if (node.postag.startsWith("NN")) {
-        parts ::= "color=green"
-      }
-      else {
-        parts ::= "color=grey"
+      if (nodeStyle contains node) {
+        parts ::= nodeStyle(node)
       }
 
       val brackets = "[" + parts.mkString(",") + "]"
@@ -263,14 +294,10 @@ class DependencyGraph (
     }
     writer.append("\n")
     
-    for (node <- filled.toSeq.sorted) {
-      writer.append(indent + quote(nodeString(node)) + " [style=filled,fillcolor=gray]\n")
+    for (node <- nodeStyle.keys.toSeq.sorted) {
+      writer.append(indent + quote(nodeString(node)) + " [" + nodeStyle(node) + "]\n")
     }
 
-    for (node <- dotted.flatMap(_.vertices).toList.sorted) {
-      writer.append(indent + quote(nodeString(node)) + " [style=filled]\n");
-    }
-    
     writer.append("\n")
     for (dep <- graph.edges.toSeq.sortBy(edge => (edge.source.indices.head, edge.dest.indices.head, edge.label))) {
       val color = dep.label match {
@@ -284,7 +311,7 @@ class DependencyGraph (
 
       var parts = List("label=\"" + dep.label + "\"")
       if (color.isDefined) parts ::= "color=\"" + color.get + "\""
-      if (dotted(dep)) parts ::= "style=\"dotted\""
+      if (edgeStyle.contains(dep)) parts ::= edgeStyle(dep)
 
       val brackets = "[" + parts.mkString(",") + "]"
       writer.append(indent + quote(nodeString(dep.source)) + " -> " + quote(nodeString(dep.dest)) + " " + brackets + "\n")
@@ -313,7 +340,7 @@ object DependencyGraph {
     try {
       val (nodes, deps) = rec(string, SortedSet[DependencyNode]())
       val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
-      new DependencyGraph(None, nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
+      new DependencyGraph(nodes.iterator.map(_.text).mkString(" "), nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
     }
     catch {
       case e => throw new DependencyGraph.SerializationException(
