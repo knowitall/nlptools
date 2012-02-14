@@ -266,11 +266,15 @@ class DependencyGraph (
 
   def printDot(writer: java.lang.Appendable, title: String, nodeStyle: Map[DependencyNode, String], edgeStyle: Map[Edge[DependencyNode], String]) {
     def quote(string: String) = "\"" + string + "\""
-    def nodeString(node: DependencyNode) = 
-      if (graph.vertices.filter(_.text.equals(node.text)).size > 1) 
-        node.text + "_" + node.postag + "_" + node.indices.mkString("_")
+    def escape(string: String) = string.replaceAll("\"", "''")
+    def nodeString(node: DependencyNode) = {
+      val text = escape(node.text)
+      val postag = escape(node.postag)
+      if (graph.vertices.filter(_.text.equals(text)).size > 1) 
+        text + "_" + postag + "_" + node.indices.mkString("_")
       else
-        node.text  + "_" + node.postag
+        text  + "_" + postag
+    }
 
     val indent = " " * 2;
 
