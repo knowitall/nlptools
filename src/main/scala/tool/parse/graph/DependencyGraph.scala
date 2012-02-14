@@ -344,7 +344,7 @@ object DependencyGraph {
     try {
       val (nodes, deps) = rec(string, SortedSet[DependencyNode]())
       val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
-      new DependencyGraph(nodes.iterator.map(_.text).mkString(" "), nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
+      new DependencyGraph((depNodes ++ nodes).iterator.map(_.text).mkString(" "), nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
     }
     catch {
       case e => throw new DependencyGraph.SerializationException(
