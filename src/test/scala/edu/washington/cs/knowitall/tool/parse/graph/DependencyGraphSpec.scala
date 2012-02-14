@@ -75,6 +75,26 @@ object DependencyGraphSpec extends Specification {
     DependencyGraph.deserialize(pickled).serialize must_== pickled
   }
   
+  "deserializes fails on garbage" in {
+    val pickled = "over_IN_2), nsubj(jumped_VBD_1, He_PRP_0); det(barrier_NN_4, the_DT_3); prep_over(jumped_VBD_1, barrier_NN_4)"
+    DependencyGraph.deserialize(pickled) must throwA[DependencyGraph.SerializationException]
+  }
+  
+  "deserializes fails on garbage" in {
+    val pickled = "ed_VBD_1, He_PRP_0); det(barrier_NN_4, the_DT_3); prep_over(jumped_VBD_1, barrier_NN_4)"
+    DependencyGraph.deserialize(pickled) must throwA[DependencyGraph.SerializationException]
+  }
+  
+  "deserializes fails on garbage" in {
+    val pickled = "(barrier_NN_4, the_DT_3); prep_over(jumped_VBD_1, barrier_NN_4)"
+    DependencyGraph.deserialize(pickled) must throwA[DependencyGraph.SerializationException]
+  }
+  
+  "deserializes fails on garbage" in {
+    val pickled = "; prep_over(jumped_VBD_1, barrier_NN_4)"
+    DependencyGraph.deserialize(pickled) must throwA[DependencyGraph.SerializationException]
+  }
+  
   "deserializes ok" in {
     val pickled = "(over_IN_2), nsubj(jumped_VBD_1, He_PRP_0); det(barrier_NN_4, the_DT_3); prep_over(jumped_VBD_1, barrier_NN_4)"
     DependencyGraph.deserialize(pickled) must throwA[DependencyGraph.SerializationException].not
