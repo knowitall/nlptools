@@ -20,11 +20,16 @@ class Bipath[T](val path: List[DirectedEdge[T]]) {
   }
 
   /** the undirected edges of the path */
-  def edges = path.foldRight[Set[Edge[T]]](Set()) { case (item, set) => set + item.edge }
+  def edges: Set[Edge[T]] = path.foldRight[Set[Edge[T]]](Set()) {
+    case (item, set) => set + item.edge
+  }
+
   /** the unique vertices along the path */
-  def nodes = path.head.start :: path.map(_.end)
+  def nodes: List[T] = path.head.start :: path.map(_.end)
+
   /** the first vertex in the path */
-  def start = path.head.start
+  def start: T = path.head.start
+
   /** collapse edges in the path that match `pred` */
   def collapse(pred: Edge[T]=>Boolean, merge: (T, T) => T) = {
     if (path.forall(dep => pred(dep.edge))) {
