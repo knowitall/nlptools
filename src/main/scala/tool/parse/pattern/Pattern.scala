@@ -111,6 +111,8 @@ class Match[T](
 
   def groups: Map[String, Match.Group] = nodeGroups ++ edgeGroups
 
+  def nodes: Iterable[T] = bipath.nodes
+  def edges: Iterable[Graph.Edge[T]] = bipath.edges
 }
 
 object Match {
