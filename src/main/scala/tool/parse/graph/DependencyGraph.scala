@@ -181,13 +181,18 @@ class DependencyGraph (
 
   def directedAdjacentCollapse(labels: Set[String]): DependencyGraph = {
     def pred(edge: Edge[DependencyNode]) = labels.contains(edge.label)
-    this.collapseAdjacentGroups(pred)(DependencyNode.directedMerge(this.graph))
+
+    // If we get a component that is not connected, remove it from consideration.
+    // It is often a mistake due to a strange parse.  It may also be an unusual edge.
+    val components = adjacentComponents(pred) filter (this.graph.areConnected)
+    val graph = this.graph.collapseGroups(components)(DependencyNode.directedMerge(this.graph))
+    new DependencyGraph(this.text, this.nodes, this.dependencies, graph)
   }
   
   def directedAdjacentCollapse(label: String): DependencyGraph = directedAdjacentCollapse(Set(label))
 
   def collapseWeakLeaves = 
-    directedAdjacentCollapse(Set("det", "aux", "amod", "num", "quantmod", "advmod"))
+    directedAdjacentCollapse(Set("neg", "det", "aux", "amod", "num", "quantmod", "advmod"))
   
   def normalize = collapseNounGroups().collapseNNPOf.simplifyPostags.collapseWeakLeaves
 
