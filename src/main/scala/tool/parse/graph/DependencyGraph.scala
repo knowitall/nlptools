@@ -192,13 +192,16 @@ class DependencyGraph (
   def normalize = collapseNounGroups().collapseNNPOf.simplifyPostags.collapseWeakLeaves
 
   def mapPostags(f: String=>String): DependencyGraph = {
+    def mapNode(node: DependencyNode): DependencyNode =
+      new DependencyNode(node.text, f(node.postag), node.indices)
+
     def mapPostags(f: String=>String) = 
-      graph.map(v => new DependencyNode(v.text, f(v.postag), v.indices))
+      graph.map(mapNode)
 
     new DependencyGraph(
       this.text, 
-      this.nodes, 
-      this.dependencies, mapPostags(f))
+      this.nodes.map(mapNode), 
+      this.dependencies.map(_.mapNodes(mapNode)), mapPostags(f))
   }
 
   def simplifyPostags = {
