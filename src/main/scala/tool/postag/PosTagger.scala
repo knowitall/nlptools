@@ -3,6 +3,7 @@ package tool
 package postag
 
 import edu.washington.cs.knowitall._
+import scala.collection.immutable
 
 /* A POS tagger takes tokenized input and associates a part of speech
  * tag with each token. */
@@ -16,4 +17,32 @@ abstract class PosTagger(val tokenizer: tokenize.Tokenizer) {
     val tags = postag(tokens)
     tokens zip tags
   }
+}
+
+object PosTagger {
+  val simplePrepositions = immutable.Set(
+    "a", "abaft", "aboard", "about", "above", "absent", "across", "afore",
+    "after", "against", "along", "alongside", "amid", "amidst", "among",
+    "amongst", "an", "apropos", "around", "as", "aside", "astride", "at",
+    "athwart", "atop", "barring", "before", "behind", "below", "beneath",
+    "beside", "besides", "between", "betwixt", "beyond", "but", "by", "circa",
+    "concerning", "despite", "down", "during", "except", "excluding", 
+    "failing", "following", "for", "from", "given", "in", "including",
+    "inside", "into", "lest", "like", "mid", "midst", "minus", "modulo",
+    "near", "next", "notwithstanding", "of", "off", "on", "onto", "opposite",
+    "out", "outside", "over", "pace", "past", "per", "plus", "pro", "qua",
+    "regarding", "round", "sans", "save", "since", "than", "through",
+    "thru", "throughout", "thruout", "till", "times", "to", "toward",
+    "towards", "under", "underneath", "unlike", "until", "up", "upon",
+    "versus", "vs.", "v.", "via", "vice", "with", "within", "without",
+    "worth")
+    
+  val prepositions = simplePrepositions ++ immutable.Set(
+    "according to", "ahead of", "apart from", "as for", "as of", "as per",
+    "as regards", "aside from", "back to", "because of", "close to",
+    "due to", "except for", "far from", "in to", "inside of", "instead of",
+    "left of", "near to", "next to", "on to", "out from", "out of",
+    "outside of", "owing to", "prior to", "pursuant to", "regardless of",
+    "right of", "subsequent to", "thanks to", "that of", "up to",
+    "where as", "as far as", "as well as")
 }
