@@ -116,9 +116,7 @@ class Match[T](
 }
 
 object Match {
-  sealed abstract class Group(matchText: String) {
-    def text = matchText
-  }
+  sealed abstract class Group(val text: String)
   case class NodeGroup[T](node: T, matchText: String) extends Group(matchText)
   case class EdgeGroup[T](dedge: DirectedEdge[T], matchText: String) extends Group(matchText)
 }
