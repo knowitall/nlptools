@@ -28,4 +28,13 @@ abstract class ChunkerMain
 extends LineProcessor {
   def chunker: Chunker
   override def process(line: String) = chunker.chunk(line).map{case (a,(b,c)) => a + "/" + b + "/" + c}.mkString(" ")
+
+  override def init(args: Array[String]) {
+    // for timing purposes
+    chunker.chunk("I want to initialize the chunker.")
+  }
+
+  override def exit(ns: Long) {
+    System.err.println(ns / 1000 / 1000 + "ms")
+  }
 }
