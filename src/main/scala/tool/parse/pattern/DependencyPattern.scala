@@ -144,10 +144,10 @@ class RegexEdgeMatcher(val labelRegex: Regex) extends DependencyEdgeMatcher {
   override def toString = "regex:"+labelRegex.toString
   def canEqual(that: Any) = that.isInstanceOf[RegexEdgeMatcher]
   override def equals(that: Any) = that match {
-    case that: RegexEdgeMatcher => (that canEqual this) && this.labelRegex == that.labelRegex
+    case that: RegexEdgeMatcher => (that canEqual this) && this.labelRegex.toString == that.labelRegex.toString
     case _ => false
   }
-  override def hashCode = this.labelRegex.hashCode
+  override def hashCode = this.labelRegex.toString.hashCode
 }
 
 abstract class AbstractDependencyNodeMatcher(val text: Option[String], val postag: Option[String]) 
