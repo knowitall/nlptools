@@ -224,7 +224,12 @@ extends NodeMatcher[T] {
   override def matchText(node: T) = matcher.matchText(node)
   
   // extend Object
-  override def toString = "{"+alias+"}"
+  override def toString = {
+    "{"+(matcher match {
+      case m: TrivialNodeMatcher[_] => alias
+      case m => alias + ":" + m.toString
+    })+"}"
+  }
   def canEqual(that: Any) = that.isInstanceOf[CaptureNodeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: CaptureNodeMatcher[_] => (that canEqual this) && this.alias == that.alias && this.matcher == that.matcher
