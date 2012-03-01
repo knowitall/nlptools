@@ -184,7 +184,7 @@ class CaptureEdgeMatcher[T](val alias: String, val matcher: EdgeMatcher[T]) exte
   }
   def canEqual(that: Any) = that.isInstanceOf[CaptureEdgeMatcher[_]]
   override def equals(that: Any) = that match {
-    case that: CaptureNodeMatcher[_] => (that canEqual this) && this.alias == that.alias && this.matcher == that.matcher
+    case that: CaptureEdgeMatcher[_] => (that canEqual this) && this.alias == that.alias && this.matcher == that.matcher
     case _ => false
   }
   override def hashCode = alias.hashCode + 39*matcher.hashCode
