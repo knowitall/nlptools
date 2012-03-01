@@ -39,6 +39,12 @@ class Pattern[T](
   // extend Object
   override def toString = {
     matchers.view.map(_.toString).mkString(" ") }
+  def canEqual(that: Any) = that.isInstanceOf[Pattern[_]]
+  override def equals(that: Any) = that match {
+    case that: Pattern[_] => (that canEqual this) && this.matchers == that.matchers
+    case _ => false
+  }
+  override def hashCode = this.matchers.hashCode
   
   /** Find all matches of this pattern in the graph. */
   def apply(graph: Graph[T]): List[Match[T]] = {
