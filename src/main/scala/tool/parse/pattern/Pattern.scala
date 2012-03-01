@@ -100,6 +100,11 @@ class Pattern[T](
       matchers.view.zipWithIndex.map {
         case (matcher, i) => if (i == index) replacement else matcher 
       }.toList)
+  
+  def reflection = new Pattern(this.matchers.reverse.map {
+    case m: EdgeMatcher[_] => m.flip
+    case m: NodeMatcher[_] => m
+  })
 }
 
 /** A representation of a match of a pattern in a graph. */
