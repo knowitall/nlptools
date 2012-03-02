@@ -62,6 +62,15 @@ class DependencyGraph (
     this(SortedSet[DependencyNode]() ++ nodes, 
         SortedSet[Dependency]() ++ dependencies)
   
+  def canEqual(that: Any) = that.isInstanceOf[DependencyGraph]
+  override def equals(that: Any) = that match {
+    case that: DependencyGraph => that.canEqual(this) && 
+        this.text == that.text &&
+        this.nodes == that.nodes &&
+        this.dependencies == that.dependencies &&
+        this.graph == that.graph
+    case _ => false
+  }
   def serialize = {
     val extra = this.nodes filterNot (this.dependencies.flatMap(dep => Set(dep.source, dep.dest)).contains(_))
     
