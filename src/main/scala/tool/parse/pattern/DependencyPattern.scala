@@ -36,7 +36,10 @@ object DependencyPattern {
       new CaptureNodeMatcher[DependencyNode](s, new DependencyNodeMatcher(None, Some(postag)) with MatchPostag) {
         override def toString = "{" + this.alias + ":" + this.matcher.asInstanceOf[DependencyNodeMatcher].postag.get + "}"}
       }
-    def captureNodeMatcher[V]: Parser[CaptureNodeMatcher[DependencyNode]] = simpleCaptureNodeMatcher | postagCaptureNodeMatcher
+    def regexCaptureNodeMatcher = "{" ~> """\w+""".r ~ ":regex:" ~ """[^<>{}:\p{Space}]+""".r <~ "}" ^^ { case s~":regex:"~r => 
+      new CaptureNodeMatcher[DependencyNode](s, new RegexNodeMatcher(new Regex(r)))
+    }
+    def captureNodeMatcher[V]: Parser[CaptureNodeMatcher[DependencyNode]] = simpleCaptureNodeMatcher | regexCaptureNodeMatcher | postagCaptureNodeMatcher
     def nodeMatcher[V]: Parser[NodeMatcher[DependencyNode]] = (captureNodeMatcher | simpleNodeMatcher) ^^ { s => s.asInstanceOf[NodeMatcher[DependencyNode]] }
     
     def regexEdgeMatcher = "regex:" ~> """[^<>{}:\p{Space}]+""".r ^^ { case regex =>
@@ -98,6 +101,24 @@ object DependencyPattern {
     }
     catch {
       case e => throw new DependencyPatternSerializationException("could not deserialize pattern: " + string, e)
+    }
+  }
+
+  def main(args: Array[String]) {
+    def print(tab: Int, m: Matcher[_]): Unit = {
+      println(" " * (tab * 2) + m)
+      println(" " * (tab * 2) + m.getClass.getSimpleName)
+      m match {
+        case m: NodeMatcherWrapper[_] => print(tab + 1, m.matcher)
+        case m: EdgeMatcherWrapper[_] => print(tab + 1, m.matcher)
+        case _ => 
+      } 
+    }
+      
+    val pattern = DependencyPattern.deserialize(args(0))
+    println(pattern)
+    for (m <- pattern.matchers) {
+      print(0, m)
     }
   }
 }
@@ -174,6 +195,27 @@ extends AbstractDependencyNodeMatcher(text, postag) {
   def matchText(node: DependencyNode) = if (matches(node)) Some(node.text) else None
   
   def this(node: DependencyNode) = this(Some(node.text), Some(node.postag))
+}
+
+class RegexNodeMatcher(val regex: Regex) extends NodeMatcher[DependencyNode] {
+  override def matches(node: DependencyNode) = node.text match {
+      case regex() => true
+      case _ => false
+  }
+
+  def matchText(node: DependencyNode) = node.text match {
+      case regex(group) => Some(group)
+      case regex() => Some(node.text)
+      case _ => None
+  }
+
+  override def toString = "regex:"+regex.toString
+  def canEqual(that: Any) = that.isInstanceOf[RegexNodeMatcher]
+  override def equals(that: Any) = that match {
+    case that: RegexNodeMatcher => (that canEqual this) && this.regex.toString == that.regex.toString
+    case _ => false
+  }
+  override def hashCode = this.regex.toString.hashCode
 }
 
 /**
