@@ -149,7 +149,11 @@ trait EdgeMatcher[T] extends Matcher[T] {
   def flip: EdgeMatcher[T]
 }
 
-class DirectedEdgeMatcher[T](val direction: Direction, val matcher: EdgeMatcher[T]) extends EdgeMatcher[T] {
+abstract class EdgeMatcherWrapper[T](val matcher: EdgeMatcher[T]) extends EdgeMatcher[T] {
+  def equals(that: EdgeMatcherWrapper[T]) = this.matcher == that.matcher
+}
+
+class DirectedEdgeMatcher[T](val direction: Direction, matcher: EdgeMatcher[T]) extends EdgeMatcherWrapper[T](matcher) {
   def matchText(edge: DirectedEdge[T]) = 
     if (edge.dir == direction) matcher.matchText(edge)
     else None
@@ -177,7 +181,7 @@ class TrivialEdgeMatcher[T] extends EdgeMatcher[T] {
   def flip = this
 }
 
-class CaptureEdgeMatcher[T](val alias: String, val matcher: EdgeMatcher[T]) extends EdgeMatcher[T] {
+class CaptureEdgeMatcher[T](val alias: String, matcher: EdgeMatcher[T]) extends EdgeMatcherWrapper[T](matcher) {
   override def matchText(edge: DirectedEdge[T]) = matcher.matchText(edge)
   override def flip = new CaptureEdgeMatcher(alias, matcher.flip)
   
@@ -205,6 +209,11 @@ trait NodeMatcher[T] extends Matcher[T] {
   def matchText(node: T): Option[String]
 }
 
+abstract class NodeMatcherWrapper[T](val matcher: NodeMatcher[T])
+extends NodeMatcher[T] {
+  def equals(that: NodeMatcherWrapper[T]) = this.matcher == that.matcher
+}
+
 /**
   * Always match any node. */
 class TrivialNodeMatcher[T] extends NodeMatcher[T] {
@@ -225,8 +234,8 @@ class TrivialNodeMatcher[T] extends NodeMatcher[T] {
   * @param  alias  the name of the captured node
   * @param  matcher  the matcher to apply
   */
-class CaptureNodeMatcher[T](val alias: String, val matcher: NodeMatcher[T]) 
-extends NodeMatcher[T] {
+class CaptureNodeMatcher[T](val alias: String, matcher: NodeMatcher[T]) 
+extends NodeMatcherWrapper[T](matcher) {
   /**
     * Convenience constructor that uses the TrivialNodeMatcher.
     */
