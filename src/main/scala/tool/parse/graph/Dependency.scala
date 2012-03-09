@@ -22,11 +22,10 @@ with Ordered[Dependency] {
   
   // extend Object
   override def toString() = this.label + "(" + this.source + " -> " + this.dest + ")"
-  override def equals(other: Any) =
-    other != null && other.isInstanceOf[Dependency] &&
-      other.asInstanceOf[Dependency].source.equals(source) &&
-      other.asInstanceOf[Dependency].dest.equals(dest) &&
-      other.asInstanceOf[Dependency].label == label
+  override def equals(that: Any) = that match {
+    case that: Dependency => this.label == that.label && this.source == that.source && this.dest == that.dest
+    case _ => false
+  }
   override def hashCode() = 37 * (this.source.hashCode + this.dest.hashCode * 37) + label.hashCode
   
   // extend Ordered
