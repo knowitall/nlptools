@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 class PatternSpecTest extends JUnit4(PatternSpec)
 object PatternSpec extends Specification {
   def testMultipathPatternApplication = {
-    val pattern = DependencyPattern.deserialize("{arg1} <nsubjpass< {rel:VBN} >prep_in> {arg2}")
+    val pattern = DependencyPattern.deserialize("{arg1} <nsubjpass< {rel:postag=VBN} >prep_in> {arg2}")
     val dgraph = DependencyGraph.deserialize("prep_in(mean_VBP_7, Canada_NNP_1); det(conditions_NNS_6, the_DT_2); amod(conditions_NNS_6, geographic_JJ_3); conj_and(geographic_JJ_3, climatic_JJ_5); amod(conditions_NNS_6, climatic_JJ_5); nsubj(mean_VBP_7, conditions_NNS_6); complm(established_VBN_12, that_IN_8); nsubjpass(established_VBN_12, LBAM_NNP_9); aux(established_VBN_12, could_MD_10); auxpass(established_VBN_12, become_VB_11); ccomp(mean_VBP_7, established_VBN_12); prep_in(established_VBN_12, parts_NNS_14); nn(Columbia_NNP_19, south_NN_16); amod(Columbia_NNP_19, coastal_JJ_17); nn(Columbia_NNP_19, British_NNP_18); prep_of(parts_NNS_14, Columbia_NNP_19); nn(Island_NNP_22, Vancouver_NNP_21); prep_of(parts_NNS_14, Island_NNP_22); conj_and(Columbia_NNP_19, Island_NNP_22); prep_in(established_VBN_12, greenhouses_NNS_27); conj_and(parts_NNS_14, greenhouses_NNS_27); amod(environments_NNS_31, other_JJ_29); amod(environments_NNS_31, protected_JJ_30); conj_and(parts_NNS_14, environments_NNS_31); conj_and(greenhouses_NNS_27, environments_NNS_31); punct(mean_VBP_7, ._._32)")
 
     pattern.toString should {
