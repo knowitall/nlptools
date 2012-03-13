@@ -106,20 +106,6 @@ class Pattern[T](
   /** A list of just the node matchers, in order. */
   def nodeMatchers = matchers.collect { case m: NodeMatcher[_] => m }
 
-  @deprecated
-  def replaceMatcherAt(replacements: List[(Int, NodeMatcher[T])]) = 
-    new Pattern(
-      matchers.view.zipWithIndex.map {
-        case (matcher, i) => replacements.find(_._1 == i).map(_._2) getOrElse matcher
-      }.toList)
-  
-  @deprecated
-  def replaceMatcherAt(index: Int, replacement: NodeMatcher[T]) = 
-    new Pattern(
-      matchers.view.zipWithIndex.map {
-        case (matcher, i) => if (i == index) replacement else matcher 
-      }.toList)
-  
   def reflection = new Pattern(this.matchers.reverse.map {
     case m: EdgeMatcher[_] => m.flip
     case m: NodeMatcher[_] => m
