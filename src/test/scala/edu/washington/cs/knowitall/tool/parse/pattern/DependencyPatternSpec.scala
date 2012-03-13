@@ -72,7 +72,7 @@ object DependencyPatternSpec extends Specification {
         new CaptureNodeMatcher[DependencyNode]("capture", new RegexNodeMatcher("asdf".r)))))
         
   testDeserialize("{capture:regex=asdf:postag=foo}", new DependencyPattern(List(
-        new CaptureNodeMatcher[DependencyNode]("capture", Set(new RegexNodeMatcher("asdf".r), new PostagNodeMatcher("foo"))))))
+        new CaptureNodeMatcher[DependencyNode]("capture", new ConjunctiveNodeMatcher(new RegexNodeMatcher("asdf".r), new PostagNodeMatcher("foo"))))))
         
   testDeserialize("regex=asdf", new DependencyPattern(List(
         new RegexNodeMatcher("asdf".r))))

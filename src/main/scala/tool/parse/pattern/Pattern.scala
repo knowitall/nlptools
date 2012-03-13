@@ -52,20 +52,11 @@ class Pattern[T](
   }
   
   def baseEdgeMatchers = {
-    def rec(m: EdgeMatcher[_]): EdgeMatcher[_] = m match {
-      case m: EdgeMatcherWrapper[_] => rec(m.matcher)
-      case m => m
-    }
-    this.edgeMatchers.map(rec(_))
+    this.edgeMatchers.map(_.baseEdgeMatcher)
   }
   
   def baseNodeMatchers = {
-    def rec(m: NodeMatcher[_]): Seq[NodeMatcher[_]] = m match {
-      case m: NodeMatcherWrapper[_] => m.matchers.toSeq.flatMap(rec(_))
-      case m => Seq(m)
-    }
-    
-    this.nodeMatchers.flatMap(rec(_))
+    this.nodeMatchers.flatMap(_.baseNodeMatchers)
   }
 
   /** Find all matches of this pattern in the graph starting at `vertex`. */
@@ -114,12 +105,12 @@ class Pattern[T](
 
 /**
   * Abstract superclass for all matchers. */
-abstract class Matcher[T]
+sealed abstract class Matcher[T]
 
 /**
   * Trait to match dependency graph edges. 
   */
-trait EdgeMatcher[T] extends Matcher[T] {
+sealed abstract class EdgeMatcher[T] extends Matcher[T] {
   def apply(edge: DirectedEdge[T]) = this.matchText(edge)
 
   def matches(edge: DirectedEdge[T]) = this.matchText(edge).isDefined
@@ -127,17 +118,25 @@ trait EdgeMatcher[T] extends Matcher[T] {
 
   def canMatch(edge: Graph.Edge[T]): Boolean = this.matches(new UpEdge(edge)) || this.matches(new DownEdge(edge))
   def flip: EdgeMatcher[T]
+  
+  def baseEdgeMatcher: BaseEdgeMatcher[T]
 }
 
-abstract class EdgeMatcherWrapper[T](val matcher: EdgeMatcher[T]) extends EdgeMatcher[T] {
-  def canEqual(that: Any) = that.isInstanceOf[EdgeMatcherWrapper[_]]
+abstract class BaseEdgeMatcher[T] extends EdgeMatcher[T] {
+  override def baseEdgeMatcher = this
+}
+
+abstract class WrappedEdgeMatcher[T](val matcher: EdgeMatcher[T]) extends EdgeMatcher[T] {
+  def canEqual(that: Any) = that.isInstanceOf[WrappedEdgeMatcher[_]]
   override def equals(that: Any) = that match {
-    case that: EdgeMatcherWrapper[_] => (that canEqual this) && this.matcher == that.matcher
+    case that: WrappedEdgeMatcher[_] => (that canEqual this) && this.matcher == that.matcher
     case _ => false
   }
+  
+  override def baseEdgeMatcher = matcher.baseEdgeMatcher
 }
 
-class DirectedEdgeMatcher[T](val direction: Direction, matcher: EdgeMatcher[T]) extends EdgeMatcherWrapper[T](matcher) {
+class DirectedEdgeMatcher[T](val direction: Direction, matcher: EdgeMatcher[T]) extends WrappedEdgeMatcher[T](matcher) {
   def matchText(edge: DirectedEdge[T]) = 
     if (edge.dir == direction) matcher.matchText(edge)
     else None
@@ -160,12 +159,12 @@ class DirectedEdgeMatcher[T](val direction: Direction, matcher: EdgeMatcher[T]) 
   override def hashCode = direction.hashCode + 39*matcher.hashCode
 }
 
-class TrivialEdgeMatcher[T] extends EdgeMatcher[T] {
+class TrivialEdgeMatcher[T] extends BaseEdgeMatcher[T] {
   def matchText(edge: DirectedEdge[T]) = Some(edge.edge.label)
   def flip = this
 }
 
-class CaptureEdgeMatcher[T](val alias: String, matcher: EdgeMatcher[T]) extends EdgeMatcherWrapper[T](matcher) {
+class CaptureEdgeMatcher[T](val alias: String, matcher: EdgeMatcher[T]) extends WrappedEdgeMatcher[T](matcher) {
   override def matchText(edge: DirectedEdge[T]) = matcher.matchText(edge)
   override def flip = new CaptureEdgeMatcher(alias, matcher.flip)
   
@@ -186,26 +185,54 @@ class CaptureEdgeMatcher[T](val alias: String, matcher: EdgeMatcher[T]) extends 
 /**
   * Trait to match dependency graph nodes. 
   */
-trait NodeMatcher[T] extends Matcher[T] {
+sealed abstract class NodeMatcher[T] extends Matcher[T] {
   def apply(node: T) = this.matchText(node)
 
   def matches(node: T) = this.matchText(node).isDefined
   def matchText(node: T): Option[String]
+  
+  def baseNodeMatchers: Seq[BaseNodeMatcher[T]]
 }
 
-abstract class NodeMatcherWrapper[T](val matchers: Set[NodeMatcher[T]])
+abstract class BaseNodeMatcher[T] extends NodeMatcher[T] {
+  override def baseNodeMatchers = Seq(this)
+}
+
+abstract class WrappedNodeMatcher[T](val matcher: NodeMatcher[T])
 extends NodeMatcher[T] {
-  def this(m: NodeMatcher[T]) = this(Set(m))
-  def canEqual(that: Any) = that.isInstanceOf[NodeMatcherWrapper[_]]
+  def canEqual(that: Any) = that.isInstanceOf[WrappedNodeMatcher[_]]
   override def equals(that: Any) = that match {
-    case that: NodeMatcherWrapper[_] => (that canEqual this) && this.matchers == that.matchers
+    case that: WrappedNodeMatcher[_] => (that canEqual this) && this.matcher == that.matcher
     case _ => false
   }
+  
+  override def baseNodeMatchers = this.matcher.baseNodeMatchers
+}
+
+class ConjunctiveNodeMatcher[T](val matchers: Set[NodeMatcher[T]]) 
+extends NodeMatcher[T] {
+  require(matchers.size > 1)
+  require(!matchers.exists(_.isInstanceOf[ConjunctiveNodeMatcher[_]]))
+  
+  def this(m: NodeMatcher[T]) = this(Set(m))
+  def this(m: NodeMatcher[T]*) = this(Set() ++ m)
+  
+  override def matchText(node: T) = matchers.flatMap(_.matchText(node)).headOption
+  override def matches(node: T) = matchers.forall(_.matches(node))
+  
+  override def baseNodeMatchers = this.matchers.toSeq.flatMap(_.baseNodeMatchers)
+  
+  override def toString = matchers.mkString(":")
+  def canEqual(that: Any) = that.isInstanceOf[ConjunctiveNodeMatcher[_]]
+  override def equals(that: Any) = that match {
+    case that: ConjunctiveNodeMatcher[_] => (that canEqual this) && this.matchers == that.matchers
+    case _ => false
+  }  
 }
 
 /**
   * Always match any node. */
-class TrivialNodeMatcher[T] extends NodeMatcher[T] {
+class TrivialNodeMatcher[T] extends BaseNodeMatcher[T] {
   override def matchText(node: T) = Some(".*")
 
   // extend Object
@@ -223,29 +250,27 @@ class TrivialNodeMatcher[T] extends NodeMatcher[T] {
   * @param  alias  the name of the captured node
   * @param  matcher  the matcher to apply
   */
-class CaptureNodeMatcher[T](val alias: String, matchers: Set[NodeMatcher[T]]) 
-extends NodeMatcherWrapper[T](matchers) {
-  def this(alias: String, matcher: NodeMatcher[T]) = this(alias, Set(matcher))
-  
+class CaptureNodeMatcher[T](val alias: String, matcher: NodeMatcher[T]) 
+extends WrappedNodeMatcher[T](matcher) {
   /**
     * Convenience constructor that uses the TrivialNodeMatcher.
     */
   def this(alias: String) = this(alias, new TrivialNodeMatcher[T]())
 
-  override def matchText(node: T) = matchers.flatMap(_.matchText(node)).headOption
+  override def matchText(node: T) = matcher.matchText(node)
   
   // extend Object
   override def toString = "{" +
-    (if (matchers.size == 1 && matchers.head.isInstanceOf[TrivialNodeMatcher[_]]) {
+    (if (matcher.isInstanceOf[TrivialNodeMatcher[_]]) {
       alias
     }
     else {
-      alias + ":" + matchers.mkString(":")
+      alias + ":" + matcher.toString
     }) + "}"
   override def canEqual(that: Any) = that.isInstanceOf[CaptureNodeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: CaptureNodeMatcher[_] => (that canEqual this) && this.alias == that.alias && super.equals(that)
     case _ => false
   }
-  override def hashCode = alias.hashCode + 39*matchers.hashCode
+  override def hashCode = alias.hashCode + 39*matcher.hashCode
 }

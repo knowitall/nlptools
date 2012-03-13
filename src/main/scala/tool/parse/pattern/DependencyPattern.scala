@@ -37,7 +37,14 @@ object DependencyPattern {
     def simpleNodeMatcherSeq: Parser[List[NodeMatcher[DependencyNode]]] = (simpleNodeMatcher ~ ":" ~ simpleNodeMatcherSeq ^^ { case m ~ ":" ~ ms => m :: ms }) | (simpleNodeMatcher ^^ { case m => List(m) })
     
     def trivialCaptureNodeMatcher: Parser[CaptureNodeMatcher[DependencyNode]] = "{" ~> """\w+""".r <~ "}" ^^ { s => new CaptureNodeMatcher[DependencyNode](s) }
-    def nestedCaptureNodeMatcher: Parser[CaptureNodeMatcher[DependencyNode]] = "{" ~> """\w+""".r ~ ":" ~ simpleNodeMatcherSeq <~ "}" ^^ { case alias ~ ":" ~ seq => new CaptureNodeMatcher[DependencyNode](alias, seq.toSet) }
+    def nestedCaptureNodeMatcher: Parser[CaptureNodeMatcher[DependencyNode]] = "{" ~> """\w+""".r ~ ":" ~ simpleNodeMatcherSeq <~ "}" ^^ { case alias ~ ":" ~ seq => 
+      seq match {
+        case x :: Nil => new CaptureNodeMatcher[DependencyNode](alias, x) 
+        case seq @ x :: xs => new CaptureNodeMatcher[DependencyNode](alias, new ConjunctiveNodeMatcher(seq.toSet)) 
+        case Nil => throw new IllegalArgumentException()
+      }
+    }
+    
     def captureNodeMatcher = nestedCaptureNodeMatcher | trivialCaptureNodeMatcher
     
     def nodeMatcher[V]: Parser[NodeMatcher[DependencyNode]] = simpleNodeMatcher | captureNodeMatcher | ("""\w+""" ^^ { s => new TextNodeMatcher(s) })
@@ -110,8 +117,9 @@ object DependencyPattern {
       println(" " * (tab * 2) + m)
       println(" " * (tab * 2) + m.getClass.getSimpleName)
       m match {
-        case m: NodeMatcherWrapper[_] => m.matchers.foreach { print(tab + 1, _) }
-        case m: EdgeMatcherWrapper[_] => print(tab + 1, m.matcher)
+        case m: WrappedNodeMatcher[_] =>print(tab + 1, m.matcher)
+        case m: ConjunctiveNodeMatcher[_] => m.matchers.foreach { print(tab + 1, _) }
+        case m: WrappedEdgeMatcher[_] => print(tab + 1, m.matcher)
         case _ => 
       } 
     }
@@ -127,7 +135,7 @@ object DependencyPattern {
 class DependencyPatternSerializationException(message: String, cause: Throwable)
 extends RuntimeException(message, cause)
 
-abstract class DependencyEdgeMatcher extends EdgeMatcher[DependencyNode]
+abstract class DependencyEdgeMatcher extends BaseEdgeMatcher[DependencyNode]
 object DependencyEdgeMatcher {
   def apply(dedge: DirectedEdge[DependencyNode]) = 
     new DirectedEdgeMatcher(dedge.dir, new LabelEdgeMatcher(dedge.edge.label))
@@ -175,7 +183,7 @@ class RegexEdgeMatcher(val labelRegex: Regex) extends DependencyEdgeMatcher {
 /**
   * Match a `DependencyNode`. */
 class DependencyNodeMatcher(val text: String, val postag: String)
-extends NodeMatcher[DependencyNode] {
+extends BaseNodeMatcher[DependencyNode] {
   override def matches(node: DependencyNode) = node.text == text && node.postag == postag
   override def matchText(node: DependencyNode) = if (matches(node)) Some(node.text) else None
   
@@ -193,7 +201,7 @@ extends NodeMatcher[DependencyNode] {
 
 /**
   * Match a `DependencyNode`. */
-class TextNodeMatcher(val text: String) extends NodeMatcher[DependencyNode] {
+class TextNodeMatcher(val text: String) extends BaseNodeMatcher[DependencyNode] {
   def this(node: DependencyNode) = this(node.text)
   
   def matchText(node: DependencyNode) = if (matches(node)) Some(node.text) else None
@@ -209,7 +217,7 @@ class TextNodeMatcher(val text: String) extends NodeMatcher[DependencyNode] {
   override def hashCode = text.hashCode + 39
 }
 
-class PostagNodeMatcher(val postag: String) extends NodeMatcher[DependencyNode] {
+class PostagNodeMatcher(val postag: String) extends BaseNodeMatcher[DependencyNode] {
   def this(node: DependencyNode) = this(node.postag)
   
   def matchText(node: DependencyNode) = if (matches(node)) Some(node.text) else None
@@ -225,7 +233,7 @@ class PostagNodeMatcher(val postag: String) extends NodeMatcher[DependencyNode] 
   override def hashCode = postag.hashCode + 39
 }
 
-class RegexNodeMatcher(val regex: Regex) extends NodeMatcher[DependencyNode] {
+class RegexNodeMatcher(val regex: Regex) extends BaseNodeMatcher[DependencyNode] {
   override def matches(node: DependencyNode) = node.text match {
       case regex() => true
       case _ => false
