@@ -12,13 +12,13 @@ class Match[T](
   /** the matched path through the graph */
   val bipath: Bipath[T], 
   /** the pattern groups in the match */
-  val nodeGroups: Map[String, Match.NodeGroup[T]],
-  val edgeGroups: Map[String, Match.EdgeGroup[T]]
+  val nodeGroups: Map[String, List[Match.NodeGroup[T]]],
+  val edgeGroups: Map[String, List[Match.EdgeGroup[T]]]
 ) {
   // extend Object
   override def toString = bipath.toString + ": " + nodeGroups.toString + " and " + edgeGroups.toString
 
-  def groups: Map[String, Match.Group] = nodeGroups ++ edgeGroups
+  def groups: Map[String, List[Match.Group]] = nodeGroups ++ edgeGroups
 
   def nodes: Iterable[T] = bipath.nodes
   def edges: Iterable[Graph.Edge[T]] = bipath.edges
