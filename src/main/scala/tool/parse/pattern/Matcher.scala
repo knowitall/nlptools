@@ -127,7 +127,10 @@ extends NodeMatcher[T] {
   def this(m: NodeMatcher[T]) = this(Set(m))
   def this(m: NodeMatcher[T]*) = this(Set() ++ m)
   
-  override def matchText(node: T) = matchers.flatMap(_.matchText(node)).headOption
+  override def matchText(node: T) = 
+    if (matches(node)) matchers.flatMap(_.matchText(node)).headOption
+    else None
+    
   override def matches(node: T) = matchers.forall(_.matches(node))
   
   override def baseNodeMatchers = this.matchers.toSeq.flatMap(_.baseNodeMatchers)
