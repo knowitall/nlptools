@@ -234,12 +234,12 @@ class PostagNodeMatcher(val postag: String) extends BaseNodeMatcher[DependencyNo
 }
 
 class RegexNodeMatcher(val regex: Regex) extends BaseNodeMatcher[DependencyNode] {
-  override def matches(node: DependencyNode) = node.text match {
+  override def matches(node: DependencyNode) = node.lemma match {
       case regex() => true
       case _ => false
   }
 
-  def matchText(node: DependencyNode) = node.text match {
+  def matchText(node: DependencyNode) = node.lemma match {
       case regex(group) => Some(group)
       case regex() => Some(node.text)
       case _ => None
