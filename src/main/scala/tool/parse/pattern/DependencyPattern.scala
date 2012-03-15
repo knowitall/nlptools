@@ -171,7 +171,7 @@ class RegexEdgeMatcher(val labelRegex: Regex) extends DependencyEdgeMatcher {
   override def flip = this
 
   // extend Object
-  override def toString = "regex:"+labelRegex.toString
+  override def toString = "regex="+labelRegex.toString
   def canEqual(that: Any) = that.isInstanceOf[RegexEdgeMatcher]
   override def equals(that: Any) = that match {
     case that: RegexEdgeMatcher => (that canEqual this) && this.labelRegex.toString == that.labelRegex.toString
