@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>nlptools</artifactId>
   <name>nlptools</name>
-  <version>1.1.0</version>
+  <version>1.1.1-SNAPSHOT</version>
   <parent>
     <groupId>edu.washington.cs.knowitall</groupId>
     <artifactId>knowitall</artifactId>
@@ -52,7 +52,7 @@
     <dependency>
       <groupId>edu.washington.cs.knowitall</groupId>
       <artifactId>common-scala</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
     <!-- Stemmers -->
     <dependency>
