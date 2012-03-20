@@ -39,8 +39,12 @@ class Pattern[T](
   }
 
   // extend Object
-  override def toString = {
-    matchers.view.map(_.toString).mkString(" ") }
+  override def toString = toStringF(identity[String])
+  def toStringF(f: String=>String) = {
+    matchers.view.map(_.toStringF(f)).mkString(" ") 
+  }
+  def serialize = toString
+
   def canEqual(that: Any) = that.isInstanceOf[Pattern[_]]
   override def equals(that: Any) = that match {
     case that: Pattern[_] => (that canEqual this) && this.matchers == that.matchers

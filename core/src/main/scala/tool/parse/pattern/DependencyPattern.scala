@@ -151,7 +151,7 @@ class LabelEdgeMatcher(val label: String) extends DependencyEdgeMatcher {
   override def flip = this
 
   // extend Object
-  override def toString = label
+  override def toStringF(f: String=>String) = f(label)
   def canEqual(that: Any) = that.isInstanceOf[LabelEdgeMatcher]
   override def equals(that: Any) = that match {
     case that: LabelEdgeMatcher => (that canEqual this) && this.label == that.label
@@ -171,7 +171,7 @@ class RegexEdgeMatcher(val labelRegex: Regex) extends DependencyEdgeMatcher {
   override def flip = this
 
   // extend Object
-  override def toString = "regex="+labelRegex.toString
+  override def toStringF(f: String=>String) = f("regex="+labelRegex.toString)
   def canEqual(that: Any) = that.isInstanceOf[RegexEdgeMatcher]
   override def equals(that: Any) = that match {
     case that: RegexEdgeMatcher => (that canEqual this) && this.labelRegex.toString == that.labelRegex.toString
@@ -188,7 +188,7 @@ extends BaseNodeMatcher[DependencyNode] {
   override def matchText(node: DependencyNode) = if (matches(node)) Some(node.text) else None
   
   // extend Object
-  override def toString = text
+  override def toStringF(f: String=>String) = f(text)
   def canEqual(that: Any) = that.isInstanceOf[DependencyNodeMatcher]
   override def equals(that: Any) = that match {
     case that: DependencyNodeMatcher => (that canEqual this) && this.text == that.text && this.postag == that.postag
@@ -208,7 +208,7 @@ class TextNodeMatcher(val text: String) extends BaseNodeMatcher[DependencyNode] 
   override def matches(node: DependencyNode) = node.text == text
   
   // extend Object
-  override def toString = "text="+text
+  override def toStringF(f: String=>String) = f("text="+text)
   def canEqual(that: Any) = that.isInstanceOf[TextNodeMatcher]
   override def equals(that: Any) = that match {
     case that: TextNodeMatcher => (that canEqual this) && this.text == that.text
@@ -224,7 +224,7 @@ class PostagNodeMatcher(val postag: String) extends BaseNodeMatcher[DependencyNo
   override def matches(node: DependencyNode) = node.postag == postag
   
   // extend Object
-  override def toString = "postag="+postag
+  override def toStringF(f: String=>String) = f("postag="+postag)
   def canEqual(that: Any) = that.isInstanceOf[PostagNodeMatcher]
   override def equals(that: Any) = that match {
     case that: PostagNodeMatcher => (that canEqual this) && this.postag == that.postag
@@ -245,7 +245,7 @@ class RegexNodeMatcher(val regex: Regex) extends BaseNodeMatcher[DependencyNode]
       case _ => None
   }
 
-  override def toString = "regex="+regex.toString
+  override def toStringF(f: String=>String) = f("regex="+regex.toString)
   def canEqual(that: Any) = that.isInstanceOf[RegexNodeMatcher]
   override def equals(that: Any) = that match {
     case that: RegexNodeMatcher => (that canEqual this) && this.regex.toString == that.regex.toString

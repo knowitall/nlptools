@@ -15,7 +15,10 @@ import graph.UpEdge
 
 /**
   * Abstract superclass for all matchers. */
-sealed abstract class Matcher[T]
+sealed abstract class Matcher[T] {
+  override def toString = toStringF(identity[String])
+  def toStringF(f: String=>String): String
+}
 
 /**
   * Trait to match dependency graph edges. 
@@ -60,7 +63,7 @@ class DirectedEdgeMatcher[T](val direction: Direction, matcher: EdgeMatcher[T]) 
   }
 
   // extend Object
-  override def toString = symbol + matcher.toString + symbol
+  override def toStringF(f: String=>String) = f(symbol + matcher.toStringF(f) + symbol)
   override def canEqual(that: Any) = that.isInstanceOf[DirectedEdgeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: DirectedEdgeMatcher[_] => (that canEqual this) && this.direction == that.direction && super.equals(that)
@@ -70,6 +73,8 @@ class DirectedEdgeMatcher[T](val direction: Direction, matcher: EdgeMatcher[T]) 
 }
 
 class TrivialEdgeMatcher[T] extends BaseEdgeMatcher[T] {
+  override def toStringF(f: String=>String) = f(".*")
+
   def matchText(edge: DirectedEdge[T]) = Some(edge.edge.label)
   def flip = this
 }
@@ -79,11 +84,11 @@ class CaptureEdgeMatcher[T](val alias: String, matcher: EdgeMatcher[T]) extends 
   override def flip = new CaptureEdgeMatcher(alias, matcher.flip)
   
   // extend Object
-  override def toString = matcher match {
+  override def toStringF(f: String=>String) = f(matcher match {
     case _: TrivialEdgeMatcher[_] => "{"+alias+"}"
-    case d: DirectedEdgeMatcher[_] => d.symbol+"{"+alias+":"+d.matcher.toString+"}"+d.symbol
-    case m: EdgeMatcher[_] => "{"+alias+":"+m.toString+"}"
-  }
+    case d: DirectedEdgeMatcher[_] => d.symbol+"{"+alias+":"+d.matcher.toStringF(f)+"}"+d.symbol
+    case m: EdgeMatcher[_] => "{"+alias+":"+m.toStringF(f)+"}"
+  })
   override def canEqual(that: Any) = that.isInstanceOf[CaptureEdgeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: CaptureEdgeMatcher[_] => (that canEqual this) && this.alias == that.alias && super.equals(that)
@@ -135,7 +140,7 @@ extends NodeMatcher[T] {
   
   override def baseNodeMatchers = this.matchers.toSeq.flatMap(_.baseNodeMatchers)
   
-  override def toString = matchers.mkString(":")
+  override def toStringF(f: String=>String) = f(matchers.map(_.toStringF(f)).mkString(":"))
   def canEqual(that: Any) = that.isInstanceOf[ConjunctiveNodeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: ConjunctiveNodeMatcher[_] => (that canEqual this) && this.matchers == that.matchers
@@ -149,7 +154,7 @@ class TrivialNodeMatcher[T] extends BaseNodeMatcher[T] {
   override def matchText(node: T) = Some(".*")
 
   // extend Object
-  override def toString = ".*"
+  override def toStringF(f: String=>String) = f(".*")
   def canEqual(that: Any) = that.isInstanceOf[TrivialNodeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: TrivialNodeMatcher[_] => that canEqual this
@@ -173,13 +178,13 @@ extends WrappedNodeMatcher[T](matcher) {
   override def matchText(node: T) = matcher.matchText(node)
   
   // extend Object
-  override def toString = "{" +
+  override def toStringF(f: String=>String) = f("{" +
     (if (matcher.isInstanceOf[TrivialNodeMatcher[_]]) {
       alias
     }
     else {
-      alias + ":" + matcher.toString
-    }) + "}"
+      alias + ":" + matcher.toStringF(f)
+    }) + "}")
   override def canEqual(that: Any) = that.isInstanceOf[CaptureNodeMatcher[_]]
   override def equals(that: Any) = that match {
     case that: CaptureNodeMatcher[_] => (that canEqual this) && this.alias == that.alias && super.equals(that)
