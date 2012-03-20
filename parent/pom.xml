@@ -1,37 +1,18 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>nlptools</artifactId>
-  <name>nlptools</name>
+  <artifactId>nlptools-parent</artifactId>
+  <name>nlptools-parent</name>
+  <version>2.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <parent>
     <groupId>edu.washington.cs.knowitall</groupId>
-    <artifactId>nlptools-parent</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <artifactId>knowitall</artifactId>
+    <version>2.1.0</version>
   </parent>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  <modules>
-    <module>core</module>
-
-    <module>tokenize/opennlp</module>
-    <module>tokenize/stanford</module>
-
-    <module>postag/opennlp</module>
-    <module>postag/stanford</module>
-
-    <module>chunk/opennlp</module>
-
-    <module>sentence/opennlp</module>
-    <module>sentence/piao</module>
-
-    <module>coref/stanford</module>
-
-    <module>parse/opennlp</module>
-    <module>parse/stanford</module>
-    <module>parse/malt</module>
-  </modules>
   <repositories>
     <repository>
       <id>knowitall-public</id>
@@ -53,6 +34,86 @@
       <url>http://scala-tools.org/repo-releases</url>
     </pluginRepository>
   </pluginRepositories>
+  <dependencies>
+    <dependency>
+      <groupId>edu.washington.cs.knowitall</groupId>
+      <artifactId>common-scala</artifactId>
+      <version>1.0.1-SNAPSHOT</version>
+    </dependency>
+    <!-- Util -->
+    <dependency>
+      <groupId>com.github.scopt</groupId>
+      <artifactId>scopt_2.9.1</artifactId>
+      <version>1.1.2</version>
+    </dependency>
+    <!-- Logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.6.4</version>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.16</version>
+    </dependency>
+    <!-- Test -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-tools.testing</groupId>
+      <artifactId>specs_2.9.1</artifactId>
+      <version>1.6.9</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <dependencyManagement>
+    <dependencies>
+    <dependency>
+      <groupId>edu.stanford</groupId>
+      <artifactId>stanford-corenlp</artifactId>
+      <version>2012-01-08</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.opennlp</groupId>
+      <artifactId>opennlp-tools</artifactId>
+      <version>1.5.2-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>edu.washington.cs.knowitall</groupId>
+      <artifactId>opennlp-postag-models</artifactId>
+      <version>1.5</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.washington.cs.knowitall</groupId>
+      <artifactId>opennlp-parse-models</artifactId>
+      <version>1.5</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.washington.cs.knowitall</groupId>
+      <artifactId>opennlp-tokenize-models</artifactId>
+      <version>1.5</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.washington.cs.knowitall</groupId>
+      <artifactId>opennlp-sent-models</artifactId>
+      <version>1.5</version>
+      <scope>runtime</scope>
+    </dependency>
+    </dependencies>
+  </dependencyManagement>
   <build>
     <sourceDirectory>src/main/scala</sourceDirectory>
     <testSourceDirectory>src/test/scala</testSourceDirectory>
@@ -110,36 +171,6 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <!-- build eclipse project with mvn eclipse:eclipse -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-eclipse-plugin</artifactId>
-        <version>2.8</version>
-        <!-- see http://maven.apache.org/plugins/maven-eclipse-plugin/eclipse-mojo.html for more information -->
-        <configuration>
-          <downloadSources>true</downloadSources>
-          <downloadJavadocs>true</downloadJavadocs>
-          <projectnatures>
-            <projectnature>org.scala-ide.sdt.core.scalanature</projectnature>
-            <projectnature>org.eclipse.jdt.core.javanature</projectnature>
-          </projectnatures>
-          <buildcommands>
-            <buildcommand>org.scala-ide.sdt.core.scalabuilder</buildcommand>
-          </buildcommands>
-          <classpathContainers>
-            <classpathContainer>org.scala-ide.sdt.launching.SCALA_CONTAINER"</classpathContainer>
-            <classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER</classpathContainer>
-          </classpathContainers>
-          <excludes>
-            <exclude>org.scala-lang:scala-library</exclude>
-            <exclude>org.scala-lang:scala-compiler</exclude>
-          </excludes>
-          <sourceIncludes>
-            <sourceInclude>**/*.scala</sourceInclude>
-            <sourceInclude>**/*.java</sourceInclude>
-          </sourceIncludes>
-        </configuration>
       </plugin>
     </plugins>
   </build>
