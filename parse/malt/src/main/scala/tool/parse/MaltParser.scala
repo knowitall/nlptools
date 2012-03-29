@@ -13,7 +13,7 @@ import tokenize.OpenNlpTokenizer
 import tool.parse.BaseStanfordParser.CollapseType
 
 object MaltParser extends DependencyParserMain {
-  var model = "engmalt.linear"
+  var model = "engmalt.linear-1.7"
 
   override def init(args: Array[String]) {
     val index = args.indexOf("-m")
@@ -25,7 +25,7 @@ object MaltParser extends DependencyParserMain {
   lazy val parser = new MaltParser(model, null);
 }
 
-class MaltParser(modelname: String = "engmalt.linear", logfile: String = null) extends BaseStanfordParser {
+class MaltParser(modelname: String = "engmalt.linear-1.7", logfile: String = null) extends BaseStanfordParser {
   val parser = new MaltParserInterface(modelname, logfile)
   val tokenizer = new OpenNlpTokenizer
   val tagger = new OpenNlpPosTagger
