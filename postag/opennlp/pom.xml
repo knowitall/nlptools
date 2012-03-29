@@ -47,5 +47,12 @@
       <artifactId>nlptools-tokenize-opennlp</artifactId>
       <version>${version}</version>
     </dependency>
+    <!-- Models -->
+    <dependency>
+      <groupId>edu.washington.cs.knowitall</groupId>
+      <artifactId>opennlp-postag-models</artifactId>
+      <version>1.5</version>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 </project>
