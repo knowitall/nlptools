@@ -71,6 +71,8 @@ class DependencyGraph (
         this.graph == that.graph
     case _ => false
   }
+  override def toString = serialize
+
   def serialize = {
     val extra = this.nodes filterNot (this.dependencies.flatMap(dep => Set(dep.source, dep.dest)).contains(_))
     
