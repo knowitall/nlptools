@@ -35,17 +35,7 @@
   <dependencies>
     <dependency>
       <groupId>org.maltparser</groupId>
-      <artifactId>malt-parser</artifactId>
-      <version>1.6.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.maltparser</groupId>
-      <artifactId>libsvm</artifactId>
-      <version>1.5.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.maltparser</groupId>
-      <artifactId>liblinear</artifactId>
+      <artifactId>maltparser</artifactId>
       <version>1.7</version>
     </dependency>
     <dependency>
