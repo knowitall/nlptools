@@ -10,8 +10,6 @@ import collection._
 
 import scala.util.matching.Regex
 
-import edu.washington.cs.knowitall.common.enrich.Traversables._
-
 /**
   * Represents a pattern with which graphs can be searched.  
   * A pattern will start and end with a node matcher, and every
@@ -92,7 +90,7 @@ class Pattern[T](
           // we found one, so recurse
           rec(xs, dedge.end, dedge :: edges, nodeGroups, groups)
         }(scala.collection.breakOut)
-      case _ => List(new Match(this, new Bipath(edges.reverse), nodeGroups.toListMultimap, edgeGroups.toListMultimap))
+      case _ => List(new Match(this, new Bipath(edges.reverse), nodeGroups.toMap, edgeGroups.toMap))
     }
 
     rec(this.matchers, vertex, List(), List(), List())
