@@ -3,6 +3,8 @@ package tool
 package parse
 package graph
 
+import collection.immutable.graph.Graph
+import collection.immutable.graph.Graph._
 import scala.collection.immutable.SortedSet
 import collection.immutable.Interval
 import tool.stem.Stemmer

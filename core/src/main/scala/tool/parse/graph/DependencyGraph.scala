@@ -3,9 +3,10 @@ package tool
 package parse
 package graph
 
-import Graph._
 import scala.collection._
 import collection.immutable.Interval
+import collection.immutable.graph.Graph
+import collection.immutable.graph.Graph._
 
 /** A representation of a graph over dependencies.  
   * This richer representation may include the text of the original sentence,

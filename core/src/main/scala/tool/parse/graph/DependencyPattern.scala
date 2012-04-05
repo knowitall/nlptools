@@ -1,12 +1,13 @@
 package edu.washington.cs.knowitall
 package tool
 package parse
-package pattern
+package graph
 
-import graph._
+import collection.immutable.graph._
+import collection.immutable.graph.Graph._
+import collection.immutable.graph.pattern._
 import scala.util.matching.Regex
 import java.util.regex.{Pattern => JPattern}
-import tool.parse.graph.DependencyNode
 
 /**
   * A pattern over a graph of dependencies. */

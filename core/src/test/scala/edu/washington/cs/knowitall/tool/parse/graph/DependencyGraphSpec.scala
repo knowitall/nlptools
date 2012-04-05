@@ -10,7 +10,7 @@ import org.specs.runner.JUnit4
 import org.junit.runner.RunWith
 import org.specs.runner.JUnitSuiteRunner
 
-import Graph._
+import collection.immutable.graph.Graph._
 
 @RunWith(classOf[JUnitSuiteRunner])
 class DependencyGraphSpecTest extends JUnit4(DependencyGraphSpec)

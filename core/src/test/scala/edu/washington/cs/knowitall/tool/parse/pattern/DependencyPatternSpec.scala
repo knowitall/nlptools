@@ -12,7 +12,9 @@ import org.specs.runner.JUnit4
 import org.junit.runner.RunWith
 import org.specs.runner.JUnitSuiteRunner
 
-import Graph._
+import collection.immutable.graph._
+import collection.immutable.graph.pattern._
+import collection.immutable.graph.Graph._
 
 @RunWith(classOf[JUnitSuiteRunner])
 class DependencyPatternSpecTest extends JUnit4(DependencyPatternSpec)
@@ -76,11 +78,4 @@ object DependencyPatternSpec extends Specification {
         
   testDeserialize("regex=asdf", new DependencyPattern(List(
         new RegexNodeMatcher("asdf".r))))
-        
-        /*
-  testDeserialize("{arg1} <{captcha:regex=this|is|a|test}< arg2", new DependencyPattern(List(
-        new CaptureNodeMatcher[DependencyNode]("arg1"),
-        new DirectedEdgeMatcher[DependencyNode](Direction.Up, new RegexEdgeMatcher("this|is|a|test".r)),
-        new RegexNodeMatcher("asdf".r))))
-        */
 }

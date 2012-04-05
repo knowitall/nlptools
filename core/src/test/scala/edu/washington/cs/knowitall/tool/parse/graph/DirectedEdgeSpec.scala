@@ -7,6 +7,7 @@ import org.specs.Specification
 import org.specs.runner.JUnit4
 import org.junit.runner.RunWith
 import org.specs.runner.JUnitSuiteRunner
+import collection.immutable.graph.UpEdge
 
 @RunWith(classOf[JUnitSuiteRunner])
 class DirectedEdgeSpecTest extends JUnit4(DirectedEdgeSpec)

@@ -1,9 +1,7 @@
 package edu.washington.cs.knowitall
 package tool
 package parse
-package pattern
-
-import graph._
+package graph
 
 import scala.io.Source
 import scopt.OptionParser
