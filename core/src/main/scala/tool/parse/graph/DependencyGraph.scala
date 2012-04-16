@@ -81,6 +81,7 @@ class DependencyGraph (
     val pickledDeps = Dependencies.serialize(this.dependencies)
 
     if (pickledNodes.isEmpty) pickledDeps
+    else if (pickledDeps.isEmpty) pickledNodes
     else pickledNodes + ", " + pickledDeps
   }
 
@@ -353,7 +354,8 @@ class DependencyGraph (
 object DependencyGraph {
   def deserialize(string: String) = {
     def rec(string: String, nodes: SortedSet[DependencyNode]): (SortedSet[DependencyNode], SortedSet[Dependency]) = {
-      if (string.charAt(0) == '(') {
+      if (string.isEmpty) (nodes, SortedSet.empty[Dependency])
+      else if (string.charAt(0) == '(') {
         val pickled = string.drop(1).takeWhile(_ != ')')
         val node = DependencyNode.deserialize(pickled)
         rec(string.drop(pickled.length + 2 /* 2 for the () */).dropWhile(_ != ',').drop(1).dropWhile(_ == ' '), nodes + node)
