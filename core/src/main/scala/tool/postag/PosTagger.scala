@@ -5,17 +5,17 @@ package postag
 import edu.washington.cs.knowitall._
 import scala.collection.immutable
 
-/* A POS tagger takes tokenized input and associates a part of speech
- * tag with each token. */
+/** A POS tagger takes tokenized input and associates a part of speech
+  * tag with each token.
+  */
 abstract class PosTagger(val tokenizer: tokenize.Tokenizer) {
   /* POS tag pre-tokenized text */
-  def postag(tokens: Array[String]): Array[String]
+  def postagTokens(tokens: Seq[tokenize.Token]): Seq[PostaggedToken]
 
   /* Tokenize and then POS tag text*/
-  def postag(sentence: String): IndexedSeq[(String, String)] = {
+  def postag(sentence: String): Seq[PostaggedToken] = {
     val tokens = tokenizer.tokenize(sentence)
-    val tags = postag(tokens)
-    tokens zip tags
+    postagTokens(tokens)
   }
 }
 
@@ -26,7 +26,7 @@ object PosTagger {
     "amongst", "an", "apropos", "around", "as", "aside", "astride", "at",
     "athwart", "atop", "barring", "before", "behind", "below", "beneath",
     "beside", "besides", "between", "betwixt", "beyond", "but", "by", "circa",
-    "concerning", "despite", "down", "during", "except", "excluding", 
+    "concerning", "despite", "down", "during", "except", "excluding",
     "failing", "following", "for", "from", "given", "in", "including",
     "inside", "into", "lest", "like", "mid", "midst", "minus", "modulo",
     "near", "next", "notwithstanding", "of", "off", "on", "onto", "opposite",
@@ -36,7 +36,7 @@ object PosTagger {
     "towards", "under", "underneath", "unlike", "until", "up", "upon",
     "versus", "vs.", "v.", "via", "vice", "with", "within", "without",
     "worth")
-    
+
   val prepositions = simplePrepositions ++ immutable.Set(
     "according to", "ahead of", "apart from", "as for", "as of", "as per",
     "as regards", "aside from", "back to", "because of", "close to",

@@ -13,12 +13,14 @@ class StanfordTokenizer extends Tokenizer {
   def tokenize(sentence: String) =
     new PTBTokenizer(
       new java.io.StringReader(sentence),
-      new CoreLabelTokenFactory(), 
-      "").map(_.word).toArray
+      new CoreLabelTokenFactory(),
+      "").map { stoken =>
+    new Token(stoken.word, stoken.beginPosition())
+  }.toSeq
 }
 
 object StanfordTokenizer extends LineProcessor {
   val tokenizer = new StanfordTokenizer()
-  override def process(sentence: String) = 
+  override def process(sentence: String) =
     tokenizer.tokenize(sentence).mkString(" ")
 }

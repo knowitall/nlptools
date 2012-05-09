@@ -4,30 +4,32 @@ package chunk
 
 import common.main.LineProcessor
 
+/** A Chunker takes postagged text and adds a chunk tag, specifying
+  * whether a noun or verb phrase is starting or continuing.
+  */
 abstract class Chunker(val postagger: postag.PosTagger) {
-  /**
-    * @returns chunk */
-  def chunk(strings: Array[String], postags: Array[String]): Array[String]
+  /* chunk postagged text */
+  def chunkPostagged(tokens: Seq[postag.PostaggedToken]): Seq[ChunkedToken]
 
-  /**
-    * @returns (strings, chunk) */
-  def chunk(strings: Array[String]): IndexedSeq[(String,String)] = {
-    val postags = postagger.postag(strings)
-    postags zip chunk(strings, postags)
+  /* chunk tokenized text */
+  def chunkTokenized(tokens: Seq[tokenize.Token]): Seq[ChunkedToken] = {
+    val postags = postagger.postagTokens(tokens)
+    chunkPostagged(postags)
   }
 
-  /**
-    * @returns (strings, (postag, chunk)) */
-  def chunk(sentence: String): IndexedSeq[(String,(String,String))] = {
-    val unzipped = postagger.postag(sentence).unzip
-    unzipped._1 zip (unzipped._2 zip chunk(unzipped._1.toArray, unzipped._2.toArray))
+  /* chunk raw text */
+  def chunk(sentence: String): Seq[ChunkedToken] = {
+    val postags = postagger.postag(sentence)
+    chunkPostagged(postags)
   }
 }
 
 abstract class ChunkerMain
 extends LineProcessor {
   def chunker: Chunker
-  override def process(line: String) = chunker.chunk(line).map{case (a,(b,c)) => a + "/" + b + "/" + c}.mkString(" ")
+  override def process(line: String) = chunker.chunk(line).map { case ChunkedToken(chunk, postag, string, offset) =>
+    string + "/" + postag + "/" + chunk
+  }.mkString(" ")
 
   override def init(args: Array[String]) {
     // for timing purposes

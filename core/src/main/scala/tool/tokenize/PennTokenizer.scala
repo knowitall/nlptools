@@ -8,7 +8,8 @@ import scala.collection.JavaConversions._
 
 import java.util.regex._
 
-/* The PennTokenizer was used to tokenize the Penn Treebank.  
+/*
+/* The PennTokenizer was used to tokenize the Penn Treebank.
  * The following is a translation from a sed file.  This algorithm
  * is entirely deterministic.  It is composed of regular expression
  * replacements. */
@@ -29,7 +30,7 @@ class PennTokenizer extends Tokenizer {
     ("""'([sSmMdD]) """, " '$1 "),
     ("'(ll|re|ve|LL|RE|VE) ", " '$1 "),
     ("(n't|N'T) ", " $1 ")
-  ).map { case (a, b) => 
+  ).map { case (a, b) =>
     (Pattern.compile(a), b)
   }
 
@@ -41,6 +42,8 @@ class PennTokenizer extends Tokenizer {
 
 object PennTokenizer extends LineProcessor {
   val tokenizer = new PennTokenizer()
-  override def process(sentence: String) = 
+  override def process(sentence: String) =
     tokenizer.tokenize(sentence).mkString(" ")
 }
+
+*/

@@ -11,6 +11,7 @@ import postag.OpenNlpPosTagger
 import stem.MorphaStemmer
 import tokenize.OpenNlpTokenizer
 import tool.parse.BaseStanfordParser.CollapseType
+import tool.postag.PostaggedToken
 
 object MaltParser extends DependencyParserMain {
   var model = "engmalt.linear-1.7"
@@ -27,16 +28,17 @@ object MaltParser extends DependencyParserMain {
 
 class MaltParser(modelname: String = "engmalt.linear-1.7", logfile: String = null) extends BaseStanfordParser {
   val parser = new MaltParserInterface(modelname, logfile)
-  val tokenizer = new OpenNlpTokenizer
   val tagger = new OpenNlpPosTagger
   val stemmer = MorphaStemmer.instance
   
   private def depHelper(sentence: String, collapser: CollapseType) = {
-    val tokens = tokenizer.tokenize(sentence)
-    val lemmas = tokens.map(stemmer.stem(_))
-    val pos = tagger.postag(tokens)
+    val tokens = tagger.postag(sentence)
+    val lemmas = tokens.map(_.string).map(stemmer.stem(_))
     
-    val labels = ((tokens zip lemmas) zip pos).map{ case ((t, l), p) => val cl = new CoreLabel(); cl.setWord(t); cl.setTag(p); cl.setLemma(l); cl }.toList
+    val labels = (tokens zip lemmas).map { case (PostaggedToken(postag, string, offset), lemma) => 
+      val cl = new CoreLabel(); cl.setWord(string); cl.setTag(postag); cl.setLemma(lemma); cl 
+    }.toList
+
     val nodes = labels.view.zipWithIndex.map {
       case (tw, i) => (i, new DependencyNode(tw.word, tw.tag, i)) 
     }.toMap
