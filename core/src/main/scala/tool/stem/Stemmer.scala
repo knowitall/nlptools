@@ -10,7 +10,7 @@ abstract class Stemmer {
   def stem(word: String): String
 
   /** Apply the stemming algorithm and then the normalizing algorithm. */
-  def lemmatize(word: String) = this.stem(this.normalize(word))
+  def lemmatize(word: String) = this.stem(Stemmer.normalize(word))
 }
 
 object Stemmer {
