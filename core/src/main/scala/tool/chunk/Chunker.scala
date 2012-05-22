@@ -8,16 +8,16 @@ import common.main.LineProcessor
   * whether a noun or verb phrase is starting or continuing.
   */
 abstract class Chunker(val postagger: postag.PosTagger) {
-  /* chunk postagged text */
+  /** chunk postagged text */
   def chunkPostagged(tokens: Seq[postag.PostaggedToken]): Seq[ChunkedToken]
 
-  /* chunk tokenized text */
+  /** chunk tokenized text */
   def chunkTokenized(tokens: Seq[tokenize.Token]): Seq[ChunkedToken] = {
     val postags = postagger.postagTokens(tokens)
     chunkPostagged(postags)
   }
 
-  /* chunk raw text */
+  /** chunk raw text */
   def chunk(sentence: String): Seq[ChunkedToken] = {
     val postags = postagger.postag(sentence)
     chunkPostagged(postags)

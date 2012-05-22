@@ -9,6 +9,59 @@ import scala.collection.immutable.SortedSet
 import collection.immutable.Interval
 import tool.stem.{ Stemmer, IdentityStemmer }
 
+/** A representation for a node in the graph of dependencies.  A node
+  * represents one or more adjacent tokens in the source sentence. 
+  */
+class DependencyNode(val text: String, val postag: String, val indices: Interval) extends Ordered[DependencyNode] {
+  require(text != null)
+  require(postag != null)
+  
+  /* create a node with a single index */
+  def this(text: String, postag: String, index: Int) = 
+    this(text, postag, Interval.singleton(index))
+  
+  // extend Ordered[DependencyNode]
+  override def compare(that: DependencyNode) = {
+    if (this == that) 0
+    else if (this.indices intersects that.indices) 
+      throw new IllegalStateException("intersecting intervals cannot be compared: " + this.toFullString + " and " + that.toFullString)
+    else this.indices.compare(that.indices)
+  }
+
+  // extend Object
+  override def toString() = toFullString //this.text
+  def canEqual(that: Any) = that.isInstanceOf[DependencyNode]
+  override def equals(that: Any) = that match {
+    case that: DependencyNode => that.text.equals(this.text) &&
+      that.postag.equals(this.postag) &&
+      that.indices.equals(this.indices)
+    case _ => false
+  }
+  override def hashCode() = this.text.hashCode * 37 + this.postag.hashCode * 37 + this.indices.hashCode
+
+  private var plemma: String = null
+  def lemma(implicit stemmer: Stemmer) = {
+    if (plemma == null) {
+      plemma = stemmer.lemmatize(text)
+    }
+    plemma
+  }
+
+  def toFullString = this.text + "_" + this.postag + "_" + this.indices.mkString("_")
+
+  def isProperNoun = postag == "NNP" || postag == "NNPS"
+  def isCommonNoun = postag == "NN" || postag == "NNS"
+  def isNoun = isProperNoun || isCommonNoun
+  def isVerb = postag.startsWith("VB")
+  def isAdjective = postag == "JJ" || postag == "JJS"
+
+  def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, indices)
+  def serialize = {
+    if (indices.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple indices")
+    text.replaceAll("[[_()][^\\p{Graph}]]", "") + "_" + postag + "_" + indices.start;
+  }
+}
+
 object DependencyNode {
   def fromLists(tokens: Iterable[String], postag: Iterable[String]) =
     (tokens zip postag).zipWithIndex.map { case ((token, pos), index) => new DependencyNode(token, pos, index) }.toArray
@@ -74,57 +127,4 @@ object DependencyNode {
   
   class SerializationException(message: String, cause: Throwable) 
   extends RuntimeException(message, cause)
-}
-
-/*
- * A representation for a node in the graph of dependencies.  A node
- * represents one or more adjacent tokens in the source sentence. */
-class DependencyNode(val text: String, val postag: String, val indices: Interval) extends Ordered[DependencyNode] {
-  require(text != null)
-  require(postag != null)
-  
-  /* create a node with a single index */
-  def this(text: String, postag: String, index: Int) = 
-    this(text, postag, Interval.singleton(index))
-  
-  // extend Ordered[DependencyNode]
-  override def compare(that: DependencyNode) = {
-    if (this == that) 0
-    else if (this.indices intersects that.indices) 
-      throw new IllegalStateException("intersecting intervals cannot be compared: " + this.toFullString + " and " + that.toFullString)
-    else this.indices.compare(that.indices)
-  }
-
-  // extend Object
-  override def toString() = toFullString //this.text
-  def canEqual(that: Any) = that.isInstanceOf[DependencyNode]
-  override def equals(that: Any) = that match {
-    case that: DependencyNode => that.text.equals(this.text) &&
-      that.postag.equals(this.postag) &&
-      that.indices.equals(this.indices)
-    case _ => false
-  }
-  override def hashCode() = this.text.hashCode * 37 + this.postag.hashCode * 37 + this.indices.hashCode
-
-  private var plemma: String = null
-  def lemma(implicit stemmer: Stemmer) = {
-    if (plemma == null) {
-      plemma = stemmer.lemmatize(text)
-    }
-    plemma
-  }
-
-  def toFullString = this.text + "_" + this.postag + "_" + this.indices.mkString("_")
-
-  def isProperNoun = postag == "NNP" || postag == "NNPS"
-  def isCommonNoun = postag == "NN" || postag == "NNS"
-  def isNoun = isProperNoun || isCommonNoun
-  def isVerb = postag.startsWith("VB")
-  def isAdjective = postag == "JJ" || postag == "JJS"
-
-  def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, indices)
-  def serialize = {
-    if (indices.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple indices")
-    text.replaceAll("[[_()][^\\p{Graph}]]", "") + "_" + postag + "_" + indices.start;
-  }
 }

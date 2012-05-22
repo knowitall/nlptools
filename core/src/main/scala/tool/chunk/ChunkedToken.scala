@@ -4,6 +4,15 @@ package tool.chunk
 import edu.washington.cs.knowitall.common.HashCodeHelper
 import edu.washington.cs.knowitall.tool.postag.PostaggedToken
 
+/** A representation of a chunked token.  A chunked token has all the
+  * aspects of a postagged token along with a chunk tag.
+  *
+  * @constructor
+  * @param  string  the string of the token
+  * @param  offset  the character offset of the token in the source sentence
+  * @param  postag  the PENN-style part-of-speech tag of the token
+  * @param  chunk   the chunk tag of the token in BIO format
+  */
 class ChunkedToken(string: String, offset: Int, postag: String, val chunk: String)
 extends PostaggedToken(string, offset, postag) {
   def this(token: PostaggedToken, chunk: String) = this(token.string, token.offset, token.postag, chunk)

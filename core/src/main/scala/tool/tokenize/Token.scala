@@ -4,6 +4,12 @@ package tokenize
 
 import edu.washington.cs.knowitall.common.HashCodeHelper
 
+/** The most simple representation of a token.  A token has a string
+  * and a character offset in the original text.
+  *
+  * @param  string  the string of the token
+  * @param  offset  the character offset of the token in the source sentence
+  */
 class Token(val string: String, val offset: Int) {
   override def toString = string + "@" + offset
 

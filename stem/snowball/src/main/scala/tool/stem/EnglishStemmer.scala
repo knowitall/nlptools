@@ -5,6 +5,7 @@ package stem
 import org.tartarus.snowball.SnowballProgram
 import org.tartarus.snowball
 
+/** Also known as the Porter2 stemmer. */
 class EnglishStemmer
 extends SnowballStemmer(new snowball.ext.EnglishStemmer)
 

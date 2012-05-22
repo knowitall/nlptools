@@ -7,6 +7,7 @@ import java.io.StringReader
 import uk.ac.susx.informatics.Morpha
 import common.main.LineProcessor
 
+/** This stemmer handles many cases, but the JFlex is 5 MB. */
 class MorphaStemmer extends Stemmer {
   def stem(word: String) = this.morpha(word)
 

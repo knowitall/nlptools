@@ -4,6 +4,7 @@ package stem
 
 import org.tartarus.snowball.SnowballProgram
 
+/** Wrapper for any Snowball stemmer. */
 class SnowballStemmer(stemmer: SnowballProgram) extends Stemmer {
   def stem(word: String) = {
     stemmer.setCurrent(word)
@@ -16,10 +17,3 @@ class SnowballStemmer(stemmer: SnowballProgram) extends Stemmer {
     }
   }
 }
-
-/*
-object SnowballStemmer
-extends StemmerMain {
-  lazy val stemmer = new PorterStemmer
-}
-*/

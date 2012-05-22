@@ -4,6 +4,14 @@ package tool.postag
 import edu.washington.cs.knowitall.common.HashCodeHelper
 import edu.washington.cs.knowitall.tool.tokenize.Token
 
+/** A representation for a part-of-speech tagged token.  POS tokens
+  * use PENN-treebank style tags.
+  *
+  * @param  string  the string of the token
+  * @param  offset  the character offset of the token in the source sentence
+  * @param  postag  the PENN-style part-of-speech tag of the token
+  * @param  postag  the chunk tag of the token in BIO format
+  */
 class PostaggedToken(string: String, offset: Int, val postag: String)
 extends Token(string, offset) {
   def this(token: Token, postag: String) = this(token.string, token.offset, postag)

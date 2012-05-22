@@ -45,5 +45,3 @@ object PennTokenizer extends LineProcessor {
   override def process(sentence: String) =
     tokenizer.tokenize(sentence).mkString(" ")
 }
-
-*/

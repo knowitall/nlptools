@@ -13,6 +13,9 @@ import tokenize.OpenNlpTokenizer
 import tool.parse.BaseStanfordParser.CollapseType
 import tool.postag.PostaggedToken
 
+/** MaltParser is much faster than the StanfordParser but has a lower F-score. 
+  * It includes wrapper code so that it can still use the Stanford postprocessing.
+  */
 object MaltParser extends DependencyParserMain {
   var model = "engmalt.linear-1.7"
 

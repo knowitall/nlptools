@@ -3,7 +3,7 @@ package tool
 package tokenize
 
 /** A tokenizer takes a sentence string as input and
-  * seperates words along word boundaries.
+  * seperates words (tokens) along word (token) boundaries.
   */
 trait Tokenizer {
   def tokenize(sentence: String): Seq[Token]
