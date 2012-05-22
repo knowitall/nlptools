@@ -54,7 +54,7 @@ object StanfordParser extends DependencyParserMain {
 
 
 class StanfordParser(lp : LexicalizedParser) extends BaseStanfordParser with ConstituencyParser {
-  def this() = this(new LexicalizedParser("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"))
+  def this() = this(LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"))
   private val tlp = new PennTreebankLanguagePack();
   private val gsf = tlp.grammaticalStructureFactory();
   

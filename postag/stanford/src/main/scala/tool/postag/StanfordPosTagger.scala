@@ -9,7 +9,7 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import tool.tokenize.Token
 
 class StanfordPosTagger(
-  val model: String = "edu/stanford/nlp/models/pos-tagger/wsj3t0-18-left3words/left3words-distsim-wsj-0-18.tagger",
+  val model: String = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger",
   tokenizer: tokenize.Tokenizer = new tokenize.StanfordTokenizer())
 extends PosTagger(tokenizer) {
 
