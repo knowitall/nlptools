@@ -50,6 +50,11 @@
     </dependency>
     <dependency>
       <groupId>edu.washington.cs.knowitall</groupId>
+      <artifactId>nlptools-stem-morpha</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>edu.washington.cs.knowitall</groupId>
       <artifactId>nlptools-postag-opennlp</artifactId>
       <version>${project.version}</version>
     </dependency>

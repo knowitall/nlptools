@@ -7,8 +7,7 @@ import collection.immutable.graph.Graph
 import collection.immutable.graph.Graph._
 import scala.collection.immutable.SortedSet
 import collection.immutable.Interval
-import tool.stem.Stemmer
-import tool.stem.MorphaStemmer
+import tool.stem.{ Stemmer, IdentityStemmer }
 
 object DependencyNode {
   def fromLists(tokens: Iterable[String], postag: Iterable[String]) =
@@ -107,7 +106,13 @@ class DependencyNode(val text: String, val postag: String, val indices: Interval
   }
   override def hashCode() = this.text.hashCode * 37 + this.postag.hashCode * 37 + this.indices.hashCode
 
-  lazy val lemma = MorphaStemmer.instance.lemmatize(text)
+  private var plemma: String = null
+  def lemma(implicit stemmer: Stemmer) = {
+    if (plemma == null) {
+      plemma = stemmer.lemmatize(text)
+    }
+    plemma
+  }
 
   def toFullString = this.text + "_" + this.postag + "_" + this.indices.mkString("_")
 

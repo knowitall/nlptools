@@ -12,6 +12,8 @@ abstract class Stemmer {
 }
 
 object Stemmer {
+  implicit def stemmer: Stemmer = IdentityStemmer
+
   val remove = """[()\[\].,;:"']""".r;
   def normalize(word: String) = Stemmer.remove.replaceAllIn(
     word.trim.toLowerCase, "")

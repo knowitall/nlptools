@@ -33,27 +33,4 @@
       <url>http://scala-tools.org/repo-releases</url>
     </pluginRepository>
   </pluginRepositories>
-  <dependencies>
-    <!-- Stemmers -->
-    <dependency>
-      <groupId>uk.ac.lancs.comp</groupId>
-      <artifactId>lovins-stemmer</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>tartarus.org</groupId>
-      <artifactId>porter-stemmer</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>uk.ac.susx.informatics</groupId>
-      <artifactId>morpha-stemmer</artifactId>
-      <version>1.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>uk.ac.lancs.comp</groupId>
-      <artifactId>paice-stemmer</artifactId>
-      <version>1.0</version>
-    </dependency>
-  </dependencies>
 </project>
