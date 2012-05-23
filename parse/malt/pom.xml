@@ -37,7 +37,7 @@
     <dependency>
       <groupId>org.maltparser</groupId>
       <artifactId>maltparser</artifactId>
-      <version>1.7</version>
+      <version>1.7.1</version>
     </dependency>
     <dependency>
       <groupId>edu.stanford.nlp</groupId>
