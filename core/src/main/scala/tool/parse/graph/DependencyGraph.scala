@@ -8,20 +8,20 @@ import collection.immutable.Interval
 import collection.immutable.graph.Graph
 import collection.immutable.graph.Graph._
 
-/** A representation of a graph over dependencies.  
+/** A representation of a graph over dependencies.
   * This richer representation may include the text of the original sentence,
   * the original nodes (before collapsing), and the original dependencies. */
 class DependencyGraph (
     /** the text of the source sentence */
     val text: String,
     /** the `DependencyNode`s from the parser */
-    val nodes: SortedSet[DependencyNode], 
+    val nodes: SortedSet[DependencyNode],
     /** the `Dependency`s from the parser */
     val dependencies: SortedSet[Dependency],
     /** a graph representation dependencies */
     val graph: Graph[DependencyNode]
   ) {
-  
+
   require(text != null)
   require(nodes != null)
   require(dependencies != null)
@@ -34,38 +34,38 @@ class DependencyGraph (
       case Some(v) => require(v == vertex.text, "text at index " + vertex.indices + " does not match: " + vertex.text + " != " + v)
     }
   }
-  
+
   // constructors
 
   def this(text: String,
-      nodes: SortedSet[DependencyNode], 
+      nodes: SortedSet[DependencyNode],
       dependencies: SortedSet[Dependency]) =
     this(nodes.iterator.map(_.text).mkString(" "),
-        SortedSet[DependencyNode]() ++ nodes, 
+        SortedSet[DependencyNode]() ++ nodes,
         SortedSet[Dependency]() ++ dependencies,
         new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
-  
-  def this(text: String, 
-      nodes: Iterable[DependencyNode], 
+
+  def this(text: String,
+      nodes: Iterable[DependencyNode],
       dependencies: Iterable[Dependency]) =
-    this(text, 
-      SortedSet[DependencyNode]() ++ nodes, 
+    this(text,
+      SortedSet[DependencyNode]() ++ nodes,
       SortedSet[Dependency]() ++ dependencies)
 
-  def this(nodes: SortedSet[DependencyNode], 
+  def this(nodes: SortedSet[DependencyNode],
       dependencies: SortedSet[Dependency]) =
     this(nodes.iterator.map(_.text).mkString(" "),
-        SortedSet[DependencyNode]() ++ nodes, 
+        SortedSet[DependencyNode]() ++ nodes,
         SortedSet[Dependency]() ++ dependencies)
 
-  def this(nodes: Iterable[DependencyNode], 
+  def this(nodes: Iterable[DependencyNode],
       dependencies: Iterable[Dependency]) =
-    this(SortedSet[DependencyNode]() ++ nodes, 
+    this(SortedSet[DependencyNode]() ++ nodes,
         SortedSet[Dependency]() ++ dependencies)
-  
+
   def canEqual(that: Any) = that.isInstanceOf[DependencyGraph]
   override def equals(that: Any) = that match {
-    case that: DependencyGraph => that.canEqual(this) && 
+    case that: DependencyGraph => that.canEqual(this) &&
         this.text == that.text &&
         this.nodes == that.nodes &&
         this.dependencies == that.dependencies &&
@@ -76,7 +76,7 @@ class DependencyGraph (
 
   def serialize = {
     val extra = this.nodes filterNot (this.dependencies.flatMap(dep => Set(dep.source, dep.dest)).contains(_))
-    
+
     val pickledNodes = (extra.iterator).map("("+_.serialize+")").mkString(", ")
     val pickledDeps = Dependencies.serialize(this.dependencies)
 
@@ -100,7 +100,7 @@ class DependencyGraph (
           new Dependency(dep.source, dep.dest, "subj")
         else dep
       }))
-  
+
   def collapseNNPOf = {
     def pred(edge: Edge[DependencyNode]) = (edge.source.indices distance edge.dest.indices) == 2 &&
       edge.label.equals("prep_of") && edge.source.postag == "NNP" && edge.dest.postag == "NNP"
@@ -108,21 +108,21 @@ class DependencyGraph (
       if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
       val sorted = nodes.toList.sorted.view
       sorted.sliding(2).foreach(l => require((l.head.indices distance l.last.indices) == 2, "two nodes to merge don't have a distance of 2 (distance is "+(l.head.indices distance l.last.indices)+"): " + l.mkString(", ")))
-      new DependencyNode(sorted.map(_.text).mkString(" of "), 
-        if (nodes.forall(_.postag.equals(nodes.head.postag))) 
+      new DependencyNode(sorted.map(_.text).mkString(" of "),
+        if (nodes.forall(_.postag.equals(nodes.head.postag)))
           nodes.head.postag
         else
-          sorted.map(_.postag).mkString(" of "), Interval.span(sorted.map(_.indices)))
+          sorted.map(_.postag).mkString(" of "), Interval.span(sorted.map(_.indices)), sorted.iterator.map(_.offset).min)
     }
-      
+
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred(_))(merge))
   }
-  
+
   /**
-    * Find components that are connected by the predicate.  
+    * Find components that are connected by the predicate.
     * Then, split components into subcomponents in which
     * all vertices correspond to adjacent words in the
-    * source sentence. 
+    * source sentence.
     */
   def adjacentComponents(pred: Edge[DependencyNode]=>Boolean): Set[Set[DependencyNode]] = {
     def splitByAdjacency(nodes: List[DependencyNode]): List[List[DependencyNode]] = {
@@ -134,12 +134,12 @@ class DependencyGraph (
 
       rec(nodes, Nil)
     }
-    
+
     val groups: Set[Set[DependencyNode]] = (for (dep <- graph.edges; if pred(dep)) yield {
       graph.connected(dep.source, dedge=>pred(dedge.edge))
     })(scala.collection.breakOut)
-    
-    
+
+
     (for {
       // for each connect nn component
       group <- groups
@@ -149,36 +149,36 @@ class DependencyGraph (
       if part.size > 1
     } yield(part.toSet))(scala.collection.breakOut)
   }
-  
+
   def collapseAdjacentGroups(pred: Edge[DependencyNode]=>Boolean)
       (implicit merge: Traversable[DependencyNode]=>DependencyNode) = {
     val components = adjacentComponents(edge => pred(edge))
     val graph = this.graph.collapseGroups(components)(merge)
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph)
   }
-  
+
   def collapseNounGroups(dividors: List[String] = List.empty) = {
     val lowerCaseDividors = dividors.map(_.toLowerCase)
-    
+
     def pred(edge: Edge[DependencyNode]) = edge.label == "nn"
     val groups = adjacentComponents(pred)
-      
+
     def splitByDividor(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
       case x :: xs if lowerCaseDividors.contains(x.text.toLowerCase) => List(x) :: splitByDividor(xs)
-      case x :: xs => 
+      case x :: xs =>
         val (part, rest) = nodes.span(node => !lowerCaseDividors.contains(node.text.toLowerCase))
         part :: splitByDividor(rest)
       case Nil => Nil
     }
-    
+
     // segment ordered dependency nodes by POS tag
     def postagEqual(a: String, b: String) = a == b || a.startsWith("NNP") && b.startsWith("NNP")
     def splitByPos(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
-      case x :: xs => nodes.takeWhile(node => postagEqual(node.postag, x.postag)) :: 
+      case x :: xs => nodes.takeWhile(node => postagEqual(node.postag, x.postag)) ::
         splitByPos(nodes.dropWhile(node => postagEqual(node.postag, x.postag)))
       case Nil => Nil
     }
-    
+
     val groupsToCollapse: Set[Set[DependencyNode]] = (for {
       // for each connect nn component
       group <- groups
@@ -188,7 +188,7 @@ class DependencyGraph (
       part <- splitByPos(dividorSplit)
       if part.size > 1
     } yield(part.toSet))(scala.collection.breakOut)
-    
+
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(groupsToCollapse))
   }
 
@@ -201,24 +201,24 @@ class DependencyGraph (
     val graph = this.graph.collapseGroups(components)(DependencyNode.directedMerge(this.graph))
     new DependencyGraph(this.text, this.nodes, this.dependencies, graph)
   }
-  
+
   def directedAdjacentCollapse(label: String): DependencyGraph = directedAdjacentCollapse(Set(label))
 
-  def collapseWeakLeaves = 
+  def collapseWeakLeaves =
     directedAdjacentCollapse(Set("neg", "det", "aux", "amod", "num", "quantmod", "advmod"))
-  
+
   def normalize = collapseNounGroups().collapseNNPOf.simplifyPostags.collapseWeakLeaves
 
   def mapPostags(f: String=>String): DependencyGraph = {
     def mapNode(node: DependencyNode): DependencyNode =
-      new DependencyNode(node.text, f(node.postag), node.indices)
+      new DependencyNode(node.text, f(node.postag), node.indices, node.offset)
 
-    def mapPostags(f: String=>String) = 
+    def mapPostags(f: String=>String) =
       graph.map(mapNode)
 
     new DependencyGraph(
-      this.text, 
-      this.nodes.map(mapNode), 
+      this.text,
+      this.nodes.map(mapNode),
       this.dependencies.map(_.mapNodes(mapNode)), mapPostags(f))
   }
 
@@ -250,21 +250,21 @@ class DependencyGraph (
 
     mapPostags(simplifyPostag)
   }
-  
+
   def dot(title: String=this.text): String = {
     val buffer = new StringBuffer(4092)
     printDot(buffer, title)
     buffer.toString
   }
-  
+
   def dotWithHighlights(title: String, specialNodes: Set[DependencyNode], specialEdges: Set[Edge[DependencyNode]]): String = {
     val buffer = new StringBuffer(4092)
     printDotWithHighlights(buffer, title, specialNodes, specialEdges)
     buffer.toString
   }
 
-  def dot(title: String, 
-      nodeStyle: Map[DependencyNode, String], 
+  def dot(title: String,
+      nodeStyle: Map[DependencyNode, String],
       edgeStyle: Map[Edge[DependencyNode], String]): String = {
     val buffer = new StringBuffer(4092)
     printDot(buffer, title, nodeStyle, edgeStyle)
@@ -276,10 +276,10 @@ class DependencyGraph (
   }
 
   def printDotWithHighlights(writer: java.lang.Appendable, title: String, specialNodes: Set[DependencyNode], specialEdges: Set[Edge[DependencyNode]]) {
-    val filledNodes = specialNodes zip Stream.continually("style=filled,fillcolor=lightgray") 
+    val filledNodes = specialNodes zip Stream.continually("style=filled,fillcolor=lightgray")
 
     val nodeStyle = filledNodes
-    val edgeStyle = (specialEdges zip Stream.continually("style=filled")) ++ 
+    val edgeStyle = (specialEdges zip Stream.continually("style=filled")) ++
       ((this.graph.edges -- specialEdges) zip Stream.continually("style=dotted,color=gray"))
 
     printDot(writer, title, nodeStyle.toMap, edgeStyle.toMap)
@@ -291,7 +291,7 @@ class DependencyGraph (
     def nodeString(node: DependencyNode) = {
       val text = escape(node.text)
       val postag = escape(node.postag)
-      if (graph.vertices.filter(_.text.equals(text)).size > 1) 
+      if (graph.vertices.filter(_.text.equals(text)).size > 1)
         text + "_" + postag + "_" + node.indices.mkString("_")
       else
         text  + "_" + postag
@@ -318,7 +318,7 @@ class DependencyGraph (
       writer.append(indent + quote(nodeString(node)) + " " + brackets + "\n")
     }
     writer.append("\n")
-    
+
     for (node <- nodeStyle.keys.toSeq.sorted) {
       writer.append(indent + quote(nodeString(node)) + " [" + nodeStyle(node) + "]\n")
     }
@@ -362,7 +362,7 @@ object DependencyGraph {
       }
       else (nodes, Dependencies.deserialize(string))
     }
-    
+
     try {
       val (nodes, deps) = rec(string, SortedSet[DependencyNode]())
       val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
@@ -373,37 +373,7 @@ object DependencyGraph {
                     "Could not deserialize graph: " + string, e)
     }
   }
-  
-  /** expand prep nodes that were compressed by Stanford into `DependencyNode`s. */
-  private def inferCollapsedNodes(nodes: List[DependencyNode], graph: Graph[DependencyNode]): List[DependencyNode] = {
-    /** at present, only infer prepositions.  Any outgoing "prep_.*" edge 
-     *  means that a preposition can be inferred.  You can't restrict that
-     *  the edge goes to `y` because "son of Graham Bell" has the prep_of
-     *  edge between "son" and "Bell". */
-    def infer(x: DependencyNode, y: DependencyNode): Option[DependencyNode] = {
-      graph.outgoing(x).find { edge => 
-       edge.label.startsWith("prep_")
-      }.map(_.label.dropWhile(_ != '_').tail).map(text => new DependencyNode(text.replaceAll("_", " "), "IN", Interval.between(x.indices, y.indices)))
-    }
 
-    // recurse over the nodes, looking for gaps to infer
-    def rec(nodes: List[DependencyNode]): List[DependencyNode] = nodes match {
-      case x :: y :: tail => 
-        // no gap
-        if (x.indices borders y.indices) x :: rec(y :: tail) 
-        // a gap of 1, let's see if we can infer
-        else if (x.indices.distance(y.indices) == 2) infer(x, y) match {
-          case None => x :: rec(y :: tail)
-          case Some(z) => x :: z :: rec(y :: tail)
-        }
-        /* the gap is too large */
-        else x :: rec(y :: tail)
-      case tail => tail
-    }
-
-    rec(nodes)
-  }
-
-  class SerializationException(message: String, cause: Throwable) 
+  class SerializationException(message: String, cause: Throwable)
   extends RuntimeException(message, cause)
 }

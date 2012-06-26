@@ -14,11 +14,11 @@ import org.specs.runner.JUnitSuiteRunner
 class DependencySpecTest extends JUnit4(DependencySpec)
 object DependencySpec extends Specification {
   val nodes = List(
-    new DependencyNode("One", "NN", 0),
-    new DependencyNode("man", "NN", 1),
-    new DependencyNode("fell", "VB", 2),
-    new DependencyNode("", ",", 3),
-    new DependencyNode("it", "PRP", 4))
+    new DependencyNode("One", "NN", 0, -1),
+    new DependencyNode("man", "NN", 1, -1),
+    new DependencyNode("fell", "VB", 2, -1),
+    new DependencyNode("", ",", 3, -1),
+    new DependencyNode("it", "PRP", 4, -1))
 
   val deps = List(
     new Dependency(nodes(0), nodes(1), "one"),
@@ -31,10 +31,10 @@ object DependencySpec extends Specification {
       Dependencies.deserialize(Dependencies.serialize(deps)) must haveTheSameElementsAs(deps)
     }
   }
-  
+
   "dependency nodes" should {
     "remove nongraphical characters when serialized" in {
-      new DependencyNode("asdf", "NN", 1).serialize must_== "asdf_NN_1"
+      new DependencyNode("asdf", "NN", 1, 0).serialize must_== "asdf_NN_1_0"
     }
   }
 }

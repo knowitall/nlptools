@@ -17,10 +17,10 @@ import tool.parse.BaseStanfordParser._
 abstract class BaseStanfordParser extends DependencyParser {
   override def dependencies(string: String): Iterable[Dependency] = dependencies(string, CCCompressed)
   def dependencies(string: String, collapse: CollapseType): Iterable[Dependency]
-  
+
   override def dependencyGraph(string: String) = dependencyGraph(string, CCCompressed)
   def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
-  
+
   def convertDependency(nodes: Map[Int, DependencyNode], dep: edu.stanford.nlp.trees.TypedDependency) = {
     new Dependency(nodes(dep.gov.index - 1), nodes(dep.dep.index - 1), dep.reln.toString)
   }
@@ -52,29 +52,28 @@ object StanfordParser extends DependencyParserMain {
   lazy val parser = new StanfordParser
 }
 
-
 class StanfordParser(lp : LexicalizedParser) extends BaseStanfordParser with ConstituencyParser {
   def this() = this(LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"))
   private val tlp = new PennTreebankLanguagePack();
   private val gsf = tlp.grammaticalStructureFactory();
-  
+
   private def depHelper(string: String, collapser: CollapseType): (Map[Int, DependencyNode], Iterable[Dependency]) = {
     val tree = lp.apply(string)
     val nodes = tree.taggedYield().view.zipWithIndex.map {
-      case (tw, i) => (i, new DependencyNode(tw.word, tw.tag, i)) 
+      case (tw, i) => (i, new DependencyNode(tw.word, tw.tag, i, tw.beginPosition))
     }.toMap
-    
+
     (nodes, convertDependencies(nodes, collapser.collapse(gsf.newGrammaticalStructure(tree))))
   }
 
-  override def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] = 
+  override def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] =
     depHelper(string, collapse)._2
-  
+
   override def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
     val (nodes, deps) = depHelper(string, collapse)
     new DependencyGraph(string, nodes.toList.sortBy(_._1).map(_._2), deps)
   }
-  
+
   override def parse(string: String) = {
     var index = 0
     def convertTree(tree: edu.stanford.nlp.trees.Tree): ParseTree = {
@@ -92,7 +91,7 @@ class StanfordParser(lp : LexicalizedParser) extends BaseStanfordParser with Con
   }
 }
 
-object StanfordConstituencyParser 
+object StanfordConstituencyParser
 extends ConstituencyParserMain {
   lazy val parser = new StanfordParser();
 }
