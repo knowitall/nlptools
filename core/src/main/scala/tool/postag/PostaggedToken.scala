@@ -26,6 +26,29 @@ extends Token(string, offset) {
       this.postag == that.postag
     case _ => false
   }
+
+  def isProperNoun = postag == "NNP" || postag == "NNPS"
+  def isCommonNoun = postag == "NN" || postag == "NNS"
+  def isNoun = isProperNoun || isCommonNoun
+
+  def isVerbBase = postag == "VB"
+  def isVerbPast = postag == "VBD"
+  def isVerbGerund = postag == "VBG"
+  def isVerbPastParticiple = postag == "VBN"
+  def isVerbNon3pPresent = postag == "VBP"
+  def isVerb3pPresent = postag == "VBZ"
+  def isVerbPresent = isVerbNon3pPresent || isVerb3pPresent
+  def isVerb = postag.startsWith("VB")
+
+  def isComparativeAdjective = postag == "JJR"
+  def isSuperlativeAdjective = postag == "JJS"
+  def isAdjective = postag == "JJ" || isComparativeAdjective || isSuperlativeAdjective
+
+  def isPersonalPronoun = postag == "PRP"
+  def isPossessivePronoun = postag == "PRP$"
+  def isPronoun = isPersonalPronoun || isPossessivePronoun
+
+  def isPossessive = isPossessivePronoun || postag == "POS"
 }
 
 object PostaggedToken {
