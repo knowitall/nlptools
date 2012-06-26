@@ -13,9 +13,9 @@ import edu.washington.cs.knowitall.tool.postag.PostaggedToken
   * @param  postag  the PENN-style part-of-speech tag of the token
   * @param  chunk   the chunk tag of the token in BIO format
   */
-class ChunkedToken(string: String, offset: Int, postag: String, val chunk: String)
-extends PostaggedToken(string, offset, postag) {
-  def this(token: PostaggedToken, chunk: String) = this(token.string, token.offset, token.postag, chunk)
+class ChunkedToken(val chunk: String, postag: String, string: String, offset: Int)
+extends PostaggedToken(postag, string, offset) {
+  def this(token: PostaggedToken, chunk: String) = this(chunk, token.postag, token.string, token.offset)
 
   override def toString = string+"/"+postag+"/"+chunk+"@"+offset
 

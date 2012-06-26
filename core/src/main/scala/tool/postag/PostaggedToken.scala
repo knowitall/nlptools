@@ -12,9 +12,9 @@ import edu.washington.cs.knowitall.tool.tokenize.Token
   * @param  postag  the PENN-style part-of-speech tag of the token
   * @param  postag  the chunk tag of the token in BIO format
   */
-class PostaggedToken(string: String, offset: Int, val postag: String)
+class PostaggedToken(val postag: String, string: String, offset: Int)
 extends Token(string, offset) {
-  def this(token: Token, postag: String) = this(token.string, token.offset, postag)
+  def this(token: Token, postag: String) = this(postag, token.string, token.offset)
 
   override def toString = string+"/"+postag+"@"+offset
 
