@@ -40,5 +40,6 @@ class MorphaStemmer extends Stemmer {
 object MorphaStemmer
 extends StemmerMain {
   lazy val stemmer = new MorphaStemmer
-  def instance = stemmer
+
+  implicit def instance: Stemmer = new MorphaStemmer
 }

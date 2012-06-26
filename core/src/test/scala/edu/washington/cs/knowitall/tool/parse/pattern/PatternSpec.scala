@@ -4,6 +4,7 @@ package parse
 package pattern
 
 import graph._
+import tool.stem.IdentityStemmer.instance
 import org.specs._
 import org.specs.runner._
 import org.junit.runner.RunWith
@@ -44,7 +45,7 @@ object PatternSpec extends Specification {
       """{arg1} <nsubj< {rel} >prep_on> {arg2}""",
       """{arg1} <nsubj< {rel} >dobj> {slot0} >conj_and> {arg2}""",
       """{arg1} <prep_on< {rel} >prep_on> {arg2}""")
-    
+
     for (patternString <- patterns) {
       patternString should {
         "deserialize correctly" in {
@@ -56,7 +57,7 @@ object PatternSpec extends Specification {
 
   testPatternSerialization
   testMultipathPatternApplication
-  
+
   "patterns differ" in {
     DependencyPattern.deserialize("{rel:postag=NNP:regex=president|son} <nn< {arg1} >nn> {arg2}") must_!= DependencyPattern.deserialize("{rel:postag=NN:regex=airline|author|book|brother|candidate|capital|ceo|chair|chairman|champion|chief|city|clone|coach|cofounder|commissioner|consort|cousin|creator|critic|daughter|dean|dictator|director|drummer|economist|editor|emperor|father|founder|friend|god|goddess|governor|graduate|head|home|host|husband|inventor|island|journal|king|lady|language|leader|man|manager|mascot|mayor|member|minister|moon|mother|name|native|newspaper|owner|part|pastor|people|premier|president|prophet|publication|publisher|queen|secretary|sign|son|speaker|star|state|student|subsidiary|suburb|unit|veteran|widow|wife|winner} <nn< {arg1} >nn> {arg2}")
   }

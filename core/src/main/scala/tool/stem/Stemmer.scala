@@ -14,13 +14,6 @@ abstract class Stemmer {
 }
 
 object Stemmer {
-  /** The default stemmer is the identity stemmer.
-    * While not the most useful, it doesn't require any dependencies.
-    * You usually would supply an alternate stemmer as an implicit parameter
-    * where needed.
-    */
-  implicit def stemmer: Stemmer = IdentityStemmer
-
   /** Special characters to remove. */
   val remove = """[()\[\].,;:"']""".r;
 

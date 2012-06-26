@@ -5,6 +5,7 @@ package graph
 
 import scala.io.Source
 import scopt.OptionParser
+import tool.stem.IdentityStemmer
 
 /** An executable that applies a pattern to a sentence. */
 object ApplyPattern {
@@ -18,7 +19,7 @@ object ApplyPattern {
 
     if (parser.parse(args)) {
       val patternSource = Source.fromFile(parser.patternFilePath)
-      val patterns = patternSource.getLines.map(DependencyPattern.deserialize(_)).toList
+      val patterns = patternSource.getLines.map(DependencyPattern.deserialize(_)(IdentityStemmer.instance)).toList
       patternSource.close
 
       val sentenceSource = Source.fromFile(parser.sentenceFilePath)
@@ -32,7 +33,7 @@ object ApplyPattern {
               println(m)
             }
           }
-          
+
           println()
           println()
         }

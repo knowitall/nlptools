@@ -11,5 +11,7 @@ extends SnowballStemmer(new snowball.ext.EnglishStemmer)
 
 object EnglishStemmer
 extends StemmerMain {
-  lazy val stemmer = new PorterStemmer
+  lazy val stemmer = new EnglishStemmer
+
+  implicit def instance: Stemmer = new EnglishStemmer
 }
