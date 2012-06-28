@@ -9,7 +9,7 @@
   <parent>
     <groupId>edu.washington.cs.knowitall</groupId>
     <artifactId>knowitall-oss</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -43,7 +43,7 @@
   <dependencyManagement>
     <dependencies>
     <dependency>
-      <groupId>edu.washington.cs.knowitall.stanford-corenlp</groupId>
+      <groupId>edu.stanford.nlp</groupId>
       <artifactId>stanford-corenlp</artifactId>
       <version>1.3.2</version>
     </dependency>
