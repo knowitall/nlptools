@@ -39,7 +39,7 @@ class MaltParser(modelname: String = "engmalt.linear-1.7", logfile: String = nul
     val lemmas = tokens.map(_.string).map(stemmer.stem(_))
 
     val labels = (tokens zip lemmas).map { case (PostaggedToken(postag, string, offset), lemma) =>
-      val cl = new CoreLabel(); cl.setWord(string); cl.setTag(postag); cl.setLemma(lemma); cl
+      val cl = new CoreLabel(); cl.setWord(string); cl.setTag(postag); cl.setLemma(lemma); cl.setBeginPosition(offset); cl
     }.toList
 
     val nodes = labels.view.zipWithIndex.map {
