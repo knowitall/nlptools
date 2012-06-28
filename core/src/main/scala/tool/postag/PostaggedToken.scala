@@ -30,6 +30,7 @@ extends Token(string, offset) {
   def isProperNoun = postag == "NNP" || postag == "NNPS"
   def isCommonNoun = postag == "NN" || postag == "NNS"
   def isNoun = isProperNoun || isCommonNoun
+  def isPluralNoun = postag == "NNS" || postag == "NNPS"
 
   def isVerbBase = postag == "VB"
   def isVerbPast = postag == "VBD"
