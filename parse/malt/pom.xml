@@ -43,7 +43,7 @@
       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>edu.stanford</groupId>
+          <groupId>edu.washington.cs.knowitall.stanford-corenlp</groupId>
           <artifactId>stanford-parse-models</artifactId>
         </exclusion>
       </exclusions>
