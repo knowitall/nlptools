@@ -22,5 +22,12 @@
       <artifactId>nlptools-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- Models -->
+    <dependency>
+      <groupId>edu.washington.cs.knowitall</groupId>
+      <artifactId>opennlp-parse-models</artifactId>
+      <version>1.5</version>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 </project>
