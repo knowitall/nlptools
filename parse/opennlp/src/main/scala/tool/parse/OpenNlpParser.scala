@@ -8,7 +8,7 @@ import opennlp.tools.parser._
 class OpenNlpParser(val model: ParserModel) extends ConstituencyParser {
   def this(modelName: String = OpenNlpParser.defaultModelName) =
     this(new ParserModel(
-        classOf[OpenNlpParser].getClassLoader.getResourceAsStream(modelName)))
+        classOf[OpenNlpParser].getResourceAsStream(modelName)))
 
   val parser = ParserFactory.create(model)
 
@@ -28,13 +28,12 @@ class OpenNlpParser(val model: ParserModel) extends ConstituencyParser {
     }
 
     val parse = ParserTool.parseLine(sentence, parser, 1)(0)
-    parse.show
     convertTree(parse)
   }
 }
 
 object OpenNlpParser extends ConstituencyParserMain {
-  lazy val parser = new OpenNlpParser("en-parser-chunking.bin") 
+  lazy val parser = new OpenNlpParser() 
 
-  val defaultModelName = "en-parser-chunking.bin"
+  val defaultModelName = "/en-parser-chunking.bin"
 }
