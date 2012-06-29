@@ -19,9 +19,9 @@
   </scm>
   <dependencies>
     <dependency>
-      <groupId>edu.washington.cs.knowitall</groupId>
-      <artifactId>common-scala</artifactId>
-      <version>1.0.5-SNAPSHOT</version>
+      <groupId>edu.washington.cs.knowitall.common-scala</groupId>
+      <artifactId>common-scala_2.9.2</artifactId>
+      <version>1.0.5</version>
     </dependency>
     <!-- Util -->
     <dependency>
