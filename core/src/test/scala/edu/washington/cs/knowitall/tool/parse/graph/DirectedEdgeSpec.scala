@@ -3,15 +3,16 @@ package tool
 package parse
 package graph
 
-import org.specs.Specification
-import org.specs.runner.JUnit4
+import org.junit._
+import org.junit.Assert._
+import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
-import org.specs.runner.JUnitSuiteRunner
-import collection.immutable.graph.UpEdge
+import org.specs2.runner.JUnitRunner
 
-@RunWith(classOf[JUnitSuiteRunner])
-class DirectedEdgeSpecTest extends JUnit4(DirectedEdgeSpec)
-object DirectedEdgeSpec extends Specification {
+import edu.washington.cs.knowitall.collection.immutable.graph.UpEdge
+
+@RunWith(classOf[JUnitRunner])
+object DirectedEdgeSpecTest extends Specification {
   val node1 = new DependencyNode("foo", "nnp", 1, 0)
   val node2 = new DependencyNode("bar", "nnp", 2, 0)
   val dependency = new Dependency(node1, node2, "label")

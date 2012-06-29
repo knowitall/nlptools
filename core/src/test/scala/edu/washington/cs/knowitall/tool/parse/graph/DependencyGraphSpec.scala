@@ -5,16 +5,14 @@ package graph
 
 import org.junit._
 import org.junit.Assert._
-import org.specs.Specification
-import org.specs.runner.JUnit4
+import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
-import org.specs.runner.JUnitSuiteRunner
+import org.specs2.runner.JUnitRunner
 
 import collection.immutable.graph.Graph._
 
-@RunWith(classOf[JUnitSuiteRunner])
-class DependencyGraphSpecTest extends JUnit4(DependencyGraphSpec)
-object DependencyGraphSpec extends Specification {
+@RunWith(classOf[JUnitRunner])
+object DependencyGraphSpecTest extends Specification {
   def testNNPOfCollapse = {
     val dgraph = DependencyGraph.deserialize("nsubjpass(born_VBN_5_0, Graham_NNP_0_0); nn(California_NNP_3_0, Southern_NNP_2_0); prep_of(Graham_NNP_0_0, California_NNP_3_0); auxpass(born_VBN_5_0, was_VBD_4_0); prep_in(born_VBN_5_0, Germany_NNP_7_0)").
             collapseNounGroups().collapseNNPOf

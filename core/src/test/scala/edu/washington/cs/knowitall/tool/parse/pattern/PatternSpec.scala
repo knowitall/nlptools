@@ -5,13 +5,14 @@ package pattern
 
 import graph._
 import tool.stem.IdentityStemmer.instance
-import org.specs._
-import org.specs.runner._
+import org.junit._
+import org.junit.Assert._
+import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
-@RunWith(classOf[JUnitSuiteRunner])
-class PatternSpecTest extends JUnit4(PatternSpec)
-object PatternSpec extends Specification {
+@RunWith(classOf[JUnitRunner])
+object PatternSpecTest extends Specification {
   def testMultipathPatternApplication = {
     val pattern = DependencyPattern.deserialize("{arg1} <nsubjpass< {rel:postag=VBN} >prep_in> {arg2}")
     val dgraph = DependencyGraph.deserialize("prep_in(mean_VBP_7_0, Canada_NNP_1_0); det(conditions_NNS_6_0, the_DT_2_0); amod(conditions_NNS_6_0, geographic_JJ_3_0); conj_and(geographic_JJ_3_0, climatic_JJ_5_0); amod(conditions_NNS_6_0, climatic_JJ_5_0); nsubj(mean_VBP_7_0, conditions_NNS_6_0); complm(established_VBN_12_0, that_IN_8_0); nsubjpass(established_VBN_12_0, LBAM_NNP_9_0); aux(established_VBN_12_0, could_MD_10_0); auxpass(established_VBN_12_0, become_VB_11_0); ccomp(mean_VBP_7_0, established_VBN_12_0); prep_in(established_VBN_12_0, parts_NNS_14_0); nn(Columbia_NNP_19_0, south_NN_16_0); amod(Columbia_NNP_19_0, coastal_JJ_17_0); nn(Columbia_NNP_19_0, British_NNP_18_0); prep_of(parts_NNS_14_0, Columbia_NNP_19_0); nn(Island_NNP_22_0, Vancouver_NNP_21_0); prep_of(parts_NNS_14_0, Island_NNP_22_0); conj_and(Columbia_NNP_19_0, Island_NNP_22_0); prep_in(established_VBN_12_0, greenhouses_NNS_27_0); conj_and(parts_NNS_14_0, greenhouses_NNS_27_0); amod(environments_NNS_31_0, other_JJ_29_0); amod(environments_NNS_31_0, protected_JJ_30_0); conj_and(parts_NNS_14_0, environments_NNS_31_0); conj_and(greenhouses_NNS_27_0, environments_NNS_31_0); punct(mean_VBP_7_0, ._._32_0)")

@@ -7,10 +7,9 @@ import graph._
 
 import org.junit._
 import org.junit.Assert._
-import org.specs.Specification
-import org.specs.runner.JUnit4
+import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
-import org.specs.runner.JUnitSuiteRunner
+import org.specs2.runner.JUnitRunner
 
 import collection.immutable.graph._
 import collection.immutable.graph.pattern._
@@ -18,9 +17,8 @@ import collection.immutable.graph.Graph._
 
 import tool.stem.IdentityStemmer.instance
 
-@RunWith(classOf[JUnitSuiteRunner])
-class DependencyPatternSpecTest extends JUnit4(DependencyPatternSpec)
-object DependencyPatternSpec extends Specification {
+@RunWith(classOf[JUnitRunner])
+object DependencyPatternSpecTest extends Specification {
   def testPostagConstraint {
     val sentence = "Angels appear in the Bible story from the first pages of Genesis right through to the final pages of the Book of Revelation ."
     val dgraph = DependencyGraph.deserialize("nsubj(appear_VB_1_0, Angels_NNPS_0_0); det(story_NN_5_0, the_DT_3_0); nn(story_NN_5_0, Bible_NNP_4_0); prep_in(appear_VB_1_0, story_NN_5_0); det(pages_NNS_9_0, the_DT_7_0); amod(pages_NNS_9_0, first_JJ_8_0); prep_from(appear_VB_1_0, pages_NNS_9_0); nn(right_NN_12_0, Genesis_NNP_11_0); prep_of(pages_NNS_9_0, right_NN_12_0); dep(appear_VB_1_0, through_IN_13_0); dep(through_IN_13_0, to_TO_14_0); det(pages_NNS_17_0, the_DT_15_0); amod(pages_NNS_17_0, final_JJ_16_0); pobj(to_TO_14_0, pages_NNS_17_0); det(Book_NNP_20_0, the_DT_19_0); prep_of(pages_NNS_17_0, Book_NNP_20_0); prep_of(Book_NNP_20_0, Revelation_NNP_22_0); punct(appear_VB_1_0, ._._23_0)").normalize

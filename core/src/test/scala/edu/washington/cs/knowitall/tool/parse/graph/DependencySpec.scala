@@ -5,14 +5,12 @@ package graph
 
 import org.junit._
 import org.junit.Assert._
-import org.specs.Specification
-import org.specs.runner.JUnit4
+import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
-import org.specs.runner.JUnitSuiteRunner
+import org.specs2.runner.JUnitRunner
 
-@RunWith(classOf[JUnitSuiteRunner])
-class DependencySpecTest extends JUnit4(DependencySpec)
-object DependencySpec extends Specification {
+@RunWith(classOf[JUnitRunner])
+object DependencySpecTest extends Specification {
   val nodes = List(
     new DependencyNode("One", "NN", 0, -1),
     new DependencyNode("man", "NN", 1, -1),
