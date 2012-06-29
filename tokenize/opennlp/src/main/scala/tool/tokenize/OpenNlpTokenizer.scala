@@ -15,7 +15,6 @@ class OpenNlpTokenizer(val model: TokenizerModel) extends Tokenizer {
 
   def tokenize(sentence: String): Seq[Token] = {
     val positions = tokenizer.tokenizePos(sentence)
-    println(positions.mkString(", "))
     val strings = positions.map {
       pos => sentence.substring(pos.getStart, pos.getEnd)
     }
