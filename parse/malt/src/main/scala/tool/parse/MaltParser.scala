@@ -7,7 +7,7 @@ import edu.stanford.nlp.ling.CoreLabel
 import edu.stanford.nlp.parser.maltparser.MaltParserInterface
 import graph.DependencyGraph
 import graph.DependencyNode
-import postag.OpenNlpPosTagger
+import postag.OpenNlpPostagger
 import stem.MorphaStemmer
 import tokenize.OpenNlpTokenizer
 import tool.parse.BaseStanfordParser.CollapseType
@@ -31,7 +31,7 @@ object MaltParser extends DependencyParserMain {
 
 class MaltParser(modelname: String = "engmalt.linear-1.7", logfile: String = null) extends BaseStanfordParser {
   val parser = new MaltParserInterface(modelname, logfile)
-  val tagger = new OpenNlpPosTagger
+  val tagger = new OpenNlpPostagger
   val stemmer = MorphaStemmer.instance
 
   private def depHelper(sentence: String, collapser: CollapseType) = {

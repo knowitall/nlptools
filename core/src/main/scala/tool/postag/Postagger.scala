@@ -8,7 +8,7 @@ import scala.collection.immutable
 /** A POS tagger takes tokenized input and associates a part of speech
   * tag with each token.
   */
-abstract class PosTagger(val tokenizer: tokenize.Tokenizer) {
+abstract class Postagger(val tokenizer: tokenize.Tokenizer) {
   /* POS tag pre-tokenized text */
   def postagTokens(tokens: Seq[tokenize.Token]): Seq[PostaggedToken]
 
@@ -19,7 +19,7 @@ abstract class PosTagger(val tokenizer: tokenize.Tokenizer) {
   }
 }
 
-object PosTagger {
+object Postagger {
   val simplePrepositions = immutable.Set(
     "a", "abaft", "aboard", "about", "above", "absent", "across", "afore",
     "after", "against", "along", "alongside", "amid", "amidst", "among",

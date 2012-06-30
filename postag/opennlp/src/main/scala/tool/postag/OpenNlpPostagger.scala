@@ -6,16 +6,16 @@ import common.main.LineProcessor
 import opennlp.tools.postag._
 import tool.tokenize.Token
 
-class OpenNlpPosTagger(
+class OpenNlpPostagger(
   val model: POSModel,
   tokenizer: tokenize.Tokenizer)
-extends PosTagger(tokenizer) {
+extends Postagger(tokenizer) {
 
   def this(
     modelName: String = "en-pos-maxent.bin",
     tokenizer: tokenize.Tokenizer = new tokenize.OpenNlpTokenizer()) =
     this(new POSModel(
-      classOf[OpenNlpPosTagger].getClassLoader.getResourceAsStream(modelName)),
+      classOf[OpenNlpPostagger].getClassLoader.getResourceAsStream(modelName)),
       tokenizer)
 
 
@@ -29,8 +29,8 @@ extends PosTagger(tokenizer) {
   }
 }
 
-object OpenNlpPosTagger extends LineProcessor {
-  val tagger = new OpenNlpPosTagger()
+object OpenNlpPostagger extends LineProcessor {
+  val tagger = new OpenNlpPostagger()
   override def process(line: String) =
     tagger.postag(line).map { case PostaggedToken(postag, string, offset) =>
       string + "/" + postag

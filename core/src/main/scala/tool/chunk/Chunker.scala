@@ -7,7 +7,7 @@ import common.main.LineProcessor
 /** A Chunker takes postagged text and adds a chunk tag, specifying
   * whether a noun or verb phrase is starting or continuing.
   */
-abstract class Chunker(val postagger: postag.PosTagger) {
+abstract class Chunker(val postagger: postag.Postagger) {
   /** chunk postagged text */
   def chunkPostagged(tokens: Seq[postag.PostaggedToken]): Seq[ChunkedToken]
 

@@ -8,10 +8,10 @@ import edu.stanford.nlp.ling.CoreLabel
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import tool.tokenize.Token
 
-class StanfordPosTagger(
+class StanfordPostagger(
   val model: String = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger",
   tokenizer: tokenize.Tokenizer = new tokenize.StanfordTokenizer())
-extends PosTagger(tokenizer) {
+extends Postagger(tokenizer) {
 
   val tagger = new MaxentTagger(model)
 
@@ -30,8 +30,8 @@ extends PosTagger(tokenizer) {
   }
 }
 
-object StanfordPosTagger extends LineProcessor {
-  val tagger = new StanfordPosTagger()
+object StanfordPostagger extends LineProcessor {
+  val tagger = new StanfordPostagger()
   override def process(line: String) =
     tagger.postag(line).map { case PostaggedToken(postag, string, offset) =>
       string + "/" + postag

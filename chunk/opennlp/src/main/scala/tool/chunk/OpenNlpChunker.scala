@@ -6,10 +6,10 @@ import opennlp.tools.chunker._
 
 class OpenNlpChunker(
   val model: ChunkerModel,
-  postagger: postag.PosTagger)
+  postagger: postag.Postagger)
 extends Chunker(postagger) {
   def this(modelName: String = "en-chunker.bin",
-    postagger: postag.PosTagger = new postag.OpenNlpPosTagger()) =
+    postagger: postag.Postagger = new postag.OpenNlpPostagger()) =
     this(new ChunkerModel(OpenNlpChunker.loadModel(modelName)), postagger)
 
   val chunker = new ChunkerME(model)
@@ -21,7 +21,7 @@ extends Chunker(postagger) {
 }
 
 object OpenNlpChunker extends ChunkerMain {
-  lazy val chunker = new OpenNlpChunker("en-chunker.bin", new postag.OpenNlpPosTagger())
+  lazy val chunker = new OpenNlpChunker("en-chunker.bin", new postag.OpenNlpPostagger())
 
   private def loadModel(name: String) = {
     val resource = classOf[OpenNlpChunker].getClassLoader.getResourceAsStream(name)
