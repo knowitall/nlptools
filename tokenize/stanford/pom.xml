@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>nlptools-tokenize-stanford</artifactId>
+  <artifactId>nlptools-tokenize-stanford_${scala.version}</artifactId>
   <version>2.2.0-SNAPSHOT</version>
   <name>nlptools-tokenize-stanford</name>
   <parent>
     <groupId>edu.washington.cs.knowitall.nlptools</groupId>
-    <artifactId>nlptools-parent</artifactId>
+    <artifactId>nlptools-parent_2.9.2</artifactId>
     <version>2.2.0-SNAPSHOT</version>
   </parent>
   <properties>
@@ -19,7 +19,7 @@
     </dependency>
     <dependency>
       <groupId>edu.washington.cs.knowitall.nlptools</groupId>
-      <artifactId>nlptools-core</artifactId>
+      <artifactId>nlptools-core_${scala.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
