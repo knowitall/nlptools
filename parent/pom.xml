@@ -96,6 +96,7 @@
             <goals>
               <goal>compile</goal>
               <goal>testCompile</goal>
+              <goal>doc-jar</goal>
             </goals>
           </execution>
         </executions>
