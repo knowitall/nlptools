@@ -367,7 +367,6 @@ object DependencyGraph {
 
     try {
       val (nodes, deps) = rec(string, SortedSet[DependencyNode]())
-      println()
       val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
       new DependencyGraph((depNodes ++ nodes).iterator.map(_.text).mkString(" "), nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
     }
