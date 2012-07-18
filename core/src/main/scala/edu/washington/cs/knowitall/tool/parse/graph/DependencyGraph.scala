@@ -92,6 +92,28 @@ class DependencyGraph (
 
     new DependencyGraph(text, nodes, deps, graph)
   }
+  
+  def collapse = {
+    def collapsePrepositions(graph: Graph[DependencyNode]): Graph[DependencyNode] = {
+      var g = graph
+      
+      g = new Graph[DependencyNode](g.vertices, g.edges.map { e => 
+        e.label match {
+          case "prep" => new Graph.Edge[DependencyNode](e.source, e.dest, e.label + "_" + e.dest.string.toLowerCase.replaceAll(" ", "_"))
+          case _ => e
+        }
+      })
+      
+      g = g.collapse(_.label == "pobj")( (nodes: Traversable[DependencyNode]) => 
+        nodes.find(n => graph.edges(n).exists(e => e.label == "pobj" && e.dest == n)).get
+      )
+      
+      g
+    }
+    
+    new DependencyGraph(this.text, this.nodes, this.dependencies,
+        collapsePrepositions(this.graph))
+  }
 
   def collapseXNsubj =
     new DependencyGraph(this.text, this.nodes, this.dependencies,

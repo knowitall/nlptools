@@ -15,10 +15,10 @@ import tool.parse.BaseStanfordParser._
  * Subclasses of BaseStanfordParser must perform an optional post-processing step that applies
  * Stanford's CC-compressed algorithm on the graph. */
 abstract class BaseStanfordParser extends DependencyParser {
-  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, CCCompressed)
+  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, None)
   def dependencies(string: String, collapse: CollapseType): Iterable[Dependency]
 
-  override def dependencyGraph(string: String) = dependencyGraph(string, CCCompressed)
+  override def dependencyGraph(string: String) = dependencyGraph(string, None).collapse
   def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
 
   def convertDependency(nodes: Map[Int, DependencyNode], dep: edu.stanford.nlp.trees.TypedDependency) = {
