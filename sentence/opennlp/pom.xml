@@ -22,5 +22,11 @@
       <artifactId>nlptools-core_${scala.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>edu.washington.cs.knowitall</groupId>
+      <artifactId>opennlp-sent-models</artifactId>
+      <version>1.5</version>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 </project>
