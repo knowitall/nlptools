@@ -9,7 +9,7 @@ import uk.ac.susx.informatics.Morpha
 import common.main.LineProcessor
 
 /** This stemmer handles many cases, but the JFlex is 5 MB. */
-class MorphaStemmer extends Stemmer {
+class MorphaStemmer extends Stemmer with PostaggedStemmer {
   def stem(word: String) = MorphaStem.stemToken(word)
 
   override def stem(word: String, postag: String) = MorphaStem.stemToken(word, postag)
