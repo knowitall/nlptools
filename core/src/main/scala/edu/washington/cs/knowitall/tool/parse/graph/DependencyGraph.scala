@@ -7,6 +7,7 @@ import scala.collection._
 import collection.immutable.Interval
 import collection.immutable.graph.Graph
 import collection.immutable.graph.Graph._
+import tool.postag.Postagger
 
 /** A representation of a graph over dependencies.
   * This richer representation may include the text of the original sentence,
@@ -92,6 +93,10 @@ class DependencyGraph (
 
     new DependencyGraph(text, nodes, deps, graph)
   }
+
+  def mapGraph(f: Graph[DependencyNode]=>Graph[DependencyNode]) = {
+    new DependencyGraph(this.text, this.nodes, this.dependencies, f(this.graph))
+  }
   
   def collapse = {
     def collapsePrepositions(graph: Graph[DependencyNode]): Graph[DependencyNode] = {
@@ -111,8 +116,36 @@ class DependencyGraph (
       g
     }
     
+    def collapseMultiwordPrepositions(graph: Graph[DependencyNode]): Graph[DependencyNode] = {
+      val preps = graph.edges.filter(_.label == "prep")
+      
+      // follow up prep, advmod, dep, amod edges
+      def cond(e: Graph.Edge[DependencyNode]) = e.label == "prep" || e.label == "advmod" || e.label == "dep" || e.label == "amod"
+      
+      preps.foldRight(graph){ case (prep, graph) =>
+        val last = prep.dest
+        val predecessors = graph.vertices.filter(_ <= last).toList.sortBy(_.indices)(Ordering[Interval].reverse)
+        
+        DependencyGraph.reversedSplitMultiwordPrepositions.filter(p => predecessors.map(_.text).startsWith(p)).toSeq match {
+          case Seq() => graph
+          case mtches =>
+	        val removeVertices = predecessors.take(mtches.maxBy(_.length).length).drop(1).flatMap(graph.inferiors(_, _.dest != last)).toSet.toList.sorted
+	        val joinVertices = removeVertices :+ last
+	        
+	        // keep last connected
+	        val parent = last.
+	        
+	        val text = joinVertices.iterator.map(_.text).mkString(" ")
+	        new Graph[DependencyNode](
+	            graph.edges.filterNot(_.vertices exists (removeVertices contains _))).map(vertex => 
+	              if (vertex == prep.dest) new DependencyNode(text, prep.dest.postag, Interval.span(joinVertices.map(_.indices)), joinVertices.head.offset)
+	              else vertex)
+        }
+      }
+    }
+    
     new DependencyGraph(this.text, this.nodes, this.dependencies,
-        collapsePrepositions(this.graph))
+        collapseMultiwordPrepositions(this.graph))
   }
 
   def collapseXNsubj =
@@ -400,4 +433,6 @@ object DependencyGraph {
 
   class SerializationException(message: String, cause: Throwable)
   extends RuntimeException(message, cause)
+  
+  val reversedSplitMultiwordPrepositions = Postagger.complexPrepositions.map(_.split(" ").toList.reverse)
 }
