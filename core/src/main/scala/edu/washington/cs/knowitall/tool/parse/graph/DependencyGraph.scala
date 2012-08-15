@@ -8,6 +8,7 @@ import collection.immutable.Interval
 import collection.immutable.graph.Graph
 import collection.immutable.graph.Graph._
 import tool.postag.Postagger
+import edu.washington.cs.knowitall.collection.immutable.graph.{DownEdge, UpEdge}
 
 /** A representation of a graph over dependencies.
   * This richer representation may include the text of the original sentence,
@@ -99,18 +100,24 @@ class DependencyGraph (
   }
   
   def collapse = {
-    def collapsePrepositions(graph: Graph[DependencyNode]): Graph[DependencyNode] = {
+    def edgifyPrepositions(graph: Graph[DependencyNode]): Graph[DependencyNode] = {
       var g = graph
       
       g = new Graph[DependencyNode](g.vertices, g.edges.map { e => 
         e.label match {
-          case "prep" => new Graph.Edge[DependencyNode](e.source, e.dest, e.label + "_" + e.dest.string.toLowerCase.replaceAll(" ", "_"))
+          case "prep" | "prepc" => 
+            val qualifier = if (graph.dedges(e.dest) exists { case DownEdge(e) => e.label == "pcomp" case _ => false }) "c" else ""
+            e.copy(label = e.label + qualifier + "_" + e.dest.string.toLowerCase.replaceAll(" ", "_"))
           case _ => e
         }
       })
       
       g = g.collapse(_.label == "pobj")( (nodes: Traversable[DependencyNode]) => 
         nodes.find(n => graph.edges(n).exists(e => e.label == "pobj" && e.dest == n)).get
+      )
+      
+      g = g.collapse(_.label == "pcomp")( (nodes: Traversable[DependencyNode]) => 
+        nodes.find(n => graph.edges(n).exists(e => e.label == "pcomp" && e.dest == n)).get
       )
       
       g
@@ -122,8 +129,8 @@ class DependencyGraph (
       // follow up prep, advmod, dep, amod edges
       def cond(e: Graph.Edge[DependencyNode]) = e.label == "prep" || e.label == "advmod" || e.label == "dep" || e.label == "amod"
 
-      preps.foldRight(graph) {
-        case (prep, graph) =>
+      preps.foldLeft(graph) {
+        case (graph, prep) =>
           if (!(graph.edges contains prep)) graph else {
             val last = prep.dest
             val predecessors = graph.vertices.filter(_ <= last).toList.sortBy(_.indices)(Ordering[Interval].reverse)
