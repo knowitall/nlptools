@@ -117,30 +117,48 @@ class DependencyGraph (
     }
     
     def collapseMultiwordPrepositions(graph: Graph[DependencyNode]): Graph[DependencyNode] = {
-      val preps = graph.edges.filter(_.label == "prep")
+      val preps = graph.edges.filter(edge => edge.label == "prep" || edge.label == "pcomp").toList.sortBy(_.dest.indices)(Ordering[Interval].reverse)
       
       // follow up prep, advmod, dep, amod edges
       def cond(e: Graph.Edge[DependencyNode]) = e.label == "prep" || e.label == "advmod" || e.label == "dep" || e.label == "amod"
-      
-      preps.foldRight(graph){ case (prep, graph) =>
-        val last = prep.dest
-        val predecessors = graph.vertices.filter(_ <= last).toList.sortBy(_.indices)(Ordering[Interval].reverse)
-        
-        DependencyGraph.reversedSplitMultiwordPrepositions.filter(p => predecessors.map(_.text).startsWith(p)).toSeq match {
-          case Seq() => graph
-          case mtches =>
-	        val removeVertices = predecessors.take(mtches.maxBy(_.length).length).drop(1).flatMap(graph.inferiors(_, _.dest != last)).toSet.toList.sorted
-	        val joinVertices = removeVertices :+ last
-	        
-	        // keep last connected
-	        val parent = last.
-	        
-	        val text = joinVertices.iterator.map(_.text).mkString(" ")
-	        new Graph[DependencyNode](
-	            graph.edges.filterNot(_.vertices exists (removeVertices contains _))).map(vertex => 
-	              if (vertex == prep.dest) new DependencyNode(text, prep.dest.postag, Interval.span(joinVertices.map(_.indices)), joinVertices.head.offset)
-	              else vertex)
-        }
+
+      preps.foldRight(graph) {
+        case (prep, graph) =>
+          if (!(graph.edges contains prep)) graph else {
+            val last = prep.dest
+            val predecessors = graph.vertices.filter(_ <= last).toList.sortBy(_.indices)(Ordering[Interval].reverse)
+
+            DependencyGraph.reversedSplitMultiwordPrepositions.filter(p => predecessors.map(_.text).startsWith(p)).toSeq match {
+              case Seq() => graph
+              case mtches =>
+                val removeVertices = predecessors.take(mtches.maxBy(_.length).length).drop(1).flatMap(graph.inferiors(_, _.dest != last)).toSet.toList.sorted
+                val joinVertices = removeVertices :+ last
+
+                // keep last connected in case we remove some
+                // of it's parents
+                var parent = last
+                while ((joinVertices contains parent) && (graph.indegree(parent) == 1)) {
+                  parent = graph.incoming(parent).head.source
+                }
+
+                if (joinVertices contains parent) {
+                  // we removed parents up to the root--abort
+                  graph
+                } else {
+                  // add an edge from the closest remaining parent
+                  // to last, if we need to
+                  val extraEdges =
+                    if (graph.neighbors(last) contains parent) Nil
+                    else List(new Graph.Edge[DependencyNode](parent, last, "prep"))
+
+                  val text = joinVertices.iterator.map(_.text).mkString(" ")
+                  new Graph[DependencyNode](
+                    extraEdges ++ graph.edges.filterNot(_.vertices exists (removeVertices contains _))).map(vertex =>
+                    if (vertex == prep.dest) new DependencyNode(text, prep.dest.postag, Interval.span(joinVertices.map(_.indices)), joinVertices.head.offset)
+                    else vertex)
+                }
+            }
+          }
       }
     }
     
