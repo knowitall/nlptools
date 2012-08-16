@@ -9,6 +9,7 @@ import collection.immutable.graph.Graph
 import collection.immutable.graph.Graph._
 import tool.postag.Postagger
 import edu.washington.cs.knowitall.collection.immutable.graph.{DownEdge, UpEdge}
+import edu.washington.cs.knowitall.collection.immutable.graph.Direction
 
 /** A representation of a graph over dependencies.
   * This richer representation may include the text of the original sentence,
@@ -196,6 +197,16 @@ class DependencyGraph (
       new Graph[DependencyNode](conjGraph.edges filterNot (_.label == "cc"))
     }
 
+    /** Distribute some edges to other nodes connected by conj_and.
+      * 
+      * 1.  Distribute nsubj, amod, advmod
+      * 2.  Distribute incoming dobj edges
+      *     a.  incoming: "Michael found rocks and spiders."
+      *     b.  outgoing: "Michael went to the beach and found rocks."
+      * 2.  Distribute incoming prep edges
+      *     a.  incoming: "Michael and George went to the beach in Spring and Fall."
+      *     b.  outgoing: "Michael and George went to the beach and slept."
+      */
     def distributeConjunctions(graph: Graph[DependencyNode]) = {
       // find components connected by conj_and
       val components = graph.components(_.label == "conj_and")
@@ -206,7 +217,12 @@ class DependencyGraph (
         // find new edges needed to distribute conjunction
         for (
           dedge <- dedges;
-          if (dedge.edge.label == "nsubj" || dedge.edge.label == "amod");
+          if (dedge.edge.label == "nsubj" || 
+              dedge.edge.label == "amod" || 
+              dedge.edge.label == "advmod" || 
+              dedge.dir == Direction.Up && (
+                dedge.edge.label == "dobj" || 
+                (dedge.edge.label startsWith "prep")));
           if !(vertices contains dedge.end);
           val v <- vertices;
           val newEdge = dedge match {
