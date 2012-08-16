@@ -98,34 +98,34 @@ class DependencyGraph (
   def mapGraph(f: Graph[DependencyNode]=>Graph[DependencyNode]) = {
     new DependencyGraph(this.text, this.nodes, this.dependencies, f(this.graph))
   }
-  
+
   def collapse = {
     def edgifyPrepositions(graph: Graph[DependencyNode]): Graph[DependencyNode] = {
       var g = graph
-      
-      g = new Graph[DependencyNode](g.vertices, g.edges.map { e => 
+
+      g = new Graph[DependencyNode](g.vertices, g.edges.map { e =>
         e.label match {
-          case "prep" | "prepc" => 
+          case "prep" | "prepc" =>
             val qualifier = if (graph.dedges(e.dest) exists { case DownEdge(e) => e.label == "pcomp" case _ => false }) "c" else ""
             e.copy(label = e.label + qualifier + "_" + e.dest.string.toLowerCase.replaceAll(" ", "_"))
           case _ => e
         }
       })
-      
-      g = g.collapse(_.label == "pobj")( (nodes: Traversable[DependencyNode]) => 
+
+      g = g.collapse(_.label == "pobj")( (nodes: Traversable[DependencyNode]) =>
         nodes.find(n => graph.edges(n).exists(e => e.label == "pobj" && e.dest == n)).get
       )
-      
-      g = g.collapse(_.label == "pcomp")( (nodes: Traversable[DependencyNode]) => 
+
+      g = g.collapse(_.label == "pcomp")( (nodes: Traversable[DependencyNode]) =>
         nodes.find(n => graph.edges(n).exists(e => e.label == "pcomp" && e.dest == n)).get
       )
-      
+
       g
     }
-    
+
     def collapseMultiwordPrepositions(graph: Graph[DependencyNode]): Graph[DependencyNode] = {
       val preps = graph.edges.filter(edge => edge.label == "prep" || edge.label == "pcomp").toList.sortBy(_.dest.indices)(Ordering[Interval].reverse)
-      
+
       // follow up prep, advmod, dep, amod edges
       def cond(e: Graph.Edge[DependencyNode]) = e.label == "prep" || e.label == "advmod" || e.label == "dep" || e.label == "amod"
 
@@ -168,9 +168,61 @@ class DependencyGraph (
           }
       }
     }
-    
+
+    def collapseJunctions(graph: Graph[DependencyNode]) = {
+      val conjGraph = graph.edges.filter(edge =>
+        // conj edges to a node with no children
+        edge.label == "conj" &&
+        // source of conj edges has a child cc edge
+        graph.dedges(edge.source).exists { case DownEdge(e) => e.label == "cc" case _ => false}
+      ).foldLeft(graph) { case (graph, conj) =>
+        val ccNodes = graph.dedges(conj.source).filter {
+          case DownEdge(e) => e.label == "cc"
+          case _ => false
+        }.iterator.map(_.edge.dest).toList
+
+        // look left (negative distance) and then right.
+        val bestCC = ccNodes.minBy { case cc =>
+          val dist = cc.indices distance conj.dest.indices
+          if (dist < 0) -ccNodes.length - dist
+          else dist
+        }
+
+        val newEdges = graph.edges - conj + conj.copy(label = "conj_"+bestCC.text)
+
+        new Graph[DependencyNode](graph.vertices, newEdges)
+      }
+
+      new Graph[DependencyNode](conjGraph.edges filterNot (_.label == "cc"))
+    }
+
+    def distributeConjunctions(graph: Graph[DependencyNode]) = {
+      // find components connected by conj_and
+      val components = graph.components(_.label == "conj_and")
+
+      val newEdges = components.flatMap { vertices =>
+        val dedges = vertices.flatMap(graph.dedges(_))
+
+        // find new edges needed to distribute conjunction
+        for (
+          dedge <- dedges;
+          if (dedge.edge.label == "nsubj" || dedge.edge.label == "amod");
+          if !(vertices contains dedge.end);
+          val v <- vertices;
+          val newEdge = dedge match {
+            case DownEdge(e) => e.copy(source = v)
+            case UpEdge(e) => e.copy(dest = v)
+          };
+          if !(newEdge.source == newEdge.dest);
+          if !(graph.edges contains newEdge)
+        ) yield (newEdge)
+      }
+
+      new Graph[DependencyNode](graph.vertices, graph.edges ++ newEdges)
+    }
+
     new DependencyGraph(this.text, this.nodes, this.dependencies,
-        collapseMultiwordPrepositions(this.graph))
+        distributeConjunctions(collapseJunctions(edgifyPrepositions(collapseMultiwordPrepositions(this.graph)))))
   }
 
   def collapseXNsubj =
@@ -458,6 +510,6 @@ object DependencyGraph {
 
   class SerializationException(message: String, cause: Throwable)
   extends RuntimeException(message, cause)
-  
+
   val reversedSplitMultiwordPrepositions = Postagger.complexPrepositions.map(_.split(" ").toList.reverse)
 }
