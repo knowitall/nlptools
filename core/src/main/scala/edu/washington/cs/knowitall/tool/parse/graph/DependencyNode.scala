@@ -20,6 +20,9 @@ class DependencyNode(string: String, postag: String, val indices: Interval, offs
   /* create a node with a single index */
   def this(text: String, postag: String, index: Int, offset: Int) =
     this(text, postag, Interval.singleton(index), offset)
+  
+  def this(postagged: PostaggedToken, indices: Interval) = 
+    this(postagged.string, postagged.postag, indices, postagged.offset)
 
   def text = string
 
