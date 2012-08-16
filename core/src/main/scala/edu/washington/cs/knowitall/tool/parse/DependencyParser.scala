@@ -16,7 +16,7 @@ trait DependencyParser {
     * will have the source text. */
   def dependencyGraph(string: String): DependencyGraph = {
     val dependencies = this.dependencies(string)
-    val nodes = dependencies.toList.flatMap(dep => List(dep.source, dep.dest)).sorted
+    val nodes = dependencies.toList.flatMap(dep => List(dep.source, dep.dest))
     new DependencyGraph(string, nodes, dependencies)
   }
 }
