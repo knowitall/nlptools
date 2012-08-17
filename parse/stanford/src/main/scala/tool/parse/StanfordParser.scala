@@ -18,7 +18,7 @@ abstract class BaseStanfordParser extends DependencyParser {
   override def dependencies(string: String): Iterable[Dependency] = dependencies(string, None)
   def dependencies(string: String, collapse: CollapseType): Iterable[Dependency]
 
-  override def dependencyGraph(string: String) = dependencyGraph(string, None).collapse
+  override def dependencyGraph(string: String) = dependencyGraph(string, None)
   def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
 
   def convertDependency(nodes: Map[Int, DependencyNode], dep: edu.stanford.nlp.trees.TypedDependency) = {
