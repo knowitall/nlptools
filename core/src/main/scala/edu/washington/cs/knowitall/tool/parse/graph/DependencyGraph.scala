@@ -209,18 +209,38 @@ class DependencyGraph (
     }
 
     /** Distribute some edges to other nodes connected by conj_and.
-      * 
-      * 1.  Distribute nsubj, amod, advmod
-      * 2.  Distribute incoming dobj edges
+      *
+      * Incoming/outgoing are defined as a direction relative to the
+      * connected component joined by the conjunction.
+      *
+      * 1.  Distribute nsubj.
+      *     a.  "Michael, Rob, and NJ went to Than Vi."
+      *     b.  "The apple was crisp and fresh."
+      * 2.  Distribute incoming advmod edges
+      *     a.  incoming: "He spoke wisely and surely."
+      *     b.  outgoing: "Just write them down and I will edit it for you."
+      * 3.  Distribute incoming acomp edges
+      *     a.  incoming: "The water looked blue and refreshing.
+      * 4.  Distribute incoming amod edges
+      *     a.  incoming: "The blue and cool water felt nice."
+      *     b.  outgoing: "Pills raise clotting , high blood pressure , heart attack , and stroke . "
+      * 5.  Distribute incoming dobj edges
       *     a.  incoming: "Michael found rocks and spiders."
       *     b.  outgoing: "Michael went to the beach and found rocks."
-      * 2.  Distribute incoming prep edges
+      * 6.  Distribute incoming rcmod edges
+      *     a.  incoming: "The woman, who wore a black dress and spoke in the theater, ate cheese."
+      *     b.  outgoing:
+      * 7.  Distribute incoming ccomp edges
+      *     a.  incoming: "He says you swim fast and eat cherries."
+      * 8.  Distribute incoming xcomp edges
+      *     a.  incoming: "He says you like to swim fast and eat cherries."
+      * 6.  Distribute incoming prep edges
       *     a.  incoming: "Michael and George went to the beach in Spring and Fall."
       *     b.  outgoing: "Michael and George went to the beach and slept."
       */
     def distributeConjunctions(graph: Graph[DependencyNode]) = {
       // find components connected by conj_and
-      val components = graph.components(_.label == "conj_and")
+      val components = graph.components(e => (e.label equalsIgnoreCase "conj_and") || e.label == "conj_&")
 
       val newEdges = components.flatMap { vertices =>
         val dedges = vertices.flatMap(graph.dedges(_))
@@ -228,11 +248,15 @@ class DependencyGraph (
         // find new edges needed to distribute conjunction
         for (
           dedge <- dedges;
-          if (dedge.edge.label == "nsubj" || 
-              dedge.edge.label == "amod" || 
-              dedge.edge.label == "advmod" || 
+          if (dedge.edge.label == "nsubj" ||
               dedge.dir == Direction.Up && (
-                dedge.edge.label == "dobj" || 
+                dedge.edge.label == "advmod" ||
+                dedge.edge.label == "amod" ||
+                dedge.edge.label == "acomp" ||
+                dedge.edge.label == "dobj" ||
+                dedge.edge.label == "rcmod" ||
+                dedge.edge.label == "ccomp" ||
+                dedge.edge.label == "xcomp" ||
                 (dedge.edge.label startsWith "prep")));
           if !(vertices contains dedge.end);
           val v <- vertices;
