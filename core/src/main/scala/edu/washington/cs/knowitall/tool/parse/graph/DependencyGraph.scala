@@ -4,6 +4,7 @@ package parse
 package graph
 
 import scala.collection._
+import org.slf4j.LoggerFactory
 import collection.immutable.Interval
 import collection.immutable.graph.Graph
 import collection.immutable.graph.Graph._
@@ -113,13 +114,23 @@ class DependencyGraph (
         }
       })
 
-      g = g.collapse(_.label == "pobj")( (nodes: Traversable[DependencyNode]) =>
-        nodes.find(n => graph.edges(n).exists(e => e.label == "pobj" && e.dest == n)).get
-      )
+      try {
+        g = g.collapse(_.label == "pobj")( (nodes: Traversable[DependencyNode]) =>
+          nodes.find(n => g.edges(n).exists(e => e.label == "pobj" && e.dest == n)).get
+        )
+      }
+      catch {
+        case e => DependencyGraph.logger.error("could not collapse pobj.", e)
+      }
 
-      g = g.collapse(_.label == "pcomp")( (nodes: Traversable[DependencyNode]) =>
-        nodes.find(n => graph.edges(n).exists(e => e.label == "pcomp" && e.dest == n)).get
-      )
+      try {
+        g = g.collapse(_.label == "pcomp")( (nodes: Traversable[DependencyNode]) => {
+          nodes.find(n => g.edges(n).exists(e => e.label == "pcomp" && e.dest == n)).get
+        })
+      }
+      catch {
+        case e => DependencyGraph.logger.error("could not collapse pcomp.", e)
+      }
 
       g
     }
@@ -500,6 +511,8 @@ class DependencyGraph (
 }
 
 object DependencyGraph {
+  val logger = LoggerFactory.getLogger(classOf[DependencyGraph])
+
   def deserialize(string: String) = {
     def rec(string: String, nodes: SortedSet[DependencyNode]): (SortedSet[DependencyNode], SortedSet[Dependency]) = {
       if (string.isEmpty) (nodes, SortedSet.empty[Dependency])
