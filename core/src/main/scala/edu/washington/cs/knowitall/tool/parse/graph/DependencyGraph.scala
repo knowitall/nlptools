@@ -543,12 +543,15 @@ object DependencyGraph {
 
   def deserialize(string: String) = {
     def rec(string: String, nodes: SortedSet[DependencyNode]): (SortedSet[DependencyNode], SortedSet[Dependency]) = {
+      // we're done, return the extra nodes and dependencies
       if (string.isEmpty) (nodes, SortedSet.empty[Dependency])
+      // we found an extra node that needs to be deserialized
       else if (string.charAt(0) == '(') {
         val pickled = string.drop(1).takeWhile(_ != ')')
         val node = DependencyNode.deserialize(pickled)
         rec(string.drop(pickled.length + 2 /* 2 for the () */).dropWhile(c => c != ',' && c != ';').drop(1).dropWhile(_ == ' '), nodes + node)
       }
+      // deserialize all the depencencies
       else {
         (nodes, Dependencies.deserialize(string))
       }
