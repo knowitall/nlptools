@@ -11,15 +11,15 @@ import scala.collection.immutable.SortedSet
 /*
  * A representation for an edge in the graph of dependencies. */
 class Dependency(
-    source: DependencyNode, 
-    dest: DependencyNode, 
-    label: String) 
-extends Edge[DependencyNode](source, dest, label) 
+    source: DependencyNode,
+    dest: DependencyNode,
+    label: String)
+extends Edge[DependencyNode](source, dest, label)
 with Ordered[Dependency] {
   require(source != null)
   require(dest != null)
   require(label != null)
-  
+
   // extend Object
   override def toString() = this.label + "(" + this.source + " -> " + this.dest + ")"
   override def equals(that: Any) = that match {
@@ -27,7 +27,7 @@ with Ordered[Dependency] {
     case _ => false
   }
   override def hashCode() = 37 * (this.source.hashCode + this.dest.hashCode * 37) + label.hashCode
-  
+
   // extend Ordered
   def compare(that: Dependency) = {
     def tuplize(dep: Dependency) =
@@ -36,7 +36,7 @@ with Ordered[Dependency] {
   }
 
   def nodes = Set(source, dest)
-  def otherNode(node: DependencyNode) = 
+  def otherNode(node: DependencyNode) =
     if (source == dest) throw new IllegalStateException("source == dest")
     else if (source == node) dest
     else source
@@ -50,20 +50,20 @@ with Ordered[Dependency] {
 }
 
 object Dependency {
-  val Serialized = new Regex("""(\p{Graph}+)\(\s*(\p{Graph}*?_\p{Graph}*?_\p{Graph}*?),\s*(\p{Graph}*?_\p{Graph}*?_\p{Graph}*?)\s*\)""")
+  val Serialized = new Regex("""(\p{Graph}+)\(\s*(\p{Graph}*?_\p{Graph}*?_\p{Graph}*?_\p{Graph}*?),\s*(\p{Graph}*?_\p{Graph}*?_\p{Graph}*?_\p{Graph}*?)\s*\)""")
   def deserialize(string: String) = try {
     val Serialized(label, source, dest) = string
     new Dependency(
-        DependencyNode.deserialize(source), 
-        DependencyNode.deserialize(dest), 
+        DependencyNode.deserialize(source),
+        DependencyNode.deserialize(dest),
         label)
   }
   catch {
     case e => throw new Dependency.SerializationException("could not deserialize dependency: " + string, e)
   }
-  
-  
-  class SerializationException(message: String, cause: Throwable) 
+
+
+  class SerializationException(message: String, cause: Throwable)
   extends RuntimeException(message, cause)
 }
 

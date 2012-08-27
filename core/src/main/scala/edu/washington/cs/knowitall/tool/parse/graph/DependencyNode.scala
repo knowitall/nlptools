@@ -20,8 +20,8 @@ class DependencyNode(string: String, postag: String, val indices: Interval, offs
   /* create a node with a single index */
   def this(text: String, postag: String, index: Int, offset: Int) =
     this(text, postag, Interval.singleton(index), offset)
-  
-  def this(postagged: PostaggedToken, indices: Interval) = 
+
+  def this(postagged: PostaggedToken, indices: Interval) =
     this(postagged.string, postagged.postag, indices, postagged.offset)
 
   def text = string
@@ -58,7 +58,8 @@ class DependencyNode(string: String, postag: String, val indices: Interval, offs
   def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, indices, offset)
   def serialize = {
     if (indices.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple indices")
-    text.replaceAll("[[_()][^\\p{Graph}]]", "") + "_" + postag + "_" + indices.start + "_" + offset;
+    def clean(string: String): String = string.replaceAll(";", ":")
+    clean(text).replaceAll("[[_()][^\\p{Graph}]]", "") + "_" + clean(postag) + "_" + indices.start + "_" + offset;
   }
 }
 
