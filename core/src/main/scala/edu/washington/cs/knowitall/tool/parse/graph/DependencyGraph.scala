@@ -105,6 +105,7 @@ class DependencyGraph (
     def edgifyPrepositions(graph: Graph[DependencyNode]): Graph[DependencyNode] = {
       var g = graph
 
+      // rename prep edges
       g = new Graph[DependencyNode](g.vertices, g.edges.map { e =>
         e.label match {
           case "prep" | "prepc" =>
@@ -114,8 +115,11 @@ class DependencyGraph (
         }
       })
 
+      // collapse edges (pobj) preceeded by prep
       try {
-        g = g.collapse(_.label == "pobj")( (nodes: Traversable[DependencyNode]) =>
+        g = g.collapse { edge =>
+            edge.label == "pobj" && (g.incoming(edge.source) exists (_.label startsWith "prep"))
+        } ((nodes: Traversable[DependencyNode]) =>
           nodes.find(n => g.edges(n).exists(e => e.label == "pobj" && e.dest == n)).get
         )
       }
@@ -123,8 +127,11 @@ class DependencyGraph (
         case e => DependencyGraph.logger.error("could not collapse pobj.", e)
       }
 
+      // collapse edges (pcomp) preceeded by prep
       try {
-        g = g.collapse(_.label == "pcomp")( (nodes: Traversable[DependencyNode]) => {
+        g = g.collapse { edge =>
+            edge.label == "pcomp" && (g.incoming(edge.source) exists (_.label startsWith "prep"))
+          }( (nodes: Traversable[DependencyNode]) => {
           nodes.find(n => g.edges(n).exists(e => e.label == "pcomp" && e.dest == n)).get
         })
       }
