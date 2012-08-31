@@ -115,10 +115,14 @@ class DependencyGraph (
         }
       })
 
+      // NOTE: conjunctions must be distributed before pobj edges
+      // are collapsed.  Otherwise some won't have incoming prep
+      // edges to their targets yet.
+
       // collapse edges (pobj) preceeded by prep
       try {
         g = g.collapse { edge =>
-            edge.label == "pobj" && (g.incoming(edge.source) exists (_.label startsWith "prep"))
+          edge.label == "pobj" && (g.incoming(edge.source) exists (_.label startsWith "prep"))
         } ((nodes: Traversable[DependencyNode]) =>
           nodes.find(n => g.edges(n).exists(e => e.label == "pobj" && e.dest == n)).get
         )
@@ -207,7 +211,7 @@ class DependencyGraph (
           else dist
         }
 
-        val newEdges = graph.edges - conj + conj.copy(label = "conj_"+bestCC.text)
+        val newEdges = scala.collection.Set[Edge[DependencyNode]]() ++ graph.edges - conj + conj.copy(label = "conj_"+bestCC.text)
 
         new Graph[DependencyNode](graph.vertices, newEdges)
       }
@@ -284,7 +288,7 @@ class DependencyGraph (
     }
 
     new DependencyGraph(this.text, this.nodes, this.dependencies,
-        distributeConjunctions(collapseJunctions(edgifyPrepositions(collapseMultiwordPrepositions(this.graph)))))
+        edgifyPrepositions(distributeConjunctions(collapseJunctions(collapseMultiwordPrepositions(this.graph)))))
   }
 
   def collapseXNsubj =
