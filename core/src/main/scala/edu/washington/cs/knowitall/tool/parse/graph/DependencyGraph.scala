@@ -78,6 +78,10 @@ class DependencyGraph (
   }
   override def toString = serialize
 
+  def interval = Interval.open(0, nodes.size)
+
+  def length = nodes.size
+
   def serialize = {
     val extra = this.nodes filterNot (this.dependencies.flatMap(dep => Set(dep.source, dep.dest)).contains(_))
 
