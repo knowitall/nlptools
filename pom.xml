@@ -23,6 +23,7 @@
     <module>stem/morpha</module>
     <module>stem/snowball</module>
 
+    <module>tokenize/breeze</module>
     <module>tokenize/opennlp</module>
     <module>tokenize/stanford</module>
 
@@ -31,6 +32,7 @@
 
     <module>chunk/opennlp</module>
 
+    <module>sentence/breeze</module>
     <module>sentence/opennlp</module>
     <!-- <module>sentence/piao</module> -->
 
