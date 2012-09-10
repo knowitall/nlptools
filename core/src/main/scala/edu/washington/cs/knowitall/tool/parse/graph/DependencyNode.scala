@@ -29,8 +29,11 @@ class DependencyNode(string: String, postag: String, val indices: Interval, offs
   // extend Ordered[DependencyNode]
   override def compare(that: DependencyNode) = {
     if (this == that) 0
-    else if (this.indices intersects that.indices)
-      throw new IllegalStateException("intersecting intervals cannot be compared: " + this.toFullString + " and " + that.toFullString)
+    else if (this.indices intersects that.indices) {
+      implicitly[Ordering[Tuple3[String, String, Int]]].compare(
+          (this.string, this.postag, this.offset),
+          (that.string, that.postag, that.offset))
+    }
     else this.indices.compare(that.indices)
   }
 
