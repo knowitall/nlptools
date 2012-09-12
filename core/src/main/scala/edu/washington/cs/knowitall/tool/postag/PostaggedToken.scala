@@ -10,7 +10,7 @@ import edu.washington.cs.knowitall.tool.tokenize.Token
   * @param  string  the string of the token
   * @param  offset  the character offset of the token in the source sentence
   * @param  postag  the PENN-style part-of-speech tag of the token
-  * @param  postag  the chunk tag of the token in BIO format
+  * @param  chunk   the chunk tag of the token in BIO format
   */
 class PostaggedToken(val postag: String, string: String, offset: Int)
 extends Token(string, offset) {

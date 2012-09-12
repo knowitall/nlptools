@@ -22,24 +22,30 @@
 
     <module>stem/morpha</module>
     <module>stem/snowball</module>
-
     <module>tokenize/breeze</module>
     <module>tokenize/opennlp</module>
     <module>tokenize/stanford</module>
-
     <module>postag/opennlp</module>
     <module>postag/stanford</module>
-
     <module>chunk/opennlp</module>
-
     <module>sentence/breeze</module>
     <module>sentence/opennlp</module>
     <!-- <module>sentence/piao</module> -->
-
     <module>coref/stanford</module>
-
     <module>parse/opennlp</module>
     <module>parse/stanford</module>
     <module>parse/malt</module>
   </modules>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <tagBase>https://svn.apache.org/repos/asf/maven/components/releases</tagBase>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
