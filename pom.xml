@@ -13,10 +13,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  <scm>
-    <connection>scm:git:///</connection>
-    <tag>HEAD</tag>
-  </scm>
   <modules>
     <module>core</module>
 
