@@ -8,7 +8,7 @@ import scala.Array.canBuildFrom
 import scala.Option.option2Iterable
 import scala.collection.JavaConversions.asScalaSet
 
-import org.maltparser.MaltParserService
+import org.maltparser.MyMaltParserService
 
 import edu.washington.cs.knowitall.collection.immutable.Interval
 import edu.washington.cs.knowitall.tool.parse.graph.Dependency
@@ -39,6 +39,12 @@ class MaltParser(modelFile: File = new File("engmalt.linear-1.7"), logFile: Opti
   val stemmer = MorphaStemmer.instance
   
   private def initializeMaltParserService() = {
+    // hack to make malt parser work with a different manifest
+    import java.lang.reflect._
+    val field = classOf[org.maltparser.core.helper.SystemInfo].getDeclaredField("version")
+    field.setAccessible(true)
+    field.set(null, "1.7")
+
     val dir = Option(modelFile.getParentFile()) map (_.getAbsolutePath)
     val file = modelFile.getName
     val command = 
@@ -55,7 +61,7 @@ class MaltParser(modelFile: File = new File("engmalt.linear-1.7"), logFile: Opti
       })
       
     System.err.println("Initializing malt: " + command);
-    val service = new MaltParserService()
+    val service = new MyMaltParserService()
     service.initializeParserModel(command);
     
     service
