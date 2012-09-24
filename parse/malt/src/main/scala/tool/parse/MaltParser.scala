@@ -3,19 +3,17 @@ package tool
 package parse
 
 import java.io.File
-
 import scala.Array.canBuildFrom
 import scala.Option.option2Iterable
 import scala.collection.JavaConversions.asScalaSet
-
 import org.maltparser.MyMaltParserService
-
 import edu.washington.cs.knowitall.collection.immutable.Interval
 import edu.washington.cs.knowitall.tool.parse.graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode
 import postag.OpenNlpPostagger
 import stem.MorphaStemmer
+import scala.collection.immutable.SortedSet
 
 /** MaltParser is much faster than the StanfordParser but has a lower F-score.
   * It includes wrapper code so that it can still use the Stanford postprocessing.
@@ -37,7 +35,7 @@ class MaltParser(modelFile: File = new File("engmalt.linear-1.7"), logFile: Opti
   val parser = initializeMaltParserService()
   val tagger = new OpenNlpPostagger
   val stemmer = MorphaStemmer.instance
-  
+
   private def initializeMaltParserService() = {
     // hack to make malt parser work with a different manifest
     import java.lang.reflect._
@@ -47,23 +45,23 @@ class MaltParser(modelFile: File = new File("engmalt.linear-1.7"), logFile: Opti
 
     val dir = Option(modelFile.getParentFile()) map (_.getAbsolutePath)
     val file = modelFile.getName
-    val command = 
-      "-c " + file + 
+    val command =
+      "-c " + file +
       (dir match {
         case Some(dir) => " -w " + dir
         case None => ""
       }) +
-      " -m parse" + 
+      " -m parse" +
       // turn logging off if no log file is specified
       (logFile match {
         case Some(file) => " -lfi " + file.getPath
         case None => " -cl off"
       })
-      
+
     System.err.println("Initializing malt: " + command);
     val service = new MyMaltParserService()
     service.initializeParserModel(command);
-    
+
     service
   }
 
@@ -73,20 +71,20 @@ class MaltParser(modelFile: File = new File("engmalt.linear-1.7"), logFile: Opti
     }.toIndexedSeq
 
     val lemmatized = tokens.map(stemmer.stemToken)
-    
-    val maltTokens: Array[String] = lemmatized.zipWithIndex.map { case (ltok, i) =>
+
+    val maltTokens: Array[String] = lemmatized.iterator.zipWithIndex.map { case (ltok, i) =>
       Iterable(i+1,
           ltok.token.string,
           ltok.lemma,
           ltok.token.postag,
           ltok.token.postag,
           "-").mkString("\t")
-    }(scala.collection.breakOut)
+    }.toArray[String]
     val structure = parser.parse(maltTokens)
-    
+
     val tables = structure.getSymbolTables
 
-    structure.getEdges.flatMap { edge =>
+    val deps: SortedSet[Dependency] = structure.getEdges.flatMap { edge =>
       if (edge.getSource.getIndex == 0 || edge.getTarget.getIndex == 0) {
         // skip the root
         None
@@ -101,7 +99,9 @@ class MaltParser(modelFile: File = new File("engmalt.linear-1.7"), logFile: Opti
 
         Some(new Dependency(source, dest, label))
       }
-    }
+    }(scala.collection.breakOut)
+
+    deps
   }
 
   override def dependencyGraph(sentence: String): DependencyGraph = {

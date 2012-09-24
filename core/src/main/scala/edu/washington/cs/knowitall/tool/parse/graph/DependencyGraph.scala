@@ -32,12 +32,14 @@ class DependencyGraph (
   require(graph != null)
 
   // check that the nodes match the nodes in the dependencies
+  /*
   for (vertex <- graph.vertices) {
     nodes.find(node => vertex.indices == node.indices).map(_.text) match {
       case None => if (vertex.indices.length == 1) throw new IllegalArgumentException("no node at index: " + vertex.indices + " (" + vertex + ")")
       case Some(v) => require(v == vertex.text, "text at index " + vertex.indices + " does not match: " + vertex.text + " != " + v)
     }
   }
+  */
 
   // constructors
 
@@ -415,13 +417,10 @@ class DependencyGraph (
     def mapNode(node: DependencyNode): DependencyNode =
       new DependencyNode(node.text, f(node.postag), node.indices, node.offset)
 
-    def mapPostags(f: String=>String) =
-      graph.map(mapNode)
-
     new DependencyGraph(
       this.text,
       this.nodes.map(mapNode),
-      this.dependencies.map(_.mapNodes(mapNode)), mapPostags(f))
+      this.dependencies.map(_.mapNodes(mapNode)), graph.map(mapNode))
   }
 
   def simplifyPostags = {
