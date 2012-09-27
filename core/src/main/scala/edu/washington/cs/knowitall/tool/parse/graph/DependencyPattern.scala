@@ -25,7 +25,7 @@ object DependencyPattern {
 
   /**
     * A parser combinator for deserializing patterns over graphs of dependencies. */
-  object Parser extends RegexParsers {
+  class Parser extends RegexParsers {
     def textNodeMatcher: Parser[NodeMatcher[DependencyNode]] = "text=" ~> """\w+""".r ^^ { s =>
       new TextNodeMatcher(s)
     }
@@ -105,10 +105,12 @@ object DependencyPattern {
     bipath.path.map(dedge => DependencyEdgeMatcher(dedge)),
     new DependencyNodeMatcher(bipath.path.head.start) :: bipath.path.map(dedge => new DependencyNodeMatcher(dedge.end)))
 
-
+  private val parser = new Parser
   def deserialize(string: String)(implicit lemmatizer: Stemmer): DependencyPattern = {
     try {
-      Parser(string)(lemmatizer)
+      parser.synchronized {
+        parser(string)(lemmatizer)
+      }
     }
     catch {
       case e => e.printStackTrace(); throw new DependencyPatternSerializationException(e.getMessage(), e)
