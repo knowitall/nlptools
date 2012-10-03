@@ -2,8 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package chunk
 
-import common.main.LineProcessor
-
 /** A Chunker takes postagged text and adds a chunk tag, specifying
   * whether a noun or verb phrase is starting or continuing.
   */

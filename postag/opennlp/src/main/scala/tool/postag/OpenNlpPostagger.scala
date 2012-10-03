@@ -2,7 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package postag
 
-import common.main.LineProcessor
 import opennlp.tools.postag._
 import tool.tokenize.Token
 

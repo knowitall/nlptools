@@ -2,7 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package sentence
 
-import common.main.LineProcessor
 import opennlp.tools.sentdetect._
 
 /** A max-ent sentencer. */

@@ -2,7 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package tokenize
 
-import common.main.LineProcessor
 import scala.collection.JavaConversions._
 import breeze.text.tokenize.{ PTBTokenizer => BreezePTBTokenizer }
 

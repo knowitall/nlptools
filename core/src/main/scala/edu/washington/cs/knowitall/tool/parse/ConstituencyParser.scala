@@ -2,8 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package parse
 
-import common.main._
-
 import graph._
 
 /** A constituency parser turns a sentence into a constituency

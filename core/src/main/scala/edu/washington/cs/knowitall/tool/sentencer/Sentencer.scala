@@ -2,8 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package sentence
 
-import common.main.LineProcessor
-
 /** A sentencer breaks text into sentences. 
   */
 abstract class Sentencer {

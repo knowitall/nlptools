@@ -2,7 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package postag
 
-import common.main.LineProcessor
 import scala.collection.JavaConversions._
 import edu.stanford.nlp.ling.CoreLabel
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;

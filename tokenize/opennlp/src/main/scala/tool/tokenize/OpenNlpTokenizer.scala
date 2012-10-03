@@ -2,7 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package tokenize
 
-import common.main.LineProcessor
 import scala.collection.JavaConversions._
 import opennlp.tools.tokenize.{ TokenizerME, TokenizerModel }
 import opennlp.tools.util.Span

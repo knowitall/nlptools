@@ -2,7 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package sentence
 
-import common.main.LineProcessor
 import breeze.text.segment.SentenceSegmenter
 import breeze.text.segment.JavaSentenceSegmenter
 

@@ -2,7 +2,6 @@ package edu.washington.cs.knowitall
 package tool
 package stem
 
-import common.main.LineProcessor
 import tokenize.Token
 import postag.PostaggedToken
 

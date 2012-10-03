@@ -3,9 +3,8 @@ package tool
 package parse
 
 import graph._
-import common.main._
 
-/** A trait for a tool that produces dependencies, such as the 
+/** A trait for a tool that produces dependencies, such as the
   * Stanford dependency parser. */
 trait DependencyParser {
   def dependencies(string: String): Iterable[Dependency]
@@ -21,7 +20,7 @@ trait DependencyParser {
   }
 }
 
-abstract class DependencyParserMain extends common.main.LineProcessor {
+abstract class DependencyParserMain extends LineProcessor {
   def parser: DependencyParser
 
   override def init(args: Array[String]) {

@@ -45,6 +45,18 @@
       <version>1.12.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>unfiltered-filter_2.9.2</artifactId>
+      <version>0.6.4</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>unfiltered-jetty_2.9.2</artifactId>
+      <version>0.6.4</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <dependencyManagement>
     <dependencies>

@@ -6,7 +6,6 @@ import java.io.StringReader
 
 import edu.washington.cs.knowitall.morpha.{ MorphaStemmer => MorphaStem }
 import uk.ac.susx.informatics.Morpha
-import common.main.LineProcessor
 
 /** This stemmer handles many cases, but the JFlex is 5 MB. */
 class MorphaStemmer extends Stemmer with PostaggedStemmer {
