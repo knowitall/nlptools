@@ -24,7 +24,7 @@
     <dependency>
       <groupId>edu.washington.cs.knowitall.common-scala</groupId>
       <artifactId>common-scala_2.9.2</artifactId>
-      <version>1.0.7-SNAPSHOT</version>
+      <version>1.0.7</version>
     </dependency>
     <!-- Util -->
     <dependency>
