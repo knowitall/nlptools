@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>nlptools-core_2.9.2</artifactId>
-  <version>2.2.3</version>
+  <version>2.2.4-SNAPSHOT</version>
   <name>nlptools-core</name>
   <parent>
     <groupId>edu.washington.cs.knowitall.nlptools</groupId>
@@ -20,7 +20,7 @@
     </dependency>
   </dependencies>
   <scm>
-    <tag>nlptools-2.2.3</tag>
+    <tag>nlptools-2.2.1</tag>
   </scm>
   <build>
   	<pluginManagement>
