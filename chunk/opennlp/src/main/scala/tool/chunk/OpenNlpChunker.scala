@@ -20,12 +20,14 @@ extends Chunker(postagger) {
   }
 }
 
-object OpenNlpChunker extends ChunkerMain {
-  lazy val chunker = new OpenNlpChunker("en-chunker.bin", new postag.OpenNlpPostagger())
-
+object OpenNlpChunker {
   private def loadModel(name: String) = {
     val resource = classOf[OpenNlpChunker].getClassLoader.getResourceAsStream(name)
     if (resource == null) throw new IllegalArgumentException("could not find resource: " + name)
     else resource
   }
+}
+
+object OpenNlpChunkerMain extends ChunkerMain {
+  lazy val chunker = new OpenNlpChunker("en-chunker.bin", new postag.OpenNlpPostagger())
 }

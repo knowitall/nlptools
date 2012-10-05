@@ -18,7 +18,7 @@ import scala.collection.immutable.SortedSet
 /** MaltParser is much faster than the StanfordParser but has a lower F-score.
   * It includes wrapper code so that it can still use the Stanford postprocessing.
   */
-object MaltParser extends DependencyParserMain {
+object MaltParserMain extends DependencyParserMain {
   var model = new File("engmalt.linear-1.7")
 
   override def init(args: Array[String]) {

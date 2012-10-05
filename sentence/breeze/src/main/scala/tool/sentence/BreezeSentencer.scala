@@ -11,7 +11,7 @@ class BreezeSentencer extends Sentencer {
   def sentences(document: String) = sentencer(document)
 }
 
-object BreezeSentencer
+object BreezeSentencerMain
 extends SentencerMain {
   lazy val sentencer = new BreezeSentencer
 }

@@ -15,7 +15,7 @@ class OpenNlpSentencer(val model: SentenceModel) extends Sentencer {
   def sentences(document: String) = sentencer.sentDetect(document)
 }
 
-object OpenNlpSentencer
+object OpenNlpSentencerMain
 extends SentencerMain {
   lazy val sentencer = new OpenNlpSentencer
 }

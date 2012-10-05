@@ -41,7 +41,7 @@ class PennTokenizer extends Tokenizer {
     }.trim.split("\\s+")
 }
 
-object PennTokenizer extends LineProcessor {
+object PennTokenizerMain extends LineProcessor {
   val tokenizer = new PennTokenizer()
   override def process(sentence: String) =
     tokenizer.tokenize(sentence).mkString(" ")

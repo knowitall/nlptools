@@ -14,7 +14,7 @@ class PTBTokenizer extends Tokenizer {
   }
 }
 
-object PTBTokenizer extends LineProcessor {
+object PTBTokenizerMain extends LineProcessor {
   val tokenizer = new PTBTokenizer()
   override def process(sentence: String) =
     tokenizer.tokenize(sentence).mkString(" ")

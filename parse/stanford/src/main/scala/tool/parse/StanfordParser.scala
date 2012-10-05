@@ -48,7 +48,7 @@ object BaseStanfordParser {
   }
 }
 
-object StanfordParser extends DependencyParserMain {
+object StanfordParserMain extends DependencyParserMain {
   lazy val parser = new StanfordParser
 }
 

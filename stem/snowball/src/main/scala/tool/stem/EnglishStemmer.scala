@@ -9,9 +9,11 @@ import org.tartarus.snowball
 class EnglishStemmer
 extends SnowballStemmer(new snowball.ext.EnglishStemmer)
 
-object EnglishStemmer
+object EnglishStemmer {
+  implicit def instance: Stemmer = new EnglishStemmer
+}
+
+object EnglishStemmerMain
 extends StemmerMain {
   lazy val stemmer = new EnglishStemmer
-
-  implicit def instance: Stemmer = new EnglishStemmer
 }

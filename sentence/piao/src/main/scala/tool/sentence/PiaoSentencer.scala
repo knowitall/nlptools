@@ -11,7 +11,7 @@ class PiaoSentencer() extends Sentencer {
     sentencer.markupRawText(2, document).split("\\n+")
 }
 
-object PiaoSentencer
+object PiaoSentencerMain
 extends SentencerMain {
   lazy val sentencer = new PiaoSentencer
 }

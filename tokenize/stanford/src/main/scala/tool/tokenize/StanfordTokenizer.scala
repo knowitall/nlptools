@@ -17,7 +17,7 @@ class StanfordTokenizer extends Tokenizer {
   }.toSeq
 }
 
-object StanfordTokenizer extends LineProcessor {
+object StanfordTokenizerMain extends LineProcessor {
   val tokenizer = new StanfordTokenizer()
   override def process(sentence: String) =
     tokenizer.tokenize(sentence).mkString(" ")

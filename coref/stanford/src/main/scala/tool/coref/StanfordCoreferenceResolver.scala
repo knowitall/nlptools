@@ -120,7 +120,7 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
         else {
           resolved.append(label.originalText)
         }
-        
+
         resolved.append(label.after)
       }
     }

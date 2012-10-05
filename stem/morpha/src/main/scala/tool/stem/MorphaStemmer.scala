@@ -14,9 +14,11 @@ class MorphaStemmer extends Stemmer with PostaggedStemmer {
   override def stem(word: String, postag: String) = MorphaStem.stemToken(word, postag)
 }
 
-object MorphaStemmer
+object MorphaStemmer {
+  implicit def instance: Stemmer = new MorphaStemmer
+}
+
+object MorphaStemmerMain
 extends StemmerMain {
   lazy val stemmer = new MorphaStemmer
-
-  implicit def instance: Stemmer = new MorphaStemmer
 }

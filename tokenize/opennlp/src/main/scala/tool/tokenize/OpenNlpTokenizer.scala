@@ -25,14 +25,16 @@ class OpenNlpTokenizer(val model: TokenizerModel) extends Tokenizer {
   }
 }
 
-object OpenNlpTokenizer extends LineProcessor {
-  val tokenizer = new OpenNlpTokenizer()
-  override def process(sentence: String) =
-    tokenizer.tokenize(sentence).mkString(" ")
-
+object OpenNlpTokenizer {
   private def loadModel(name: String) = {
     val resource = classOf[OpenNlpTokenizer].getClassLoader.getResourceAsStream(name)
     if (resource == null) throw new IllegalArgumentException("could not find resource: " + name)
     else resource
   }
+}
+
+object OpenNlpTokenizerMain extends LineProcessor {
+  val tokenizer = new OpenNlpTokenizer()
+  override def process(sentence: String) =
+    tokenizer.tokenize(sentence).mkString(" ")
 }

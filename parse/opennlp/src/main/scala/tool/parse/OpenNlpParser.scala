@@ -32,8 +32,10 @@ class OpenNlpParser(val model: ParserModel) extends ConstituencyParser {
   }
 }
 
-object OpenNlpParser extends ConstituencyParserMain {
-  lazy val parser = new OpenNlpParser() 
-
+object OpenNlpParser {
   val defaultModelName = "/en-parser-chunking.bin"
+}
+
+object OpenNlpParserMain extends ConstituencyParserMain {
+  lazy val parser = new OpenNlpParser() 
 }
