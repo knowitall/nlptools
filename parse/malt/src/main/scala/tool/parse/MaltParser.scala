@@ -3,10 +3,11 @@ package tool
 package parse
 
 import java.io.File
+import java.net.URL
 import scala.Array.canBuildFrom
 import scala.Option.option2Iterable
 import scala.collection.JavaConversions.asScalaSet
-import org.maltparser.MyMaltParserService
+import org.maltparser.MaltParserService
 import edu.washington.cs.knowitall.collection.immutable.Interval
 import edu.washington.cs.knowitall.tool.parse.graph.Dependency
 import graph.DependencyGraph
@@ -19,7 +20,7 @@ import scala.collection.immutable.SortedSet
   * It includes wrapper code so that it can still use the Stanford postprocessing.
   */
 object MaltParserMain extends DependencyParserMain {
-  var model = new File("engmalt.linear-1.7")
+  var model = new File("engmalt.linear-1.7.mco")
 
   override def init(args: Array[String]) {
     val index = args.indexOf("-m")
@@ -28,13 +29,15 @@ object MaltParserMain extends DependencyParserMain {
     }
   }
 
-  lazy val parser = new MaltParser(model, None);
+  lazy val parser = new MaltParser(model);
 }
 
-class MaltParser(modelFile: File = new File("engmalt.linear-1.7"), logFile: Option[File] = None) extends DependencyParser {
+class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL, logFile: Option[File] = None) extends DependencyParser {
   val parser = initializeMaltParserService()
   val tagger = new OpenNlpPostagger
   val stemmer = MorphaStemmer.instance
+
+  def this(modelFile: File) = this(modelFile.toURI.toURL, None)
 
   private def initializeMaltParserService() = {
     // hack to make malt parser work with a different manifest
@@ -43,14 +46,8 @@ class MaltParser(modelFile: File = new File("engmalt.linear-1.7"), logFile: Opti
     field.setAccessible(true)
     field.set(null, "1.7")
 
-    val dir = Option(modelFile.getParentFile()) map (_.getAbsolutePath)
-    val file = modelFile.getName
     val command =
-      "-c " + file +
-      (dir match {
-        case Some(dir) => " -w " + dir
-        case None => ""
-      }) +
+      "-u " + modelUrl +
       " -m parse" +
       // turn logging off if no log file is specified
       (logFile match {
@@ -59,7 +56,7 @@ class MaltParser(modelFile: File = new File("engmalt.linear-1.7"), logFile: Opti
       })
 
     System.err.println("Initializing malt: " + command);
-    val service = new MyMaltParserService()
+    val service = new MaltParserService()
     service.initializeParserModel(command);
 
     service
