@@ -1,20 +1,25 @@
 package edu.washington.cs.knowitall.tool.conf.impl
-import java.io.PrintWriter
 
-import java.io.File
-import edu.washington.cs.knowitall.common.Resource
+import java.io.InputStream
+import java.io.OutputStream
+import java.io.PrintWriter
+import java.net.URL
+import java.util.Scanner
+
+import scala.io.Source
+
+import edu.washington.cs.knowitall.common.Resource.using
 import edu.washington.cs.knowitall.tool.conf.ConfidenceFunction
 import edu.washington.cs.knowitall.tool.conf.FeatureSet
-import edu.washington.cs.knowitall.common.Resource.using
-import java.io.OutputStream
 
-/** An implementation of logistic regression of features that can be
-  * represented as a double.
-  *
-  * @param  featureSet  the features to use
-  * @param  featureWeights  the feature weights
-  * @param  intercept  the intercept value
-  */
+/**
+ * An implementation of logistic regression of features that can be
+ * represented as a double.
+ *
+ * @param  featureSet  the features to use
+ * @param  featureWeights  the feature weights
+ * @param  intercept  the intercept value
+ */
 class LogisticRegression[T](
   featureSet: FeatureSet[T, Double],
   val featureWeights: Map[String, Double],
@@ -38,11 +43,11 @@ class LogisticRegression[T](
       else weight * featureSet.featureMap(name).apply(extraction)
     }.sum
 
-    1.0 / (1.0 + math.exp(-(exponentCoefficient*z + this.intercept)))
+    1.0 / (1.0 + math.exp(-(exponentCoefficient * z + this.intercept)))
   }
 
   override def save(output: OutputStream): Unit = {
-    using (new PrintWriter(output)) { pw =>
+    using(new PrintWriter(output)) { pw =>
       save(pw)
     }
   }
@@ -53,5 +58,28 @@ class LogisticRegression[T](
     }
 
     writer.println("Intercept" + "\t" + intercept)
+  }
+}
+
+object LogisticRegression {
+  private val tab = """\t""".r
+  def fromUrl[E](featureSet: FeatureSet[E, Double], url: URL) = {
+    def buildFeatureWeightMap(input: InputStream): Map[String, Double] = {
+      var featureWeights = Map.empty[String, Double]
+
+      using(Source.fromInputStream(input)) { source =>
+        source.getLines.foreach { line =>
+          val parts = tab.split(line)
+          val featureName = parts(0).trim
+          val weight = parts(1).toDouble
+          featureWeights += featureName -> weight
+        }
+      }
+
+      featureWeights.toMap
+    }
+    using(url.openStream) { input =>
+      new LogisticRegression[E](featureSet, buildFeatureWeightMap(input))
+    }
   }
 }
