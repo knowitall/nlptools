@@ -24,7 +24,7 @@
     <dependency>
       <groupId>edu.washington.cs.knowitall.common-scala</groupId>
       <artifactId>common-scala_2.9.2</artifactId>
-      <version>1.0.7</version>
+      <version>1.0.8</version>
     </dependency>
     <!-- Util -->
     <dependency>
@@ -60,40 +60,40 @@
   </dependencies>
   <dependencyManagement>
     <dependencies>
-    <dependency>
-      <groupId>edu.stanford.nlp</groupId>
-      <artifactId>stanford-corenlp</artifactId>
-      <version>${stanford.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.opennlp</groupId>
-      <artifactId>opennlp-tools</artifactId>
-      <version>1.5.2-incubating</version>
-    </dependency>
-    <dependency>
-      <groupId>edu.washington.cs.knowitall</groupId>
-      <artifactId>opennlp-postag-models</artifactId>
-      <version>1.5</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>edu.washington.cs.knowitall</groupId>
-      <artifactId>opennlp-parse-models</artifactId>
-      <version>1.5</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>edu.washington.cs.knowitall</groupId>
-      <artifactId>opennlp-tokenize-models</artifactId>
-      <version>1.5</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>edu.washington.cs.knowitall</groupId>
-      <artifactId>opennlp-sent-models</artifactId>
-      <version>1.5</version>
-      <scope>runtime</scope>
-    </dependency>
+      <dependency>
+        <groupId>edu.stanford.nlp</groupId>
+        <artifactId>stanford-corenlp</artifactId>
+        <version>${stanford.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.opennlp</groupId>
+        <artifactId>opennlp-tools</artifactId>
+        <version>1.5.2-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>edu.washington.cs.knowitall</groupId>
+        <artifactId>opennlp-postag-models</artifactId>
+        <version>1.5</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>edu.washington.cs.knowitall</groupId>
+        <artifactId>opennlp-parse-models</artifactId>
+        <version>1.5</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>edu.washington.cs.knowitall</groupId>
+        <artifactId>opennlp-tokenize-models</artifactId>
+        <version>1.5</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>edu.washington.cs.knowitall</groupId>
+        <artifactId>opennlp-sent-models</artifactId>
+        <version>1.5</version>
+        <scope>runtime</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <build>
