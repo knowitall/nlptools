@@ -31,6 +31,7 @@
     <module>parse/opennlp</module>
     <module>parse/stanford</module>
     <module>parse/malt</module>
+    <module>conf/breeze</module>
   </modules>
   <build>
     <plugins>
