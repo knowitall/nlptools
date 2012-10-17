@@ -57,7 +57,9 @@ class LogisticRegression[T](
       writer.println(name + "\t" + weight)
     }
 
-    writer.println("Intercept" + "\t" + intercept)
+    if (!(featureWeights contains "Intercept")) {
+      writer.println("Intercept" + "\t" + intercept)
+    }
   }
 }
 

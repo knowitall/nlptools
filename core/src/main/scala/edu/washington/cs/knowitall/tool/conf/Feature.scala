@@ -16,4 +16,12 @@ object Feature {
   def from[E, V](name: String, f: E=>V) = new Feature[E, V](name) {
     override def apply(that: E): V = f(that)
   }
+  
+  implicit def booleanToDouble[E](feature: Feature[E, Boolean]) = 
+    new Feature[E, Double](feature.name) {
+	  override def apply(item: E) = {
+	    if (feature(item)) 1.0
+	    else 0.0
+	  }
+    }
 }

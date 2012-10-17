@@ -9,17 +9,16 @@ import breeze.optimize.FirstOrderMinimizer.OptParams
 import edu.washington.cs.knowitall.tool.conf.impl.LogisticRegression
 
 class BreezeLogisticRegressionTrainer[E](features: FeatureSet[E, Double]) extends ConfidenceTrainer[E](features) {
-  def trainBreezeClassifier(instances: Iterable[Labelled[E]]) = {
+  def trainBreezeClassifier(instances: Iterable[Labelled[E]], optParams: OptParams = OptParams(useL1 = true)) = {
     val examples = instances.zipWithIndex map { case (Labelled(label, item: E), i) =>
       val vector = DenseVector((1.0 +: features.vectorize(item)).toArray)
       Example[Boolean, DenseVector[Double]](label, vector, id=i.toString)
     }
 
-    new LogisticClassifier.Trainer[Boolean,DenseVector[Double]](
-        OptParams(useL1 = true)).train(examples)
+    new LogisticClassifier.Trainer[Boolean,DenseVector[Double]](optParams).train(examples)
   }
 
-  override def train(labelled: Iterable[Labelled[E]]): ConfidenceFunction[E] = {
+  override def train(labelled: Iterable[Labelled[E]]): LogisticRegression[E] = {
     val classifier = trainBreezeClassifier(labelled)
 
     val weights = (("Intercept" +: features.featureNames).iterator zip classifier.featureWeights.indexed(true).iterator.map(_._2)).toMap
