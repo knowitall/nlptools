@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>nlptools-tokenize-stanford_2.9.2</artifactId>
+  <artifactId>nlptools-conf-breeze_2.9.2</artifactId>
   <version>2.2.4-SNAPSHOT</version>
-  <name>nlptools-tokenize-stanford</name>
+  <name>nlptools-sentence-breeze</name>
   <parent>
     <groupId>edu.washington.cs.knowitall.nlptools</groupId>
     <artifactId>nlptools-parent_2.9.2</artifactId>
@@ -14,8 +14,14 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>edu.stanford.nlp</groupId>
-      <artifactId>stanford-corenlp</artifactId>
+      <groupId>org.scalanlp</groupId>
+      <artifactId>breeze-process_2.9.2</artifactId>
+      <version>0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scalanlp</groupId>
+      <artifactId>breeze-learn_2.9.2</artifactId>
+      <version>0.1</version>
     </dependency>
     <dependency>
       <groupId>edu.washington.cs.knowitall.nlptools</groupId>
@@ -23,7 +29,6 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
-
   <scm>
     <tag>nlptools-2.2.1</tag>
   </scm>
