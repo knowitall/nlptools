@@ -18,7 +18,6 @@
       <artifactId>maltparser</artifactId>
       <version>1.7.2</version>
     </dependency>
-    </dependency>
     <dependency>
       <groupId>edu.stanford.nlp</groupId>
       <artifactId>stanford-corenlp</artifactId>
