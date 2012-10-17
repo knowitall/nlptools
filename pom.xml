@@ -4,11 +4,11 @@
   <artifactId>nlptools_${scala.version}</artifactId>
   <name>nlptools</name>
   <packaging>pom</packaging>
-  <version>2.2.4-SNAPSHOT</version>
+  <version>2.2.5-SNAPSHOT</version>
   <parent>
     <artifactId>nlptools-parent_2.9.2</artifactId>
     <groupId>edu.washington.cs.knowitall.nlptools</groupId>
-    <version>2.2.2</version>
+    <version>2.2.3</version>
   </parent>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -31,6 +31,7 @@
     <module>parse/opennlp</module>
     <module>parse/stanford</module>
     <module>parse/malt</module>
+    <module>conf/breeze</module>
   </modules>
   <build>
     <plugins>
