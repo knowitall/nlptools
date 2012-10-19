@@ -20,6 +20,15 @@ abstract class Postagger(val tokenizer: tokenize.Tokenizer) {
 }
 
 object Postagger {
+  val subjectPronouns = immutable.Set("i", "you", "he", "she", "it", "they", "we")
+  val objectPronouns = immutable.Set("me", "you", "him", "her", "it", "us", "them")
+  val reflexivePronouns = immutable.Set("myself", "yourself", "himself", "itself", "themself", "ourselves", "yourselves", "themselves")
+  val possessivePronouns = immutable.Set("mine", "yours", "his", "hers", "its", "ours", "theirs")
+  val pronouns = subjectPronouns ++ objectPronouns ++ reflexivePronouns ++ possessivePronouns
+
+  val articles = immutable.Set("a", "an", "the")
+  val possessives = immutable.Set("my", "your", "his", "her", "its", "our", "your", "their")
+
   val simplePrepositions = immutable.Set(
     "a", "abaft", "aboard", "about", "above", "absent", "across", "afore",
     "after", "against", "along", "alongside", "amid", "amidst", "among",
@@ -36,7 +45,7 @@ object Postagger {
     "towards", "under", "underneath", "unlike", "until", "up", "upon",
     "versus", "vs.", "v.", "via", "vice", "with", "within", "without",
     "worth")
-  
+
   val complexPrepositions = immutable.Set(
     "according to", "ahead of", "apart from", "as for", "as of", "as per",
     "as regards", "aside from", "back to", "because of", "close to",
