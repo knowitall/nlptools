@@ -3,7 +3,7 @@ package tool
 package parse
 package graph
 
-import scala.collection._
+import scala.collection.immutable
 import org.slf4j.LoggerFactory
 import collection.immutable.Interval
 import collection.immutable.graph.Graph
@@ -19,9 +19,9 @@ class DependencyGraph (
     /** the text of the source sentence */
     val text: String,
     /** the `DependencyNode`s from the parser */
-    val nodes: SortedSet[DependencyNode],
+    val nodes: immutable.SortedSet[DependencyNode],
     /** the `Dependency`s from the parser */
-    val dependencies: SortedSet[Dependency],
+    val dependencies: immutable.SortedSet[Dependency],
     /** a graph representation dependencies */
     val graph: Graph[DependencyNode]
   ) {
@@ -44,30 +44,30 @@ class DependencyGraph (
   // constructors
 
   def this(text: String,
-      nodes: SortedSet[DependencyNode],
-      dependencies: SortedSet[Dependency]) =
+      nodes: immutable.SortedSet[DependencyNode],
+      dependencies: immutable.SortedSet[Dependency]) =
     this(nodes.iterator.map(_.text).mkString(" "),
-        SortedSet[DependencyNode]() ++ nodes,
-        SortedSet[Dependency]() ++ dependencies,
+        immutable.SortedSet[DependencyNode]() ++ nodes,
+        immutable.SortedSet[Dependency]() ++ dependencies,
         new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
 
   def this(text: String,
       nodes: Iterable[DependencyNode],
       dependencies: Iterable[Dependency]) =
     this(text,
-      SortedSet[DependencyNode]() ++ nodes,
-      SortedSet[Dependency]() ++ dependencies)
+      immutable.SortedSet[DependencyNode]() ++ nodes,
+      immutable.SortedSet[Dependency]() ++ dependencies)
 
-  def this(nodes: SortedSet[DependencyNode],
-      dependencies: SortedSet[Dependency]) =
+  def this(nodes: immutable.SortedSet[DependencyNode],
+      dependencies: immutable.SortedSet[Dependency]) =
     this(nodes.iterator.map(_.text).mkString(" "),
-        SortedSet[DependencyNode]() ++ nodes,
-        SortedSet[Dependency]() ++ dependencies)
+        immutable.SortedSet[DependencyNode]() ++ nodes,
+        immutable.SortedSet[Dependency]() ++ dependencies)
 
   def this(nodes: Iterable[DependencyNode],
       dependencies: Iterable[Dependency]) =
-    this(SortedSet[DependencyNode]() ++ nodes,
-        SortedSet[Dependency]() ++ dependencies)
+    this(immutable.SortedSet[DependencyNode]() ++ nodes,
+        immutable.SortedSet[Dependency]() ++ dependencies)
 
   def canEqual(that: Any) = that.isInstanceOf[DependencyGraph]
   override def equals(that: Any) = that match {
@@ -340,7 +340,7 @@ class DependencyGraph (
     }
 
     val groups: Set[Set[DependencyNode]] = (for (dep <- graph.edges; if pred(dep)) yield {
-      graph.connected(dep.source, dedge=>pred(dedge.edge))
+      graph.connected(dep.source, dedge=>pred(dedge.edge)).toSet
     })(scala.collection.breakOut)
 
 
@@ -556,9 +556,9 @@ object DependencyGraph {
   val logger = LoggerFactory.getLogger(classOf[DependencyGraph])
 
   def deserialize(string: String) = {
-    def rec(string: String, nodes: SortedSet[DependencyNode]): (SortedSet[DependencyNode], SortedSet[Dependency]) = {
+    def rec(string: String, nodes: immutable.SortedSet[DependencyNode]): (immutable.SortedSet[DependencyNode], immutable.SortedSet[Dependency]) = {
       // we're done, return the extra nodes and dependencies
-      if (string.isEmpty) (nodes, SortedSet.empty[Dependency])
+      if (string.isEmpty) (nodes, immutable.SortedSet.empty[Dependency])
       // we found an extra node that needs to be deserialized
       else if (string.charAt(0) == '(') {
         val pickled = string.drop(1).takeWhile(_ != ')')
@@ -572,7 +572,7 @@ object DependencyGraph {
     }
 
     try {
-      val (nodes, deps) = rec(string, SortedSet[DependencyNode]())
+      val (nodes, deps) = rec(string, immutable.SortedSet[DependencyNode]())
       val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
       new DependencyGraph((depNodes ++ nodes).iterator.map(_.text).mkString(" "), nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
     }
