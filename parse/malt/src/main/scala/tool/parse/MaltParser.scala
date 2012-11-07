@@ -63,42 +63,46 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
   }
 
   override def dependencies(sentence: String): Iterable[Dependency] = {
-    val tokens = tagger.postag(sentence).iterator.zipWithIndex.map { case (t, i) =>
-      new DependencyNode(t, Interval.singleton(i))
-    }.toIndexedSeq
+    val trimmed = sentence.trim
+    if (trimmed.isEmpty) Iterable.empty
+    else {
+      val tokens = tagger.postag(trimmed).iterator.zipWithIndex.map { case (t, i) =>
+        new DependencyNode(t, Interval.singleton(i))
+      }.toIndexedSeq
 
-    val lemmatized = tokens.map(stemmer.stemToken)
+      val lemmatized = tokens.map(stemmer.stemToken)
 
-    val maltTokens: Array[String] = lemmatized.iterator.zipWithIndex.map { case (ltok, i) =>
-      Iterable(i+1,
-          ltok.token.string,
-          ltok.lemma,
-          ltok.token.postag,
-          ltok.token.postag,
-          "-").mkString("\t")
-    }.toArray[String]
-    val structure = parser.parse(maltTokens)
+      val maltTokens: Array[String] = lemmatized.iterator.zipWithIndex.map { case (ltok, i) =>
+        Iterable(i+1,
+            ltok.token.string,
+            ltok.lemma,
+            ltok.token.postag,
+            ltok.token.postag,
+            "-").mkString("\t")
+      }.toArray[String]
+      val structure = parser.parse(maltTokens)
 
-    val tables = structure.getSymbolTables
+      val tables = structure.getSymbolTables
 
-    val deps: SortedSet[Dependency] = structure.getEdges.flatMap { edge =>
-      if (edge.getSource.getIndex == 0 || edge.getTarget.getIndex == 0) {
-        // skip the root
-        None
-      }
-      else {
-        val source = tokens(edge.getSource.getIndex - 1)
-        val dest = tokens(edge.getTarget.getIndex - 1)
+      val deps: SortedSet[Dependency] = structure.getEdges.flatMap { edge =>
+        if (edge.getSource.getIndex == 0 || edge.getTarget.getIndex == 0) {
+          // skip the root
+          None
+        }
+        else {
+          val source = tokens(edge.getSource.getIndex - 1)
+          val dest = tokens(edge.getTarget.getIndex - 1)
 
-        val types = edge.getLabelTypes
-        val labels = types.map(edge.getLabelSymbol)
-        val label = labels.head
+          val types = edge.getLabelTypes
+          val labels = types.map(edge.getLabelSymbol)
+          val label = labels.head
 
-        Some(new Dependency(source, dest, label))
-      }
-    }(scala.collection.breakOut)
+          Some(new Dependency(source, dest, label))
+        }
+      }(scala.collection.breakOut)
 
-    deps
+      deps
+    }
   }
 
   override def dependencyGraph(sentence: String): DependencyGraph = {
