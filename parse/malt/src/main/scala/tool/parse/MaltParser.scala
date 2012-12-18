@@ -13,6 +13,7 @@ import edu.washington.cs.knowitall.tool.parse.graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode
 import postag.OpenNlpPostagger
+import postag.Postagger
 import stem.MorphaStemmer
 import scala.collection.immutable.SortedSet
 
@@ -32,12 +33,11 @@ object MaltParserMain extends DependencyParserMain {
   lazy val parser = new MaltParser(model);
 }
 
-class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL, logFile: Option[File] = None) extends DependencyParser {
+class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL, tagger: Postagger = new OpenNlpPostagger, logFile: Option[File] = None) extends DependencyParser {
   val parser = initializeMaltParserService()
-  val tagger = new OpenNlpPostagger
   val stemmer = MorphaStemmer.instance
 
-  def this(modelFile: File) = this(modelFile.toURI.toURL, None)
+  def this(modelFile: File) = this(modelUrl = modelFile.toURI.toURL)
 
   private def initializeMaltParserService() = {
     // hack to make malt parser work with a different manifest
@@ -62,8 +62,16 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
     service
   }
 
+  private def clean(sentence: String) = {
+    sentence.trim.
+      // replace unicode double quotes
+      replaceAll("[\u201c\u201d\u201e\u201f\u275d\u275e]", "\"").
+      // replace unicode single quotes
+      replaceAll("[\u2018\u2019\u201a\u201b\u275b\u275c]", "'")
+  }
+
   override def dependencies(sentence: String): Iterable[Dependency] = {
-    val trimmed = sentence.trim
+    val trimmed = clean(sentence)
     if (trimmed.isEmpty) Iterable.empty
     else {
       val tokens = tagger.postag(trimmed).iterator.zipWithIndex.map { case (t, i) =>
