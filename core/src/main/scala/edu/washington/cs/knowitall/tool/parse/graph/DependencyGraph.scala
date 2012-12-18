@@ -46,7 +46,7 @@ class DependencyGraph (
   def this(text: String,
       nodes: immutable.SortedSet[DependencyNode],
       dependencies: immutable.SortedSet[Dependency]) =
-    this(nodes.iterator.map(_.text).mkString(" "),
+    this(text,
         immutable.SortedSet[DependencyNode]() ++ nodes,
         immutable.SortedSet[Dependency]() ++ dependencies,
         new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
