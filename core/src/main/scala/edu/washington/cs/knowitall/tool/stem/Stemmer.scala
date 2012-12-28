@@ -7,6 +7,8 @@ import postag.PostaggedToken
 
 /** A stemmer takes a string token and produces a normalized form. */
 abstract class Stemmer {
+  def apply(word: String) = lemmatize(word)
+  
   /** Apply the stemming algorithm. */
   def stem(word: String): String
  

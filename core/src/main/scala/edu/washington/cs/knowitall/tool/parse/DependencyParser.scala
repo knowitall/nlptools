@@ -7,6 +7,8 @@ import graph._
 /** A trait for a tool that produces dependencies, such as the
   * Stanford dependency parser. */
 trait DependencyParser {
+  def apply(string: String) = dependencyGraph(string)
+ 
   def dependencies(string: String): Iterable[Dependency]
 
   /**

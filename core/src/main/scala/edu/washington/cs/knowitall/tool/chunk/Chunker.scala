@@ -6,6 +6,8 @@ package chunk
   * whether a noun or verb phrase is starting or continuing.
   */
 abstract class Chunker(val postagger: postag.Postagger) {
+  def apply(sentence: String) = chunk(sentence)
+  
   /** chunk postagged text */
   def chunkPostagged(tokens: Seq[postag.PostaggedToken]): Seq[ChunkedToken]
 

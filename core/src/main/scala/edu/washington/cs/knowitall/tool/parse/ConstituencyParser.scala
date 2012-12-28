@@ -9,6 +9,8 @@ import graph._
   * hierarchical.
   */
 trait ConstituencyParser {
+  def apply(string: String) = parse(string)
+  
   def parse(string: String): ParseTree
 }
 

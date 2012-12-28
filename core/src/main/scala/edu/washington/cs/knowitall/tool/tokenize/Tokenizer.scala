@@ -6,6 +6,7 @@ package tokenize
   * seperates words (tokens) along word (token) boundaries.
   */
 trait Tokenizer {
+  def apply(sentence: String) = tokenize(sentence)
   def tokenize(sentence: String): Seq[Token]
 }
 
