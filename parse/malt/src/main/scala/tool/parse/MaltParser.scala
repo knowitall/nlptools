@@ -57,7 +57,19 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
 
     System.err.println("Initializing malt: " + command);
     val service = new MaltParserService()
-    service.initializeParserModel(command);
+
+    try {
+      service.initializeParserModel(command);
+    }
+    catch {
+      case e: org.maltparser.core.config.ConfigurationException =>
+        println("\n" + 
+        "There was an error configurating MaltParser.\n" +
+        "This is most likely because the model file '" + modelUrl + "' was not found.\n" +
+        "Please download the MaltParser model file from http://www.maltparser.org.\n")
+
+        throw e
+    }
 
     service
   }
