@@ -15,7 +15,7 @@ class SimpleEnglishTokenizer extends Tokenizer {
 }
 
 object SimpleEnglishTokenizerMain extends LineProcessor {
-  val tokenizer = new PTBTokenizer()
+  val tokenizer = new SimpleEnglishTokenizer()
   override def process(sentence: String) =
     tokenizer.tokenize(sentence).mkString(" ")
 }
