@@ -2,12 +2,12 @@ package edu.washington.cs.knowitall
 package tool
 package sentence
 
-import edu.washington.cs.knowitall.tool.segmenter.Segmenter
-import edu.washington.cs.knowitall.tool.segmenter.SegmenterMain
+import edu.washington.cs.knowitall.tool.segment.Segmenter
+import edu.washington.cs.knowitall.tool.segment.SegmenterMain
 import opennlp.tools.sentdetect.SentenceDetectorME
 import opennlp.tools.sentdetect.SentenceModel
 import edu.washington.cs.knowitall.collection.immutable.Interval
-import edu.washington.cs.knowitall.tool.segmenter.Segment
+import edu.washington.cs.knowitall.tool.segment.Segment
 
 /** A max-ent sentencer. */
 class OpenNlpSentencer(val model: SentenceModel) extends Segmenter {

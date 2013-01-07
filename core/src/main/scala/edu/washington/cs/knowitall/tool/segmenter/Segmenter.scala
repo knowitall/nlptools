@@ -1,6 +1,6 @@
 package edu.washington.cs.knowitall
 package tool
-package segmenter
+package segment
 
 import _root_.edu.washington.cs.knowitall.collection.immutable.Interval
 
