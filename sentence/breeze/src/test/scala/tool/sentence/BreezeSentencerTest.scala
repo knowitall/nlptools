@@ -7,7 +7,7 @@ import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
-import edu.washington.cs.knowitall.tool.segmenter.Segment
+import edu.washington.cs.knowitall.tool.segment.Segment
 import tool.sentence.BreezeSentencer
 
 @RunWith(classOf[JUnitRunner])

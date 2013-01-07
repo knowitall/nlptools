@@ -3,10 +3,10 @@ package tool
 package sentence
 
 import breeze.text.segment.JavaSentenceSegmenter
-import edu.washington.cs.knowitall.tool.segmenter.Segmenter
-import edu.washington.cs.knowitall.tool.segmenter.SegmenterMain
+import edu.washington.cs.knowitall.tool.segment.Segmenter
+import edu.washington.cs.knowitall.tool.segment.SegmenterMain
 import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
-import edu.washington.cs.knowitall.tool.segmenter.Segment
+import edu.washington.cs.knowitall.tool.segment.Segment
 import edu.washington.cs.knowitall.tool.tokenize.Token
 
 class BreezeSentencer extends Segmenter {
