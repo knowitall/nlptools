@@ -35,7 +35,7 @@ object MaltParserMain extends DependencyParserMain {
 
 class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL, tagger: Postagger = new OpenNlpPostagger, logFile: Option[File] = None) extends DependencyParser {
   val parser = initializeMaltParserService()
-  val stemmer = MorphaStemmer.instance
+  val stemmer = MorphaStemmer
 
   def this(modelFile: File) = this(modelUrl = modelFile.toURI.toURL)
 

@@ -9,8 +9,6 @@ import graph._
   * hierarchical.
   */
 trait ConstituencyParser {
-  def apply(string: String) = parse(string)
-  
   def parse(string: String): ParseTree
 }
 
@@ -18,7 +16,7 @@ trait ConstituencyParser {
 abstract class ParseTree(val token: String, var index: Int, val children: Array[ParseTree]) extends Iterable[ParseTree] {
 
   /** Prints the tree in Penn treebank format. */
-  override def toString() = 
+  override def toString() =
     if (children.size == 0)
       token
     else
