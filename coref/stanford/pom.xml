@@ -30,6 +30,12 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <groupId>edu.washington.cs.knowitall.stanford-corenlp</groupId>
+      <artifactId>stanford-sutime-models</artifactId>
+      <version>${stanford.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
       <groupId>edu.washington.cs.knowitall.nlptools</groupId>
       <artifactId>nlptools-core_${scala.version}</artifactId>
       <version>${project.version}</version>
