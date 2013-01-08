@@ -33,7 +33,7 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
     val tokens: Array[Array[CoreLabel]] = document.get[
       java.util.List[CoreMap],
       SentencesAnnotation
-    ] (classOf[SentencesAnnotation]).map {sentence => 
+    ] (classOf[SentencesAnnotation]).map {sentence =>
       sentence.get[
           java.util.List[CoreLabel],
           TokensAnnotation
@@ -43,15 +43,15 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
     // stanford is doing some WEIRD stuff, look at the JavaDoc for get
     // somehow Java handles this without having to specify the types.
     val coremaps = document.get[
-      java.util.Map[java.lang.Integer, CorefChain], 
+      java.util.Map[java.lang.Integer, CorefChain],
       CorefChainAnnotation
     ] (classOf[CorefChainAnnotation])
 
     (for ((k, chain) <- coremaps) yield {
-      val representitive = chain.getRepresentativeMention()
-      val mentions = chain.getCorefMentions()
+      val representitive = chain.getRepresentativeMention
+      val mentions = chain.getMentionsInTextualOrder
 
-      (representitive.mentionSpan, mentions.map(m => 
+      (representitive.mentionSpan, mentions.map(m =>
         new Mention(m.mentionSpan, tokens(m.sentNum - 1)(m.startIndex - 1).beginPosition)
       ).toList)
     })(scala.collection.breakOut)
@@ -64,21 +64,21 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
     // stanford is doing some WEIRD stuff, look at the JavaDoc for get
     // somehow Java handles this without having to specify the types.
     val coremaps = document.get[
-      java.util.Map[java.lang.Integer, CorefChain], 
+      java.util.Map[java.lang.Integer, CorefChain],
       CorefChainAnnotation
     ] (classOf[CorefChainAnnotation])
 
-    // build a map of spots to replace a mention with the 
+    // build a map of spots to replace a mention with the
     // best mention (sentence, word) -> (mention, length)
-    val replacements: Map[(Int, Int), (String, Int)] = 
+    val replacements: Map[(Int, Int), (String, Int)] =
     (for { (k, chain) <- coremaps;
       representitive = chain.getRepresentativeMention
-      mention <- chain.getCorefMentions 
-      if chain.getCorefMentions.size > 1
+      mention <- chain.getMentionsInTextualOrder
+      if chain.getMentionsInTextualOrder.size > 1
       if mention.mentionSpan != representitive.mentionSpan
     } yield {
       // switch to 0-indexing
-      ((mention.sentNum-1, mention.startIndex-1), 
+      ((mention.sentNum-1, mention.startIndex-1),
       (representitive.mentionSpan, mention.endIndex - mention.startIndex))
     })(scala.collection.breakOut)
 
@@ -94,7 +94,7 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
       val labels = sentence.get[
           java.util.List[CoreLabel],
           TokensAnnotation
-        ](classOf[TokensAnnotation]) 
+        ](classOf[TokensAnnotation])
 
       // iterate over words of this sentence
       val iterator = labels.view.zipWithIndex.iterator()
@@ -136,7 +136,7 @@ object StanfordCoreferenceResolver {
     val resolver = new StanfordCoreferenceResolver()
     val mentions = resolver.mentions(text).toList
       .filter(_._2.size > 1).sortBy(- _._2.size)
-    println(mentions.map{case (k, v) => 
+    println(mentions.map{case (k, v) =>
       k+" -> "+v.mkString(", ")
     }.mkString("\n"))
     println(resolver.resolve(text, (original,replacement)=>original+"["+replacement+"]"))
