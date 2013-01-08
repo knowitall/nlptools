@@ -14,7 +14,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <scala.version>2.9.2</scala.version>
-    <stanford.version>1.3.2</stanford.version>
+    <stanford.version>1.3.4</stanford.version>
   </properties>
   <scm>
     <url>https://github.com/knowitall/nlptools</url>
