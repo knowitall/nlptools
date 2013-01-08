@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>nlptools-stem-morpha_2.9.2</artifactId>
-  <version>2.3.0</version>
+  <version>2.3.1-SNAPSHOT</version>
   <name>nlptools-stem-morpha</name>
   <parent>
     <groupId>edu.washington.cs.knowitall.nlptools</groupId>
@@ -26,6 +26,6 @@
   </dependencies>
 
   <scm>
-    <tag>nlptools-2.3.0</tag>
+    <tag>nlptools-2.2.1</tag>
   </scm>
 </project>
