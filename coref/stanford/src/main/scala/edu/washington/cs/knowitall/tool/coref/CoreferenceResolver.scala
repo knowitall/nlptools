@@ -31,6 +31,6 @@ abstract class CoreferenceResolver {
 
 /*
  * A representation for a mention in a document. */
-class Mention(text: String, offset: Int) {
+case class Mention(text: String, offset: Int) {
   override def toString = offset + ":" + "\"" + text + "\""
 }
