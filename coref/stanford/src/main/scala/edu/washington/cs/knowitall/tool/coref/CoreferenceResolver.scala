@@ -8,9 +8,20 @@ package coref
  * most informative mention. */
 abstract class CoreferenceResolver {
   /*
-   * Process a document and return a map of mentions, where the key is the
-   * most representitive mention. */
-  def mentions(text: String): Map[String, List[Mention]]
+   * Process a document and return a map of mentions in a cluster, where the
+   * key is the most representitive mention. */
+  def clusters(text: String): Map[String, List[Mention]]
+
+  /*
+   * Process a document and return a map of mention resolutions, where the
+   * key set covers all mentions and the value is the most representitive
+   * mention. */
+  def mentions(text: String): Map[Mention, String] = {
+    for {
+      (bestMention, mentions) <- clusters(text)
+      mention <- mentions
+    } yield (mention -> bestMention)
+  }
 
   /*
    * Process a document and return a document with all mentions replaced by

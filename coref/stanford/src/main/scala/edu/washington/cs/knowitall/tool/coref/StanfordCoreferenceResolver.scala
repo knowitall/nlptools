@@ -23,7 +23,7 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
   }
 
   // create a lookup
-  override def mentions(text: String): Map[String, List[Mention]] = {
+  override def clusters(text: String): Map[String, List[Mention]] = {
     val document = new Annotation(text);
     // run the Stanford pipeline
     corenlp.annotate(document);
