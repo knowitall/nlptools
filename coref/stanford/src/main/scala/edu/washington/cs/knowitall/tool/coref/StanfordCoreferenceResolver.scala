@@ -23,7 +23,7 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
   }
 
   // create a lookup
-  override def clusters(text: String): Map[String, List[Mention]] = {
+  override def clusters(text: String): Map[Mention, List[Mention]] = {
     val document = new Annotation(text);
     // run the Stanford pipeline
     corenlp.annotate(document);
@@ -51,13 +51,13 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
       val representitive = chain.getRepresentativeMention
       val mentions = chain.getMentionsInTextualOrder
 
-      (representitive.mentionSpan, mentions.map(m =>
+      (new Mention(representitive.mentionSpan, tokens(representitive.sentNum - 1)(representitive.startIndex - 1).beginPosition), mentions.map(m =>
         new Mention(m.mentionSpan, tokens(m.sentNum - 1)(m.startIndex - 1).beginPosition)
       ).toList)
     })(scala.collection.breakOut)
   }
 
-  override def resolve(text: String, transform: (String,String)=>String): String = {
+  def resolve(text: String, transform: (String,String)=>String): String = {
     val document = new Annotation(text);
     corenlp.annotate(document);
 
@@ -129,15 +129,14 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
   }
 }
 
-object StanfordCoreferenceResolver {
+object StanfordCoreferenceResolverMain {
   def main(args: Array[String]) {
     def quote(s: String) = "\""+s+"\""
     val text = io.Source.stdin.getLines.mkString("\n")
     val resolver = new StanfordCoreferenceResolver()
-    val mentions = resolver.mentions(text).toList
-      .filter(_._2.size > 1).sortBy(- _._2.size)
-    println(mentions.map{case (k, v) =>
-      k+" -> "+v.mkString(", ")
+    val mentions = resolver.substitutions(text).filter(_.best.text.size > 1)
+    println(mentions.map{case Substitution(mention, best) =>
+      mention+" -> "+best.text.mkString(", ")
     }.mkString("\n"))
     println(resolver.resolve(text, (original,replacement)=>original+"["+replacement+"]"))
   }
