@@ -2,18 +2,24 @@ package edu.washington.cs.knowitall
 package tool
 package coref
 
+import java.io.File
+import java.io.PrintWriter
+
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.mapAsJavaMap
+import scala.collection.JavaConversions.mapAsScalaMap
+import scala.collection.JavaConversions.seqAsJavaList
+
 import common.ling.Word
-
-import scala.collection.JavaConversions._
-
-import edu.stanford.nlp.pipeline.Annotation
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations._
-import edu.stanford.nlp.dcoref._
-import edu.stanford.nlp.util.CoreMap
-
-import edu.stanford.nlp.ling.CoreAnnotations._
+import edu.stanford.nlp.dcoref.CorefChain
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation
+import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation
 import edu.stanford.nlp.ling.CoreLabel
+import edu.stanford.nlp.pipeline.Annotation
+import edu.stanford.nlp.pipeline.StanfordCoreNLP
+import edu.stanford.nlp.util.CoreMap
+import edu.washington.cs.knowitall.common.Resource.using
 
 class StanfordCoreferenceResolver extends CoreferenceResolver {
   lazy val corenlp = {
@@ -30,71 +36,53 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
 
     // an array of arrays, where the first dimension is sentences
     // and the second is tokens
-    val tokens: Array[Array[CoreLabel]] = document.get[
-      java.util.List[CoreMap],
-      SentencesAnnotation
-    ] (classOf[SentencesAnnotation]).map {sentence =>
-      sentence.get[
-          java.util.List[CoreLabel],
-          TokensAnnotation
-      ](classOf[TokensAnnotation]).toList.toArray
+    val tokens: Array[Array[CoreLabel]] = document.get[java.util.List[CoreMap], SentencesAnnotation](classOf[SentencesAnnotation]).map { sentence =>
+      sentence.get[java.util.List[CoreLabel], TokensAnnotation](classOf[TokensAnnotation]).toList.toArray
     }.toArray
 
     // stanford is doing some WEIRD stuff, look at the JavaDoc for get
     // somehow Java handles this without having to specify the types.
-    val coremaps = document.get[
-      java.util.Map[java.lang.Integer, CorefChain],
-      CorefChainAnnotation
-    ] (classOf[CorefChainAnnotation])
+    val coremaps = document.get[java.util.Map[java.lang.Integer, CorefChain], CorefChainAnnotation](classOf[CorefChainAnnotation])
 
     (for ((k, chain) <- coremaps) yield {
       val representitive = chain.getRepresentativeMention
       val mentions = chain.getMentionsInTextualOrder
 
       (new Mention(representitive.mentionSpan, tokens(representitive.sentNum - 1)(representitive.startIndex - 1).beginPosition), mentions.map(m =>
-        new Mention(m.mentionSpan, tokens(m.sentNum - 1)(m.startIndex - 1).beginPosition)
-      ).toList)
+        new Mention(m.mentionSpan, tokens(m.sentNum - 1)(m.startIndex - 1).beginPosition)).toList)
     })(scala.collection.breakOut)
   }
 
-  def resolve(text: String, transform: (String,String)=>String): String = {
+  def resolve(text: String, transform: (String, String) => String): String = {
     val document = new Annotation(text);
     corenlp.annotate(document);
 
     // stanford is doing some WEIRD stuff, look at the JavaDoc for get
     // somehow Java handles this without having to specify the types.
-    val coremaps = document.get[
-      java.util.Map[java.lang.Integer, CorefChain],
-      CorefChainAnnotation
-    ] (classOf[CorefChainAnnotation])
+    val coremaps = document.get[java.util.Map[java.lang.Integer, CorefChain], CorefChainAnnotation](classOf[CorefChainAnnotation])
 
     // build a map of spots to replace a mention with the
     // best mention (sentence, word) -> (mention, length)
     val replacements: Map[(Int, Int), (String, Int)] =
-    (for { (k, chain) <- coremaps;
-      representitive = chain.getRepresentativeMention
-      mention <- chain.getMentionsInTextualOrder
-      if chain.getMentionsInTextualOrder.size > 1
-      if mention.mentionSpan != representitive.mentionSpan
-    } yield {
-      // switch to 0-indexing
-      ((mention.sentNum-1, mention.startIndex-1),
-      (representitive.mentionSpan, mention.endIndex - mention.startIndex))
-    })(scala.collection.breakOut)
+      (for {
+        (k, chain) <- coremaps;
+        representitive = chain.getRepresentativeMention
+        mention <- chain.getMentionsInTextualOrder
+        if chain.getMentionsInTextualOrder.size > 1
+        if mention.mentionSpan != representitive.mentionSpan
+      } yield {
+        // switch to 0-indexing
+        ((mention.sentNum - 1, mention.startIndex - 1),
+          (representitive.mentionSpan, mention.endIndex - mention.startIndex))
+      })(scala.collection.breakOut)
 
-    val sentences = document.get[
-      java.util.List[CoreMap],
-      SentencesAnnotation
-    ] (classOf[SentencesAnnotation]);
+    val sentences = document.get[java.util.List[CoreMap], SentencesAnnotation](classOf[SentencesAnnotation]);
 
     val resolved = new StringBuilder((1.5 * text.length).toInt)
 
     // iterate over sentences
     for ((sentence, sentenceIndex) <- sentences.view.zipWithIndex) {
-      val labels = sentence.get[
-          java.util.List[CoreLabel],
-          TokensAnnotation
-        ](classOf[TokensAnnotation])
+      val labels = sentence.get[java.util.List[CoreLabel], TokensAnnotation](classOf[TokensAnnotation])
 
       // iterate over words of this sentence
       val iterator = labels.view.zipWithIndex.iterator()
@@ -116,8 +104,7 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
 
           val replacement = transform(replaced.toString, if (wordIndex == 0) Word.capitalize(string) else string)
           resolved.append(replacement)
-        }
-        else {
+        } else {
           resolved.append(label.originalText)
         }
 
@@ -130,14 +117,63 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
 }
 
 object StanfordCoreferenceResolverMain {
+  case class Config(
+    val inputFile: Option[File] = None,
+    val outputFile: Option[File] = None,
+    val bratOutput: Boolean = false) {
+
+    def writer = outputFile match {
+      case Some(file) => new PrintWriter(file)
+      case None => new PrintWriter(System.out)
+    }
+
+    def source = inputFile match {
+      case Some(file) => io.Source.fromFile(file, "UTF-8")
+      case None => io.Source.stdin
+    }
+  }
+
   def main(args: Array[String]) {
-    def quote(s: String) = "\""+s+"\""
-    val text = io.Source.stdin.getLines.mkString("\n")
+    val parser = new scopt.immutable.OptionParser[Config]("coref") {
+      def options = Seq(
+        flag("brat", "brat output") { (c: Config) => c.copy(bratOutput = true) },
+        opt("o", "output", "output file") { (path: String, c: Config) => c.copy(outputFile = Some(new File(path))) },
+        opt("i", "input", "input file") { (path: String, c: Config) => c.copy(inputFile = Some(new File(path))) })
+    }
+
+    parser.parse(args, new Config()) match {
+      case Some(config) => run(config)
+      case None =>
+    }
+  }
+
+  def run(config: Config) {
+    def quote(s: String) = "\"" + s + "\""
+    val text =
+      using(config.source) { source =>
+        source.getLines.mkString("\n")
+      }
     val resolver = new StanfordCoreferenceResolver()
-    val mentions = resolver.substitutions(text).filter(_.best.text.size > 1)
-    println(mentions.map{case Substitution(mention, best) =>
-      mention+" -> "+best.text.mkString(", ")
-    }.mkString("\n"))
-    println(resolver.resolve(text, (original,replacement)=>original+"["+replacement+"]"))
+
+    val substitutions = resolver.substitutions(text).filter(_.best.text.size > 1).filter(sub => sub.mention != sub.best)
+    using(config.writer) { writer =>
+      if (config.bratOutput) {
+        val mentions = substitutions.flatMap { case Substitution(actual, mention) => List(actual, mention) }
+
+        val mentionMap = (mentions.zipWithIndex map { case (mention, index) => mention -> ("T" + index) }).toMap
+
+        val entities = mentionMap.map { case (mention, name) => List(name, "Mention " + mention.charInterval.start + " " + mention.charInterval.end, mention.text) }
+        val relations = substitutions.zipWithIndex map { case (Substitution(actual, mention), index) => List("R" + index, "Mention-of Arg1:" + mentionMap(actual) + " Arg2:" + mentionMap(mention), "") }
+
+        entities.map(_ mkString "\t") foreach writer.println
+        relations.map(_ mkString "\t") foreach writer.println
+      } else {
+        writer.println(substitutions.map {
+          case Substitution(mention, best) =>
+            mention + " -> " + best.text
+        }.mkString("\n"))
+        writer.println(resolver.resolve(text, (original, replacement) => original + "[" + replacement + "]"))
+      }
+    }
   }
 }
