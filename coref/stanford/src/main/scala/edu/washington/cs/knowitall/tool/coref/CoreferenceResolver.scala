@@ -105,7 +105,6 @@ object CoreferenceResolver {
 /*
  * A representation for a mention in a document. */
 case class Mention(text: String, offset: Int) {
-  def normalized = text.toLowerCase.trim
   override def toString = offset + ":" + "\"" + text + "\""
 
   def charInterval = Interval.open(offset, offset + text.size)
@@ -114,17 +113,35 @@ case class Mention(text: String, offset: Int) {
     Postagger.pronouns contains text
   }
 
+  def possessive = Mention.isPossessive(this.text)
 
-  def possessive = {
-    normalized.endsWith("'s") || normalized.endsWith("s'") || Mention.possessives.exists(normalized endsWith _);
+  def possessivize = {
+    this.copy(text = Mention.possessivize(this.text))
+  }
+
+  def depossessivize = {
+    this.copy(text = Mention.depossessivize(this.text))
   }
 }
 
 object Mention {
   val possessives = Postagger.possessivePronouns ++ Postagger.possessives
 
-  def isPossessive(word: String) =
-    word.endsWith("'s") || word.endsWith("s'") || possessives.contains(word.trim.toLowerCase);
+  def isPossessive(text: String) = {
+    val normalized = text.toLowerCase.trim
+    normalized.endsWith("'s") || normalized.endsWith("s'") || Mention.possessives.contains(normalized);
+  }
+
+  def possessivize(text: String) = text match {
+    case text if text endsWith "s" => text + "'"
+    case text => text + "'s"
+  }
+
+  def depossessivize(text: String) = text match {
+    case text if text endsWith "'" => text.dropRight(1).trim
+    case text if text endsWith "'s" => text.dropRight(2).trim
+    case _ => throw new IllegalStateException("Mention not possessive: " + text)
+  }
 }
 
 case class Substitution(mention: Mention, best: Mention) {
@@ -132,5 +149,17 @@ case class Substitution(mention: Mention, best: Mention) {
     new Substitution(
       this.mention.copy(offset = this.mention.offset + shift),
       this.best.copy(offset = this.best.offset + shift))
+  }
+
+  def fixPossessive = {
+    if (best.possessive && !mention.possessive) {
+      this.copy(best=best.depossessivize)
+    }
+    else if (!best.possessive && mention.possessive) {
+      this.copy(best=best.possessivize)
+    }
+    else {
+      this
+    }
   }
 }

@@ -48,4 +48,23 @@ object CoreferenceResolverTest extends Specification {
       case ResolvedString(actual, resolved) => actual
     }.mkString("") must_== "one two three four five."
   }
+
+  "is possessivize" in {
+    Mention.isPossessive("Schmitz's") must beTrue
+    Mention.isPossessive("Schmitzes'") must beTrue
+    Mention.isPossessive("my") must beTrue
+    Mention.isPossessive("your") must beTrue
+    Mention.isPossessive("his") must beTrue
+    Mention.isPossessive("her") must beTrue
+    Mention.isPossessive("their") must beTrue
+    Mention.isPossessive("our") must beTrue
+
+    Mention.isPossessive("Schmitz") must beFalse
+    Mention.isPossessive("Schmits") must beFalse
+  }
+
+  "possessivize" in {
+    Mention.possessivize("Schmitz") must_== "Schmitz's"
+    Mention.possessivize("Schmitzes") must_== "Schmitzes'"
+  }
 }
