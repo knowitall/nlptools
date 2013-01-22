@@ -23,7 +23,7 @@ abstract class CoreferenceResolver {
     val transform = for {
       (bestMention, mentions) <- clusters(text)
       mention <- mentions
-      if mention.text != bestMention
+      if mention.text != bestMention.text
     } yield (Substitution(mention, bestMention))
 
     transform.toSeq.sortBy(_.mention.offset)
