@@ -3,6 +3,7 @@ package tool
 package coref
 
 import collection.immutable.Interval
+import edu.washington.cs.knowitall.tool.postag.Postagger
 
 /*
  * A coreference resolver takes text as input and produces clusters
@@ -54,6 +55,28 @@ object CoreferenceResolver {
     result
   }
 
+  def substitute(indexedText: Seq[(Char, Int)], substitutions: Seq[(Interval, String)]): Seq[(Char, Int)] = {
+    var result = indexedText
+    val subs = substitutions.sortBy(_._1)
+
+    var adjust = 0
+    for ((interval, string) <- subs) {
+      val shifted = interval.shift(adjust)
+      val indexedBest = string.zipWithIndex.map {
+        case (c, i) =>
+          val shiftedIndex = i + interval.start
+          val index =
+            if (shiftedIndex > interval.last) interval.last
+            else shiftedIndex
+          (c, index)
+      }
+      result = result.takeWhile(_._2 < interval.start) ++ indexedBest ++ result.dropWhile(_._2 < interval.end)
+      adjust += string.size - interval.size
+    }
+
+    result
+  }
+
   def resolve(text: String, substitutions: Seq[Substitution]): Seq[ResolutionString] = {
     var result = Seq.empty[ResolutionString]
     var string = text
@@ -63,9 +86,6 @@ object CoreferenceResolver {
     for (Substitution(original, resolution) <- subs) {
       val shifted = original.charInterval.shift(-adjust)
       result = result :+ NormalString(string.take(shifted.start)) :+ ResolvedString(original.text, resolution.text)
-      println(string)
-      println(original.charInterval)
-      println(shifted)
       string = string.drop(shifted.end)
       adjust += shifted.end
     }
@@ -85,15 +105,32 @@ object CoreferenceResolver {
 /*
  * A representation for a mention in a document. */
 case class Mention(text: String, offset: Int) {
+  def normalized = text.toLowerCase.trim
   override def toString = offset + ":" + "\"" + text + "\""
 
   def charInterval = Interval.open(offset, offset + text.size)
+
+  def isPronoun = {
+    Postagger.pronouns contains text
+  }
+
+
+  def possessive = {
+    normalized.endsWith("'s") || normalized.endsWith("s'") || Mention.possessives.exists(normalized endsWith _);
+  }
+}
+
+object Mention {
+  val possessives = Postagger.possessivePronouns ++ Postagger.possessives
+
+  def isPossessive(word: String) =
+    word.endsWith("'s") || word.endsWith("s'") || possessives.contains(word.trim.toLowerCase);
 }
 
 case class Substitution(mention: Mention, best: Mention) {
   def shift(shift: Int) = {
     new Substitution(
-        this.mention.copy(offset = this.mention.offset + shift),
-        this.best.copy(offset = this.best.offset + shift))
+      this.mention.copy(offset = this.mention.offset + shift),
+      this.best.copy(offset = this.best.offset + shift))
   }
 }
