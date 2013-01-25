@@ -16,12 +16,11 @@
     <dependency>
       <groupId>edu.stanford.nlp</groupId>
       <artifactId>stanford-corenlp</artifactId>
-      <version>1.3.2</version>
     </dependency>
     <dependency>
       <groupId>edu.washington.cs.knowitall.stanford-corenlp</groupId>
       <artifactId>stanford-ner-models</artifactId>
-      <version>1.3.2</version>
+      <version>${stanford.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
