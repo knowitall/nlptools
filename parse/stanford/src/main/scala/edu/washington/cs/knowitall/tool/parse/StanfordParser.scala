@@ -92,8 +92,6 @@ object StanfordParser {
       case (tw, i) => (i, new DependencyNode(tw.word, tw.tag, i, tw.beginPosition))
     }.toMap
 
-    gsf.newGrammaticalStructure(tree)
-
     (nodes, convertDependencies(nodes, collapser.collapse(gsf.newGrammaticalStructure(tree))))
   }
 
