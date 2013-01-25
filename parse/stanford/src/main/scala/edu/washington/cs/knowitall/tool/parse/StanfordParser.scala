@@ -10,23 +10,21 @@ import graph.DependencyGraph
 import graph.DependencyNode
 import edu.stanford.nlp.trees.GrammaticalStructure
 import tool.parse.BaseStanfordParser._
+import edu.stanford.nlp.trees.Tree
 
 /*
  * Subclasses of BaseStanfordParser must perform an optional post-processing step that applies
  * Stanford's CC-compressed algorithm on the graph. */
 abstract class BaseStanfordParser extends DependencyParser {
-  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, None)
   def dependencies(string: String, collapse: CollapseType): Iterable[Dependency]
 
-  override def dependencyGraph(string: String) = dependencyGraph(string, None)
-  def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
+  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, None)
 
-  def convertDependency(nodes: Map[Int, DependencyNode], dep: edu.stanford.nlp.trees.TypedDependency) = {
-    new Dependency(nodes(dep.gov.index - 1), nodes(dep.dep.index - 1), dep.reln.toString)
-  }
-  def convertDependencies(nodes: Map[Int, DependencyNode], dep: Iterable[edu.stanford.nlp.trees.TypedDependency]) = {
-    // filter out the dependency from the root
-    dep.filter(_.gov.index > 0).map(d => convertDependency(nodes, d))
+  override def dependencyGraph(string: String) = dependencyGraph(string, None)
+  def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
+    val deps = dependencies(string)
+    val nodes = deps.flatMap(_.nodes).toSet
+    new DependencyGraph(string, nodes.toList.sortBy(_.indices), deps)
   }
 }
 
@@ -52,34 +50,32 @@ object StanfordParserMain extends DependencyParserMain {
   lazy val parser = new StanfordParser
 }
 
-class StanfordParser(lp : LexicalizedParser) extends BaseStanfordParser with ConstituencyParser {
+class StanfordParser(lp: LexicalizedParser) extends BaseStanfordParser with ConstituencyParser {
   def this() = this(LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"))
-  private val tlp = new PennTreebankLanguagePack();
-  private val gsf = tlp.grammaticalStructureFactory();
-
-  private def depHelper(string: String, collapser: CollapseType): (Map[Int, DependencyNode], Iterable[Dependency]) = {
-    val tree = lp.apply(string)
-    val nodes = tree.taggedYield().view.zipWithIndex.map {
-      case (tw, i) => (i, new DependencyNode(tw.word, tw.tag, i, tw.beginPosition))
-    }.toMap
-
-    (nodes, convertDependencies(nodes, collapser.collapse(gsf.newGrammaticalStructure(tree))))
-  }
 
   override def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] =
-    depHelper(string, collapse)._2
+    StanfordParser.dependencyHelper(lp.apply(string), collapse)._2
 
   override def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
-    val (nodes, deps) = depHelper(string, collapse)
+    val (nodes, deps) = StanfordParser.dependencyHelper(lp.apply(string), collapse)
     new DependencyGraph(string, nodes.toList.sortBy(_._1).map(_._2), deps)
   }
 
   override def parse(string: String) = {
+    StanfordParser.convertTree(lp.apply(string))
+  }
+}
+
+object StanfordParser {
+  private val tlp = new PennTreebankLanguagePack()
+  private val gsf = tlp.grammaticalStructureFactory()
+
+  def convertTree(tree: edu.stanford.nlp.trees.Tree): ParseTree = {
     var index = 0
-    def convertTree(tree: edu.stanford.nlp.trees.Tree): ParseTree = {
+    def rec(tree: edu.stanford.nlp.trees.Tree): ParseTree = {
       val curindex = index
       index += 1
-      val children = tree.children.map(child => convertTree(child))
+      val children = tree.children.map(child => rec(child))
       if (tree.isPhrasal)
         new ParseTreePhrase(tree.value, curindex, children)
       else if (tree.isPreTerminal)
@@ -87,11 +83,31 @@ class StanfordParser(lp : LexicalizedParser) extends BaseStanfordParser with Con
       else
         new ParseTreeToken(tree.value, curindex, children)
     }
-    convertTree(lp.apply(string))
+
+    rec(tree)
+  }
+
+  def dependencyHelper(tree: Tree, collapser: CollapseType): (Map[Int, DependencyNode], Iterable[Dependency]) = {
+    val nodes = tree.taggedYield().view.zipWithIndex.map {
+      case (tw, i) => (i, new DependencyNode(tw.word, tw.tag, i, tw.beginPosition))
+    }.toMap
+
+    gsf.newGrammaticalStructure(tree)
+
+    (nodes, convertDependencies(nodes, collapser.collapse(gsf.newGrammaticalStructure(tree))))
+  }
+
+  def convertDependency(nodes: Map[Int, DependencyNode], dep: edu.stanford.nlp.trees.TypedDependency) = {
+    new Dependency(nodes(dep.gov.index - 1), nodes(dep.dep.index - 1), dep.reln.toString)
+  }
+
+  def convertDependencies(nodes: Map[Int, DependencyNode], dep: Iterable[edu.stanford.nlp.trees.TypedDependency]) = {
+    // filter out the dependency from the root
+    dep.filter(_.gov.index > 0).map(d => convertDependency(nodes, d))
   }
 }
 
 object StanfordConstituencyParser
-extends ConstituencyParserMain {
+  extends ConstituencyParserMain {
   lazy val parser = new StanfordParser();
 }
