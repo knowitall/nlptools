@@ -22,7 +22,7 @@ abstract class BaseStanfordParser extends DependencyParser {
 
   override def dependencyGraph(string: String) = dependencyGraph(string, None)
   def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
-    val deps = dependencies(string)
+    val deps = dependencies(string, collapse)
     val nodes = deps.flatMap(_.nodes).toSet
     new DependencyGraph(string, nodes.toList.sortBy(_.indices), deps)
   }
