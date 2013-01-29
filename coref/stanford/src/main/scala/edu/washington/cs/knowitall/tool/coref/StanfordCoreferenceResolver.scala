@@ -54,65 +54,11 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
   }
 
   def resolve(text: String, transform: (String, String) => String): String = {
-    val document = new Annotation(text);
-    corenlp.annotate(document);
-
-    // stanford is doing some WEIRD stuff, look at the JavaDoc for get
-    // somehow Java handles this without having to specify the types.
-    val coremaps = document.get[java.util.Map[java.lang.Integer, CorefChain], CorefChainAnnotation](classOf[CorefChainAnnotation])
-
-    // build a map of spots to replace a mention with the
-    // best mention (sentence, word) -> (mention, length)
-    val replacements: Map[(Int, Int), (String, Int)] =
-      (for {
-        (k, chain) <- coremaps;
-        representitive = chain.getRepresentativeMention
-        mention <- chain.getMentionsInTextualOrder
-        if chain.getMentionsInTextualOrder.size > 1
-        if mention.mentionSpan != representitive.mentionSpan
-      } yield {
-        // switch to 0-indexing
-        ((mention.sentNum - 1, mention.startIndex - 1),
-          (representitive.mentionSpan, mention.endIndex - mention.startIndex))
-      })(scala.collection.breakOut)
-
-    val sentences = document.get[java.util.List[CoreMap], SentencesAnnotation](classOf[SentencesAnnotation]);
-
-    val resolved = new StringBuilder((1.5 * text.length).toInt)
-
-    // iterate over sentences
-    for ((sentence, sentenceIndex) <- sentences.view.zipWithIndex) {
-      val labels = sentence.get[java.util.List[CoreLabel], TokensAnnotation](classOf[TokensAnnotation])
-
-      // iterate over words of this sentence
-      val iterator = labels.view.zipWithIndex.iterator()
-      while (iterator.hasNext) {
-        val (label, wordIndex) = iterator.next
-        if (replacements.containsKey((sentenceIndex, wordIndex))) {
-          val (string, length) = replacements((sentenceIndex, wordIndex))
-
-          // skip over the other tokens of this mention
-          val replaced = new StringBuffer((label.originalText.length + 1) * (length + 1))
-          replaced.append(label.originalText)
-          replaced.append(label.after)
-          for (i <- 1 until length) {
-            val (skip, _) = iterator.next()
-
-            replaced.append(skip.originalText)
-            replaced.append(skip.after)
-          }
-
-          val replacement = transform(replaced.toString, if (wordIndex == 0) Word.capitalize(string) else string)
-          resolved.append(replacement)
-        } else {
-          resolved.append(label.originalText)
-        }
-
-        resolved.append(label.after)
-      }
+    val substitutions = this.substitutions(text).map { case Substitution(from, to) =>
+      Substitution(from, to.copy(text = from.text + "[" + to.text + "]"))
     }
 
-    resolved.toString
+    CoreferenceResolver.substitute(text, substitutions)
   }
 }
 
