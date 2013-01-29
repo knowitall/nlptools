@@ -26,14 +26,22 @@ class BllipParser(val tokenizer: Tokenizer) extends BaseStanfordParser with Cons
     blipp.getBestParse(words)
   }
 
-  def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] = {
+  override def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
+    import scala.collection.JavaConverters._
+
     val tokens = tokenizer(string)
     val words = tokens.map(token => new Word(token.string, token.interval.start, token.interval.end)).asJava
 
     val tree = blipp.getBestParse(words)
 
-    val dependencies = StanfordParser.dependencyHelper(tree, collapse)._2
-    dependencies.map(_.mapNodes(node => new DependencyNode(node.string, node.postag, node.indices, tokens(node.indices.head).offset)))
+    val (nodes, deps) = StanfordParser.dependencyHelper(tree, collapse)
+
+    def withOffset(node: DependencyNode) =
+      new DependencyNode(node.string, node.postag, node.indices, tokens(node.indices.head).offset)
+
+    val nodesWithOffsets = nodes map (node => withOffset(node))
+    val depsWithOffsets = deps.map(_.mapNodes(node => withOffset(node)))
+    new DependencyGraph(string, nodesWithOffsets.toList.sortBy(_.indices), depsWithOffsets)
   }
 
   def parse(string: String) = {
