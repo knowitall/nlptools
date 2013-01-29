@@ -11,11 +11,20 @@ import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
 import graph.Dependency
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
+import java.lang.ProcessBuilder
+import java.io.PrintWriter
 
 class BllipParser(val tokenizer: Tokenizer) extends BaseStanfordParser with ConstituencyParser {
   def this() = this(new OpenNlpTokenizer())
 
   val blipp = new CharniakParser("bllip-parser/first-stage/PARSE/parseIt", "bllip-parser/first-stage/DATA/EN/")
+
+  object BllipProcess {
+    import sys.process._
+
+    private var result: String = _
+    private val bllip = "bllip-parser/first-stage/PARSE/parseIt" run BasicIO(false, (line: String) => result = line, None).writeInput
+  }
 
   private def parseHelper(string: String) = {
     import scala.collection.JavaConverters._
