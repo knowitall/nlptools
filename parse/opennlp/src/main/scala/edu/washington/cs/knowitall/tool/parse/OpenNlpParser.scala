@@ -37,5 +37,5 @@ object OpenNlpParser {
 }
 
 object OpenNlpParserMain extends ConstituencyParserMain {
-  lazy val parser = new OpenNlpParser() 
+  lazy val constituencyParser = new OpenNlpParser()
 }

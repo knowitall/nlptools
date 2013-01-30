@@ -23,14 +23,7 @@ import scala.collection.immutable.SortedSet
 object MaltParserMain extends DependencyParserMain {
   var model = new File("engmalt.linear-1.7.mco")
 
-  override def init(args: Array[String]) {
-    val index = args.indexOf("-m")
-    if (index >= 0) {
-      model = new File(args(index + 1))
-    }
-  }
-
-  lazy val parser = new MaltParser(model);
+  lazy val dependencyParser = new MaltParser(model);
 }
 
 class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL, tagger: Postagger = new OpenNlpPostagger, logFile: Option[File] = None) extends DependencyParser {

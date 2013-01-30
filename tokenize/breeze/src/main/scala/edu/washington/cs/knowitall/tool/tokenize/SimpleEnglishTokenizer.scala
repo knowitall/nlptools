@@ -14,8 +14,6 @@ class SimpleEnglishTokenizer extends Tokenizer {
   }
 }
 
-object SimpleEnglishTokenizerMain extends LineProcessor {
+object SimpleEnglishTokenizerMain extends TokenizerMain {
   val tokenizer = new SimpleEnglishTokenizer()
-  override def process(sentence: String) =
-    tokenizer.tokenize(sentence).mkString(" ")
 }

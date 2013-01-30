@@ -28,7 +28,7 @@ abstract class ParseTree(val token: String, var index: Int, val children: Array[
     def preorder(node: ParseTree): List[ParseTree] = node :: node.children.toList.flatMap(preorder(_))
     preorder(this).iterator
   }
-  
+
   def print {
     def print(tree: ParseTree, indent: Int) {
       if (tree.children.isEmpty) {
@@ -39,7 +39,7 @@ abstract class ParseTree(val token: String, var index: Int, val children: Array[
         println(" " * indent + ")")
       }
     }
-    
+
     print(this, 0)
   }
 
@@ -73,7 +73,10 @@ class ParseTreePostag(token: String, index: Int, children: Array[ParseTree]) ext
 class ParseTreeToken(token: String, index: Int, children: Array[ParseTree]) extends ParseTree(token, index, children) {}
 
 abstract class ConstituencyParserMain
-extends LineProcessor {
-  def parser: ConstituencyParser
-  override def process(line: String) = { println(parser.parse(line).toString); parser.parse(line).printDOT(System.out); "" }
+extends LineProcessor("parser") {
+  def constituencyParser: ConstituencyParser
+  override def process(line: String) = {
+    println(constituencyParser.parse(line).toString);
+    constituencyParser.parse(line).printDOT(System.out); ""
+  }
 }

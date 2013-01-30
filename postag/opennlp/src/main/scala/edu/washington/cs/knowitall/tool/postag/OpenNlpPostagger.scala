@@ -28,10 +28,6 @@ extends Postagger(tokenizer) {
   }
 }
 
-object OpenNlpPostaggerMain extends LineProcessor {
-  val tagger = new OpenNlpPostagger()
-  override def process(line: String) =
-    tagger.postag(line).map { case PostaggedToken(postag, string, offset) =>
-      string + "/" + postag
-    }.mkString(" ")
+object OpenNlpPostaggerMain extends PostaggerMain {
+  override val tagger = new OpenNlpPostagger()
 }

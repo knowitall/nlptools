@@ -29,10 +29,6 @@ extends Postagger(tokenizer) {
   }
 }
 
-object StanfordPostaggerMain extends LineProcessor {
-  val tagger = new StanfordPostagger()
-  override def process(line: String) =
-    tagger.postag(line).map { case PostaggedToken(postag, string, offset) =>
-      string + "/" + postag
-    }.mkString(" ")
+object StanfordPostaggerMain extends PostaggerMain {
+  override val tagger = new StanfordPostagger()
 }

@@ -10,7 +10,7 @@ import scala.collection.immutable
   */
 abstract class Postagger(val tokenizer: tokenize.Tokenizer) {
   def apply(sentence: String) = postag(sentence)
-  
+
   /* POS tag pre-tokenized text */
   def postagTokens(tokens: Seq[tokenize.Token]): Seq[PostaggedToken]
 
@@ -58,4 +58,13 @@ object Postagger {
     "where as", "as far as", "as well as")
 
   val prepositions = simplePrepositions ++ complexPrepositions
+}
+
+abstract class PostaggerMain extends LineProcessor("postagger") {
+  def tagger: Postagger
+  override def process(line: String) =
+    tagger.postag(line).map {
+      case PostaggedToken(postag, string, offset) =>
+        string + "/" + postag
+    }.mkString(" ")
 }

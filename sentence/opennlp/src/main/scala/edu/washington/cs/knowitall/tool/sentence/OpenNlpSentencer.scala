@@ -16,7 +16,7 @@ class OpenNlpSentencer(val model: SentenceModel) extends Segmenter {
   def this(modelName: String = "en-sent.bin") =
     this(new SentenceModel(
         classOf[OpenNlpSentencer].getClassLoader.getResourceAsStream(modelName)))
-        
+
   override def segmentTexts(document: String) = {
     sentencer.sentDetect(document)
   }

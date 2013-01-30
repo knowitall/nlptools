@@ -8,15 +8,15 @@ import postag.PostaggedToken
 /** A stemmer takes a string token and produces a normalized form. */
 abstract class Stemmer {
   def apply(word: String) = lemmatize(word)
-  
+
   /** Apply the stemming algorithm. */
   def stem(word: String): String
- 
+
   /** Stem a token without a postag. */
   def stemToken[T <: Token](token: T) = Lemmatized(token, this.stem(token.string))
 
   /** Apply the normalizing algorithm and then the stemming algorithm. */
-  def lemmatize(word: String) = this.stem(Stemmer.normalize(word)) 
+  def lemmatize(word: String) = this.stem(Stemmer.normalize(word))
 
   /** Lemmatize a token without a postag. */
   def lemmatizeToken[T <: Token](token: T) = Lemmatized(token, this.lemmatize(token.string))
@@ -46,7 +46,7 @@ object Stemmer {
 }
 
 abstract class StemmerMain
-extends LineProcessor {
+extends LineProcessor("stemmer") {
   def stemmer: Stemmer
   override def process(line: String) = line.split("\\s+").map(stemmer.lemmatize(_)).mkString(" ")
 }

@@ -43,7 +43,7 @@ object BaseStanfordParser {
 }
 
 object StanfordParserMain extends DependencyParserMain {
-  lazy val parser = new StanfordParser
+  lazy val dependencyParser = new StanfordParser
 }
 
 class StanfordParser(lp: LexicalizedParser) extends BaseStanfordParser with ConstituencyParser {
@@ -103,5 +103,5 @@ object StanfordParser {
 
 object StanfordConstituencyParser
   extends ConstituencyParserMain {
-  lazy val parser = new StanfordParser();
+  lazy val constituencyParser = new StanfordParser();
 }

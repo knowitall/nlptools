@@ -1,25 +1,61 @@
 package edu.washington.cs.knowitall.tool
 
-import edu.washington.cs.knowitall.common.main.{ LineProcessor => CliLineProcessor }
 import unfiltered.request._
 import unfiltered.response._
 import unfiltered.filter.Planify
+import edu.washington.cs.knowitall.common.Timing
 
-abstract class LineProcessor extends CliLineProcessor {
-  override def main(args: Array[String]) = {
-    if (args.exists(_ == "--server")) {
-      runServer(args filterNot (_ == "--server"))
-    }
-    else {
-      super.main(args)
+abstract class LineProcessor(name: String) {
+  import scopt.immutable._
+  import scopt.immutable.OptionParser._
+
+  class Config(val server: Boolean = false, val port: Int = 8080) {
+    def copy(server: Boolean = server, port: Int = port) =
+      new Config(server, port)
+  }
+
+  val parser = new scopt.immutable.OptionParser[Config](name) {
+    def options = Seq(
+      flag("server", "run as a server") { (c: Config) => c.copy(server = true) },
+      intOpt("port", "which port to run the server on") { (port: Int, c: Config) => c.copy(port = port) }
+    )
+  }
+
+  def main(args: Array[String]) = {
+    parser.parse(args, new Config) match {
+      case Some(config) => run(config)
+      case None =>
     }
   }
 
-  def runServer(args: Array[String]) = {
-    val port = args.dropWhile(_ != "--port").drop(1).headOption match {
-      case None => 8080
-      case Some(p) => p.toInt
+  def init(config: Config): Unit = {}
+
+  def run(config: Config) {
+    init(config)
+    if (config.server) runServer(config)
+    else runCli(config)
+  }
+
+  def handle(line: String): Unit = {
+    println(process(line))
+  }
+
+  def process(line: String): String
+
+  def runCli(config: Config) {
+    val scanner = new java.util.Scanner(System.in, "UTF-8")
+
+    val ns = Timing.time {
+      while (scanner.hasNextLine) {
+        handle(scanner.nextLine)
+      }
     }
+
+    System.err.println(Timing.Seconds.format(ns))
+  }
+
+  def runServer(config: Config) = {
+    val port = config.port
 
     val plan = Planify {
       case Path(Seg(p :: Nil)) => ResponseString(p)

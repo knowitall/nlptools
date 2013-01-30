@@ -8,7 +8,7 @@ import graph._
   * Stanford dependency parser. */
 trait DependencyParser {
   def apply(string: String) = dependencyGraph(string)
- 
+
   def dependencies(string: String): Iterable[Dependency]
 
   /**
@@ -22,19 +22,15 @@ trait DependencyParser {
   }
 }
 
-abstract class DependencyParserMain extends LineProcessor {
-  def parser: DependencyParser
+abstract class DependencyParserMain extends LineProcessor("parser") {
+  def dependencyParser: DependencyParser
 
-  override def init(args: Array[String]) {
+  override def init(config: Config) {
     // for timing purposes
-    parser.dependencies("I want to initialize the parser.")
+    dependencyParser.dependencies("I want to initialize the parser.")
   }
 
   override def process(line : String) = {
-    parser.dependencyGraph(line).serialize
-  }
-
-  override def exit(ns: Long) {
-    System.err.println(ns / 1000 / 1000 + "ms")
+    dependencyParser.dependencyGraph(line).serialize
   }
 }

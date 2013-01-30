@@ -34,3 +34,9 @@ object Tokenizer {
     tokens
   }
 }
+
+abstract class TokenizerMain extends LineProcessor("tokenizer") {
+  def tokenizer: Tokenizer
+  override def process(sentence: String) =
+    tokenizer.tokenize(sentence).mkString(" ")
+}

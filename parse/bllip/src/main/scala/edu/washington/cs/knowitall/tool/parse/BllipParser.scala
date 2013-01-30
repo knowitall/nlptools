@@ -59,10 +59,10 @@ class BllipParser(val tokenizer: Tokenizer) extends BaseStanfordParser with Cons
 }
 
 object BlippDependencyParserMain extends DependencyParserMain {
-  lazy val parser = new BllipParser
+  lazy val dependencyParser = new BllipParser
 }
 
 object BlippConstituencyParserMain
   extends ConstituencyParserMain {
-  lazy val parser = new BllipParser
+  lazy val constituencyParser = new BllipParser
 }

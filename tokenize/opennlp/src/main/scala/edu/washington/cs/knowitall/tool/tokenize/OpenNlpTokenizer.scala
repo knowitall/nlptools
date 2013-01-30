@@ -33,8 +33,6 @@ object OpenNlpTokenizer {
   }
 }
 
-object OpenNlpTokenizerMain extends LineProcessor {
+object OpenNlpTokenizerMain extends TokenizerMain {
   val tokenizer = new OpenNlpTokenizer()
-  override def process(sentence: String) =
-    tokenizer.tokenize(sentence).mkString(" ")
 }

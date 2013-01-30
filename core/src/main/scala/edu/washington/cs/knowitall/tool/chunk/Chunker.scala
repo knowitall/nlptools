@@ -7,7 +7,7 @@ package chunk
   */
 abstract class Chunker(val postagger: postag.Postagger) {
   def apply(sentence: String) = chunk(sentence)
-  
+
   /** chunk postagged text */
   def chunkPostagged(tokens: Seq[postag.PostaggedToken]): Seq[ChunkedToken]
 
@@ -25,18 +25,14 @@ abstract class Chunker(val postagger: postag.Postagger) {
 }
 
 abstract class ChunkerMain
-extends LineProcessor {
+extends LineProcessor("chunker") {
   def chunker: Chunker
   override def process(line: String) = chunker.chunk(line).map { case ChunkedToken(chunk, postag, string, offset) =>
     string + "/" + postag + "/" + chunk
   }.mkString(" ")
 
-  override def init(args: Array[String]) {
+  override def init(config: Config) {
     // for timing purposes
     chunker.chunk("I want to initialize the chunker.")
-  }
-
-  override def exit(ns: Long) {
-    System.err.println(ns / 1000 / 1000 + "ms")
   }
 }
