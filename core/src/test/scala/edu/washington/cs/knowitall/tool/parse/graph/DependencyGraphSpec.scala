@@ -8,8 +8,8 @@ import org.junit.Assert._
 import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
-
 import collection.immutable.graph.Graph._
+import edu.washington.cs.knowitall.tool.stem.Stemmer
 
 @RunWith(classOf[JUnitRunner])
 object DependencyGraphSpecTest extends Specification {
@@ -131,6 +131,36 @@ object DependencyGraphSpecTest extends Specification {
     
     graph.serialize must_== pickled
     graph.graph must_== graphOld.graph
+  }
+  
+  "serializes to CONLL" in {
+    implicit val stemmer = new Stemmer {
+      def stem(word: String) = word.toLowerCase
+    }
+    val pickled = "nsubj(wanted_VBD_1_2, I_PRP_0_0); xcomp(wanted_VBD_1_2, go_VB_3_12); aux(go_VB_3_12, to_TO_2_9); prep(go_VB_3_12, to_TO_4_15); pobj(to_TO_4_15, store_NN_6_22); det(store_NN_6_22, the_DT_5_18); prep(store_NN_6_22, for_IN_7_28); pobj(for_IN_7_28, cream_NN_10_41); det(cream_NN_10_41, some_DT_8_32); nn(cream_NN_10_41, ice_NN_9_37)"
+    val graph = DependencyGraph.deserialize(pickled)
+    graph.toCONLL must_==("""1	I	i	PRP	_	2	nsubj
+2	wanted	wanted	VBD	_	0	root
+3	to	to	TO	_	4	aux
+4	go	go	VB	_	2	xcomp
+5	to	to	TO	_	4	prep
+6	the	the	DT	_	7	det
+7	store	store	NN	_	5	pobj
+8	for	for	IN	_	7	prep
+9	some	some	DT	_	11	det
+10	ice	ice	NN	_	11	nn
+11	cream	cream	NN	_	8	pobj""")
+	}
+
+  "deserializes from CONLL" in {
+    implicit val stemmer = new Stemmer {
+      def stem(word: String) = word.toLowerCase
+    }
+    val pickled = "nsubj(wanted_VBD_1_2, I_PRP_0_0); xcomp(wanted_VBD_1_2, go_VB_3_12); aux(go_VB_3_12, to_TO_2_9); prep(go_VB_3_12, to_TO_4_15); pobj(to_TO_4_15, store_NN_6_22); det(store_NN_6_22, the_DT_5_18); prep(store_NN_6_22, for_IN_7_28); pobj(for_IN_7_28, cream_NN_10_41); det(cream_NN_10_41, some_DT_8_32); nn(cream_NN_10_41, ice_NN_9_37)"
+    val graph = DependencyGraph.deserialize(pickled)
+    println(graph.serialize)
+    println(DependencyGraph.fromCONLL(graph.toCONLL))
+    DependencyGraph.fromCONLL(graph.toCONLL) must_== graph
   }
 
   testNNPOfCollapse

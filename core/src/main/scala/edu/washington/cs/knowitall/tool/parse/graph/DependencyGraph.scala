@@ -11,6 +11,7 @@ import collection.immutable.graph.Graph._
 import tool.postag.Postagger
 import edu.washington.cs.knowitall.collection.immutable.graph.{DownEdge, UpEdge}
 import edu.washington.cs.knowitall.collection.immutable.graph.Direction
+import edu.washington.cs.knowitall.tool.stem.Stemmer
 
 /** A representation of a graph over dependencies.
   * This richer representation may include the text of the original sentence,
@@ -451,6 +452,31 @@ class DependencyGraph (
 
     mapPostags(simplifyPostag)
   }
+  
+  def toCONLL(implicit stemmer: Stemmer) = {
+    this.nodes.toSeq.zipWithIndex.map { case (node, index) =>
+      val deps = this.dependencies.filter(_.dest == node)
+      require(deps.size <= 1, "multiple dependencies from node: " + node)
+      val (destIndex, label) = deps.headOption match {
+        case Some(dep) =>
+          require(dep.source.indices.size == 1, "destination is multiple indices: " + dep)
+          (dep.source.indices.head + 1, dep.label)
+        case None => (0, "root")
+      }
+      
+      val cols = Iterable(
+          index + 1,
+          node.text,
+          node.lemma,
+          node.postag,
+          "_",
+          destIndex,
+          label
+      )
+      
+      cols mkString "\t"
+    }.mkString("\n")
+  }
 
   def dot(title: String=this.text): String = {
     val buffer = new StringBuffer(4092)
@@ -580,6 +606,35 @@ object DependencyGraph {
       case e => throw new DependencyGraph.SerializationException(
                     "Could not deserialize graph: " + string, e)
     }
+  }
+  
+  def fromCONLL(iterator: Iterator[String]): DependencyGraph = {
+    val section = iterator.takeWhile(!_.trim.isEmpty).toIndexedSeq
+    
+    var offset = 0
+    val nodes = section.map { line =>
+      val Array(index, string, lemma, postag, _, _, _) = line.split("\t")
+      val node = new DependencyNode(string, postag, index.toInt - 1, offset)
+      offset += string.length
+      
+      node
+    }
+    
+    val deps = section.flatMap { line =>
+      val Array(index, string, lemma, postag, _, sourceIndex, edge) = line.split("\t")
+      if (sourceIndex.toInt > 0) {
+        Some(new Dependency(nodes(sourceIndex.toInt - 1), nodes(index.toInt - 1), edge))
+      }
+      else {
+        None
+      }
+    }
+    
+    new DependencyGraph(nodes, deps)
+  }
+  
+  def fromCONLL(string: String): DependencyGraph = {
+    fromCONLL(string.split("\n").iterator)
   }
 
   class SerializationException(message: String, cause: Throwable)
