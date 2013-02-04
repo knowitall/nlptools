@@ -40,6 +40,7 @@ abstract class LineProcessor(name: String) {
 
   def handle(writer: PrintWriter, line: String): Unit = {
     writer.println(process(line))
+    writer.flush()
   }
 
   def process(line: String): String
