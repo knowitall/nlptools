@@ -271,6 +271,10 @@ class DependencyGraph (
           dedge <- dedges;
           if (dedge.edge.label == "nsubj" ||
               dedge.edge.label == "nsubjpass" ||
+              dedge.dir == Direction.Down && (
+                // distribute "to" in: "I want to swim and eat cherries"
+                dedge.edge.label == "aux"
+              ) ||
               dedge.dir == Direction.Up && (
                 dedge.edge.label == "advmod" ||
                 dedge.edge.label == "amod" ||
@@ -452,7 +456,7 @@ class DependencyGraph (
 
     mapPostags(simplifyPostag)
   }
-  
+
   def toCONLL(implicit stemmer: Stemmer) = {
     this.nodes.toSeq.zipWithIndex.map { case (node, index) =>
       val deps = this.dependencies.filter(_.dest == node)
@@ -463,7 +467,7 @@ class DependencyGraph (
           (dep.source.indices.head + 1, dep.label)
         case None => (0, "root")
       }
-      
+
       val cols = Iterable(
           index + 1,
           node.text,
@@ -473,7 +477,7 @@ class DependencyGraph (
           destIndex,
           label
       )
-      
+
       cols mkString "\t"
     }.mkString("\n")
   }
@@ -607,19 +611,19 @@ object DependencyGraph {
                     "Could not deserialize graph: " + string, e)
     }
   }
-  
+
   def fromCONLL(iterator: Iterator[String]): DependencyGraph = {
     val section = iterator.takeWhile(!_.trim.isEmpty).toIndexedSeq
-    
+
     var offset = 0
     val nodes = section.map { line =>
       val Array(index, string, lemma, postag, _, _, _) = line.split("\t")
       val node = new DependencyNode(string, postag, index.toInt - 1, offset)
       offset += string.length
-      
+
       node
     }
-    
+
     val deps = section.flatMap { line =>
       val Array(index, string, lemma, postag, _, sourceIndex, edge) = line.split("\t")
       if (sourceIndex.toInt > 0) {
@@ -629,10 +633,10 @@ object DependencyGraph {
         None
       }
     }
-    
+
     new DependencyGraph(nodes, deps)
   }
-  
+
   def fromCONLL(string: String): DependencyGraph = {
     fromCONLL(string.split("\n").iterator)
   }
