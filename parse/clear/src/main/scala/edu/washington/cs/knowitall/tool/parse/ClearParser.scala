@@ -48,7 +48,7 @@ class ClearParser(val postagger: Postagger = new ClearPostagger) extends Depende
       if label != "root"
       val destNode = sourceNode.getHead
     } yield {
-      new Dependency(nodeMap(sourceNode), nodeMap(destNode), label)
+      new Dependency(nodeMap(destNode), nodeMap(sourceNode), label)
     }
 
     new DependencyGraph(string, nodeMap.values, deps)
