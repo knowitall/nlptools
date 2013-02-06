@@ -17,26 +17,25 @@ import com.googlecode.clearnlp.dependency.DEPTree
 import com.googlecode.clearnlp.dependency.DEPNode
 import edu.washington.cs.knowitall.tool.tokenize.ClearTokenizer
 import edu.washington.cs.knowitall.common.Resource.using
+import edu.washington.cs.knowitall.tool.postag.Postagger
+import edu.washington.cs.knowitall.tool.postag.ClearPostagger
+import com.googlecode.clearnlp.pos.POSNode
 
-class ClearParser(val tokenizer: Tokenizer) extends DependencyParser {
-  val clearPosTagger = using (this.getClass.getResource("ontonotes-en-pos-1.3.0.jar").openStream()) { input =>
-    new CPOSTagger(new ZipInputStream(input));
-  }
+class ClearParser(val postagger: Postagger = new ClearPostagger) extends DependencyParser {
   val clearDepParser = using (this.getClass.getResource("ontonotes-en-dep-1.3.0.jar").openStream()) { input =>
     new CDEPPassParser(new ZipInputStream(input))
   }
 
   override def dependencyGraph(string: String) = {
-    val tokens = tokenizer.tokenize(string)
+    val tokens = postagger.postag(string)
     val tree = new DEPTree()
     tokens.zipWithIndex.foreach { case (token, i) =>
-      tree.add(new DEPNode(i + 1, token.string))
+      val node = new DEPNode(i + 1, token.string)
+      node.pos = token.postag
+      tree.add(node)
     }
 
-    clearPosTagger.process(tree)
     clearDepParser.process(tree)
-
-    println(tree.toStringDEP())
 
     val nodeMap = (for ((node, i) <- tree.iterator.asScala.drop(1).zipWithIndex) yield {
       node -> new DependencyNode(node.form, node.pos, i, tokens(i).offset)
@@ -57,5 +56,5 @@ class ClearParser(val tokenizer: Tokenizer) extends DependencyParser {
 }
 
 object ClearDependencyParserMain extends DependencyParserMain {
-  lazy val dependencyParser = new ClearParser(new ClearTokenizer)
+  lazy val dependencyParser = new ClearParser()
 }

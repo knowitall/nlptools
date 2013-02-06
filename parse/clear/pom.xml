@@ -20,7 +20,7 @@
     </dependency>
     <dependency>
       <groupId>edu.washington.cs.knowitall.nlptools</groupId>
-      <artifactId>nlptools-tokenize-clear_${scala.version}</artifactId>
+      <artifactId>nlptools-postag-clear_${scala.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
