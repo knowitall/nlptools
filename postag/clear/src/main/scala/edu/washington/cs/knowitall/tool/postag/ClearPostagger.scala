@@ -1,0 +1,38 @@
+package edu.washington.cs.knowitall
+package tool
+package postag
+
+import java.util.zip.ZipInputStream
+import scala.collection.JavaConverters.asScalaIteratorConverter
+import com.googlecode.clearnlp.component.pos.CPOSTagger
+import com.googlecode.clearnlp.dependency.DEPNode
+import com.googlecode.clearnlp.dependency.DEPTree
+import edu.washington.cs.knowitall.common.Resource.using
+import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
+import edu.washington.cs.knowitall.tool.tokenize.ClearTokenizer
+import edu.washington.cs.knowitall.tool.tokenize.Token
+
+class ClearPostagger(override val tokenizer: Tokenizer = new ClearTokenizer) extends Postagger(tokenizer) {
+  val clearPosTagger = using (this.getClass.getResource("ontonotes-en-pos-1.3.0.jar").openStream()) { input =>
+    new CPOSTagger(new ZipInputStream(input));
+  }
+
+  override def postagTokens(tokens: Seq[Token]) = {
+    val tree = new DEPTree()
+    tokens.zipWithIndex.foreach { case (token, i) =>
+      tree.add(new DEPNode(i + 1, token.string))
+    }
+
+    clearPosTagger.process(tree)
+
+    val postaggedTokens = for ((treeNode, token) <- (tree.iterator.asScala.drop(1).toSeq zip tokens)) yield {
+      new PostaggedToken(token, treeNode.pos)
+    }
+
+    postaggedTokens
+  }
+}
+
+object ClearPostaggerMain extends PostaggerMain {
+  override val tagger = new ClearPostagger()
+}
