@@ -9,17 +9,15 @@ import graph._
 trait DependencyParser {
   def apply(string: String) = dependencyGraph(string)
 
-  def dependencies(string: String): Iterable[Dependency]
+  def dependencies(string: String): Iterable[Dependency] = {
+    this.dependencyGraph(string).dependencies
+  }
 
   /**
     * Create a graph of the dependencies.  This has more information than
     * creating a DependencyGraph from an `Iterable[Dependency]` because it
     * will have the source text. */
-  def dependencyGraph(string: String): DependencyGraph = {
-    val dependencies = this.dependencies(string)
-    val nodes = dependencies.toList.flatMap(dep => List(dep.source, dep.dest))
-    new DependencyGraph(string, nodes, dependencies)
-  }
+  def dependencyGraph(string: String): DependencyGraph
 }
 
 abstract class DependencyParserMain extends LineProcessor("parser") {
