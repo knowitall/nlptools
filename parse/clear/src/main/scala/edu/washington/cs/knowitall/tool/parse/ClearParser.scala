@@ -17,11 +17,14 @@ import com.googlecode.clearnlp.dependency.DEPTree
 import com.googlecode.clearnlp.dependency.DEPNode
 import edu.washington.cs.knowitall.tool.tokenize.ClearTokenizer
 import edu.washington.cs.knowitall.common.Resource.using
+import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
 import edu.washington.cs.knowitall.tool.postag.Postagger
 import edu.washington.cs.knowitall.tool.postag.ClearPostagger
-import com.googlecode.clearnlp.pos.POSNode
 
-class ClearParser(val postagger: Postagger = new ClearPostagger) extends DependencyParser {
+class ClearParser(val postagger: Postagger = new ClearPostagger()) extends DependencyParser {
+  val clearMorpha = using(this.getClass.getResource("/edu/washington/cs/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
+    new CEnglishMPAnalyzer(new ZipInputStream(input))
+  }
   val clearDepParser = using (this.getClass.getResource("ontonotes-en-dep-1.3.0.jar").openStream()) { input =>
     new CDEPPassParser(new ZipInputStream(input))
   }
@@ -35,6 +38,7 @@ class ClearParser(val postagger: Postagger = new ClearPostagger) extends Depende
       tree.add(node)
     }
 
+    clearMorpha.process(tree)
     clearDepParser.process(tree)
 
     val nodeMap = (for ((node, i) <- tree.iterator.asScala.drop(1).zipWithIndex) yield {
