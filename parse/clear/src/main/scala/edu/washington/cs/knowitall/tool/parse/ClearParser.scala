@@ -1,0 +1,61 @@
+package edu.washington.cs.knowitall
+package tool
+package parse
+
+import scala.collection.JavaConverters._
+import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
+import graph.Dependency
+import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
+import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
+import java.lang.ProcessBuilder
+import java.io.PrintWriter
+import com.googlecode.clearnlp.component.pos.CPOSTagger
+import com.googlecode.clearnlp.component.dep.CDEPPassParser
+import java.util.zip.ZipInputStream
+import com.googlecode.clearnlp.nlp.NLPDecode
+import com.googlecode.clearnlp.dependency.DEPTree
+import com.googlecode.clearnlp.dependency.DEPNode
+import edu.washington.cs.knowitall.tool.tokenize.ClearTokenizer
+import edu.washington.cs.knowitall.common.Resource.using
+
+class ClearParser(val tokenizer: Tokenizer) extends DependencyParser {
+  val clearPosTagger = using (this.getClass.getResource("ontonotes-en-pos-1.3.0.jar").openStream()) { input =>
+    new CPOSTagger(new ZipInputStream(input));
+  }
+  val clearDepParser = using (this.getClass.getResource("ontonotes-en-dep-1.3.0.jar").openStream()) { input =>
+    new CDEPPassParser(new ZipInputStream(input))
+  }
+
+  override def dependencyGraph(string: String) = {
+    val tokens = tokenizer.tokenize(string)
+    val tree = new DEPTree()
+    tokens.zipWithIndex.foreach { case (token, i) =>
+      tree.add(new DEPNode(i + 1, token.string))
+    }
+
+    clearPosTagger.process(tree)
+    clearDepParser.process(tree)
+
+    println(tree.toStringDEP())
+
+    val nodeMap = (for ((node, i) <- tree.iterator.asScala.drop(1).zipWithIndex) yield {
+      node -> new DependencyNode(node.form, node.pos, i, tokens(i).offset)
+    }).toMap
+
+    val deps = for {
+      sourceNode <- tree.iterator.asScala.drop(1).toList
+      if sourceNode.hasHead
+      val label = sourceNode.getLabel
+      if label != "root"
+      val destNode = sourceNode.getHead
+    } yield {
+      new Dependency(nodeMap(sourceNode), nodeMap(destNode), label)
+    }
+
+    new DependencyGraph(string, nodeMap.values, deps)
+  }
+}
+
+object ClearDependencyParserMain extends DependencyParserMain {
+  lazy val dependencyParser = new ClearParser(new ClearTokenizer)
+}
