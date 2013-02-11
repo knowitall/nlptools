@@ -18,7 +18,7 @@ object ConllToGraph extends App {
       case None => new PrintWriter(System.out)
     }) { writer =>
       val lines = source.getLines
-      
+
       while (!lines.isEmpty) {
         val graph = DependencyGraph.fromCONLL(lines)
         writer.println(graph.serialize)
