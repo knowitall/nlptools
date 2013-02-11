@@ -19,12 +19,14 @@ class BllipParser(val tokenizer: Tokenizer) extends BaseStanfordParser with Cons
 
   val blipp = new CharniakParser("bllip-parser/first-stage/PARSE/parseIt", "bllip-parser/first-stage/DATA/EN/")
 
+  /*
   object BllipProcess {
     import sys.process._
 
     private var result: String = _
     private val bllip = "bllip-parser/first-stage/PARSE/parseIt" run BasicIO(false, (line: String) => result = line, None).writeInput
   }
+  */
 
   private def parseHelper(string: String) = {
     import scala.collection.JavaConverters._
@@ -58,11 +60,11 @@ class BllipParser(val tokenizer: Tokenizer) extends BaseStanfordParser with Cons
   }
 }
 
-object BlippDependencyParserMain extends DependencyParserMain {
+object BllipDependencyParserMain extends DependencyParserMain {
   lazy val dependencyParser = new BllipParser
 }
 
-object BlippConstituencyParserMain
+object BllipConstituencyParserMain
   extends ConstituencyParserMain {
   lazy val constituencyParser = new BllipParser
 }

@@ -14,6 +14,16 @@
   </properties>
   <dependencies>
     <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>unfiltered-filter_2.9.2</artifactId>
+      <version>0.6.5</version>
+    </dependency>
+    <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>unfiltered-jetty_2.9.2</artifactId>
+      <version>0.6.5</version>
+    </dependency>
+    <dependency>
       <groupId>edu.washington.cs.knowitall.nlptools</groupId>
       <artifactId>nlptools-core_${scala.version}</artifactId>
       <version>${project.version}</version>
