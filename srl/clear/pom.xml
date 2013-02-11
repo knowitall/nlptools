@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>nlptools-parse-clear_2.9.2</artifactId>
+  <artifactId>nlptools-srl-clear_2.9.2</artifactId>
   <version>2.3.1-SNAPSHOT</version>
   <name>nlptools-srl-clear</name>
   <parent>
@@ -20,7 +20,7 @@
     </dependency>
     <dependency>
       <groupId>edu.washington.cs.knowitall.nlptools</groupId>
-      <artifactId>nlptools-postag-clear_${scala.version}</artifactId>
+      <artifactId>nlptools-parse-clear_${scala.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
