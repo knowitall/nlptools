@@ -5,6 +5,7 @@ package parse
 import scala.collection.JavaConverters._
 import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
 import graph.Dependency
+import edu.washington.cs.knowitall.tool.parse.DependencyParserMain;
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
 import java.lang.ProcessBuilder
