@@ -29,6 +29,8 @@ object Roles {
       case "A0" => A0
       case "A1" => A1
       case "A2" => A2
+      case "A3" => A3
+      case "A4" => A4
       case "AM-ADV" => AM_ADV
       case "AM-DIR" => AM_DIR
       case "AM-DIS" => AM_DIS
@@ -49,6 +51,8 @@ object Roles {
   case object A0 extends Role("subject")
   case object A1 extends Role("object")
   case object A2 extends Role("indirect object")
+  case object A3 extends Role("???")
+  case object A4 extends Role("???")
   case object AM_ADV extends Role("adverbial modification")
   case object AM_DIR extends Role("direction")
   case object AM_DIS extends Role("discourse marker")
