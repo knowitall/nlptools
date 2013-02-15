@@ -41,6 +41,7 @@ extends Token(string, offset) {
   def isVerbPresent = isVerbNon3pPresent || isVerb3pPresent
   def isVerb = postag.startsWith("VB")
 
+  def isPlainAdjective = postag == "JJ"
   def isComparativeAdjective = postag == "JJR"
   def isSuperlativeAdjective = postag == "JJS"
   def isAdjective = postag == "JJ" || isComparativeAdjective || isSuperlativeAdjective
@@ -50,6 +51,17 @@ extends Token(string, offset) {
   def isPronoun = isPersonalPronoun || isPossessivePronoun
 
   def isPossessive = isPossessivePronoun || postag == "POS"
+    
+  def isDeterminer = postag == "DT"
+  def isCardinalNumber = postag == "CD"
+  def isSuperlativeAdverb = postag == "RBS"
+  def isPunctuation = punctuation.contains(postag)
+  def isSubordinatingConjunction = postag == "IN"
+  def isCoordinatingConjunction = postag == "CC"
+  def isConjunction = isSubordinatingConjunction || isCoordinatingConjunction
+  def isPreposition = postag == "IN"
+    
+  val punctuation = Set("#", "$", "''", "(", ")", ",", ".", ":", "``")
 }
 
 object PostaggedToken {
