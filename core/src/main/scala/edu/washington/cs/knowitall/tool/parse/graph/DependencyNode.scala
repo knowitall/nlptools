@@ -13,7 +13,7 @@ import tool.postag.PostaggedToken
 /** A representation for a node in the graph of dependencies.  A node
   * represents one or more adjacent tokens in the source sentence.
   */
-class DependencyNode(string: String, postag: String, val indices: Interval, offset: Int) extends PostaggedToken(postag, string, offset) with Ordered[DependencyNode] {
+class DependencyNode(string: String, postag: String, val tokenInterval: Interval, offset: Int) extends PostaggedToken(postag, string, offset) with Ordered[DependencyNode] {
   require(string != null)
   require(postag != null)
 
@@ -21,20 +21,26 @@ class DependencyNode(string: String, postag: String, val indices: Interval, offs
   def this(text: String, postag: String, index: Int, offset: Int) =
     this(text, postag, Interval.singleton(index), offset)
 
-  def this(postagged: PostaggedToken, indices: Interval) =
-    this(postagged.string, postagged.postag, indices, postagged.offset)
+  def this(postagged: PostaggedToken, tokenInterval: Interval) =
+    this(postagged.string, postagged.postag, tokenInterval, postagged.offset)
 
   def text = string
+
+  def index = {
+    require(indices.size == 1, "node must span a single index")
+    indices.head
+  }
+  def indices = tokenInterval
 
   // extend Ordered[DependencyNode]
   override def compare(that: DependencyNode) = {
     if (this == that) 0
-    else if (this.indices intersects that.indices) {
+    else if (this.tokenInterval intersects that.tokenInterval) {
       implicitly[Ordering[Tuple3[String, String, Int]]].compare(
           (this.string, this.postag, this.offset),
           (that.string, that.postag, that.offset))
     }
-    else this.indices.compare(that.indices)
+    else this.tokenInterval.compare(that.tokenInterval)
   }
 
   // extend Object
@@ -43,10 +49,10 @@ class DependencyNode(string: String, postag: String, val indices: Interval, offs
   override def equals(that: Any) = that match {
     case that: DependencyNode => that.text.equals(this.text) &&
       that.postag.equals(this.postag) &&
-      that.indices.equals(this.indices)
+      that.tokenInterval.equals(this.tokenInterval)
     case _ => false
   }
-  override def hashCode() = this.text.hashCode * 37 + this.postag.hashCode * 37 + this.indices.hashCode
+  override def hashCode() = this.text.hashCode * 37 + this.postag.hashCode * 37 + this.tokenInterval.hashCode
 
   private var plemma: String = null
   def lemma(implicit stemmer: Stemmer) = {
@@ -56,13 +62,13 @@ class DependencyNode(string: String, postag: String, val indices: Interval, offs
     plemma
   }
 
-  def toFullString = this.text + "_" + this.postag + "_" + this.indices.mkString("_")
+  def toFullString = this.text + "_" + this.postag + "_" + this.tokenInterval.mkString("_")
 
-  def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, indices, offset)
+  def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, tokenInterval, offset)
   def serialize = {
-    if (indices.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple indices")
+    if (tokenInterval.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple tokenInterval")
     def clean(string: String): String = string.replaceAll(";", ":")
-    clean(text).replaceAll("[[_()][^\\p{Graph}]]", "") + "_" + clean(postag) + "_" + indices.start + "_" + offset;
+    clean(text).replaceAll("[[_()][^\\p{Graph}]]", "") + "_" + clean(postag) + "_" + tokenInterval.start + "_" + offset;
   }
 }
 
@@ -81,15 +87,15 @@ object DependencyNode {
 
     // union the intervals, or throw a more informative exception if they are
     // not adjacent
-    val indices = try {
-      Interval.union(sorted.map(_.indices))
+    val tokenInterval = try {
+      Interval.union(sorted.map(_.tokenInterval))
     }
     catch {
       case e =>
         throw new IllegalArgumentException("A set of non-adjacent intervals cannot be merged: " + e.toString)
     }
 
-    new DependencyNode(text, postag, indices, sorted.iterator.map(_.offset).min)
+    new DependencyNode(text, postag, tokenInterval, sorted.iterator.map(_.offset).min)
   }
 
   /**
@@ -106,15 +112,15 @@ object DependencyNode {
 
     // union the intervals, or throw a more informative exception if they are
     // not adjacent
-    val indices = try {
-      Interval.union(sorted.map(_.indices))
+    val tokenInterval = try {
+      Interval.union(sorted.map(_.tokenInterval))
     }
     catch {
       case e =>
         throw new IllegalArgumentException("A set of non-adjacent intervals cannot be merged: " + e.toString)
     }
 
-    new DependencyNode(text, postag, indices, sorted.iterator.map(_.offset).min)
+    new DependencyNode(text, postag, tokenInterval, sorted.iterator.map(_.offset).min)
   }
 
   def deserialize(string: String) = {
