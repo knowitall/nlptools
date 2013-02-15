@@ -52,7 +52,7 @@ class BllipParser(val tokenizer: Tokenizer) extends BaseStanfordParser with Cons
 
     val nodesWithOffsets = nodes map (node => withOffset(node))
     val depsWithOffsets = deps.map(_.mapNodes(node => withOffset(node)))
-    new DependencyGraph(string, nodesWithOffsets.toList.sortBy(_.indices), depsWithOffsets)
+    new DependencyGraph(nodesWithOffsets.toList.sortBy(_.indices), depsWithOffsets)
   }
 
   def parse(string: String) = {

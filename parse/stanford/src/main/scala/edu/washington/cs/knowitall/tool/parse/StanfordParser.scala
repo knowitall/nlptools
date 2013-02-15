@@ -54,7 +54,7 @@ class StanfordParser(lp: LexicalizedParser) extends BaseStanfordParser with Cons
 
   override def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
     val (nodes, deps) = StanfordParser.dependencyHelper(lp.apply(string), collapse)
-    new DependencyGraph(string, nodes.toList.sortBy(_.indices), deps)
+    new DependencyGraph(nodes.toList.sortBy(_.indices), deps)
   }
 
   override def parse(string: String) = {

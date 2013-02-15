@@ -121,6 +121,6 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
   override def dependencyGraph(sentence: String): DependencyGraph = {
     val deps = dependencies(sentence)
     val nodes: Set[DependencyNode] = deps.flatMap(dep => Set(dep.source, dep.dest))(scala.collection.breakOut)
-    new DependencyGraph(sentence, nodes, deps)
+    new DependencyGraph(nodes, deps)
   }
 }

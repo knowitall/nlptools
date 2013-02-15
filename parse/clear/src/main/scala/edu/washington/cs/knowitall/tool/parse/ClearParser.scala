@@ -4,8 +4,8 @@ package parse
 
 import scala.collection.JavaConverters._
 import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
+import edu.washington.cs.knowitall.tool.tokenize.Token
 import graph.Dependency
-import edu.washington.cs.knowitall.tool.parse.DependencyParserMain;
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
 import java.lang.ProcessBuilder
@@ -42,6 +42,12 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
     clearMorpha.process(tree)
     clearDepParser.process(tree)
 
+    ClearParser.graphFromTree(string, tree, tokens)
+  }
+}
+
+object ClearParser {
+  def graphFromTree(string: String, tree: DEPTree, tokens: Seq[Token]) = {
     val nodeMap = (for ((node, i) <- tree.iterator.asScala.drop(1).zipWithIndex) yield {
       node -> new DependencyNode(node.form, node.pos, i, tokens(i).offset)
     }).toMap
@@ -56,7 +62,7 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
       new Dependency(nodeMap(destNode), nodeMap(sourceNode), label)
     }
 
-    new DependencyGraph(string, nodeMap.values, deps)
+    new DependencyGraph(nodeMap.values, deps)
   }
 }
 
