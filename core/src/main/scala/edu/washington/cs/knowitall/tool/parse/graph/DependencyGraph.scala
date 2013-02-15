@@ -17,8 +17,6 @@ import edu.washington.cs.knowitall.tool.stem.Stemmer
   * This richer representation may include the text of the original sentence,
   * the original nodes (before collapsing), and the original dependencies. */
 class DependencyGraph (
-    /** the text of the source sentence */
-    val text: String,
     /** the `DependencyNode`s from the parser */
     val nodes: immutable.SortedSet[DependencyNode],
     /** the `Dependency`s from the parser */
@@ -27,7 +25,6 @@ class DependencyGraph (
     val graph: Graph[DependencyNode]
   ) {
 
-  require(text != null)
   require(nodes != null)
   require(dependencies != null)
   require(graph != null)
@@ -43,32 +40,32 @@ class DependencyGraph (
   */
 
   // constructors
-
-  def this(text: String,
-      nodes: immutable.SortedSet[DependencyNode],
-      dependencies: immutable.SortedSet[Dependency]) =
-    this(text,
-        immutable.SortedSet[DependencyNode]() ++ nodes,
-        immutable.SortedSet[Dependency]() ++ dependencies,
-        new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
-
-  def this(text: String,
-      nodes: Iterable[DependencyNode],
-      dependencies: Iterable[Dependency]) =
-    this(text,
-      immutable.SortedSet[DependencyNode]() ++ nodes,
-      immutable.SortedSet[Dependency]() ++ dependencies)
-
   def this(nodes: immutable.SortedSet[DependencyNode],
       dependencies: immutable.SortedSet[Dependency]) =
-    this(nodes.iterator.map(_.text).mkString(" "),
-        immutable.SortedSet[DependencyNode]() ++ nodes,
-        immutable.SortedSet[Dependency]() ++ dependencies)
+    this(immutable.SortedSet[DependencyNode]() ++ nodes,
+        immutable.SortedSet[Dependency]() ++ dependencies,
+        new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
 
   def this(nodes: Iterable[DependencyNode],
       dependencies: Iterable[Dependency]) =
     this(immutable.SortedSet[DependencyNode]() ++ nodes,
-        immutable.SortedSet[Dependency]() ++ dependencies)
+      immutable.SortedSet[Dependency]() ++ dependencies)
+
+  /** the text of the source sentence */
+  val text = {
+    def buildString(nodes: Iterable[DependencyNode]) = {
+      val builder = new StringBuilder()
+
+      for (node <- nodes) {
+        builder.append(" " * (node.offset - builder.length))
+        builder.append(node.text)
+      }
+
+      builder.toString()
+    }
+
+    buildString(nodes)
+  }
 
   def canEqual(that: Any) = that.isInstanceOf[DependencyGraph]
   override def equals(that: Any) = that match {
@@ -101,11 +98,11 @@ class DependencyGraph (
     val graph = this.graph.map(f)
     val deps = this.dependencies.map(_.mapNodes(f))
 
-    new DependencyGraph(text, nodes, deps, graph)
+    new DependencyGraph(nodes, deps, graph)
   }
 
   def mapGraph(f: Graph[DependencyNode]=>Graph[DependencyNode]) = {
-    new DependencyGraph(this.text, this.nodes, this.dependencies, f(this.graph))
+    new DependencyGraph(this.nodes, this.dependencies, f(this.graph))
   }
 
   def collapse = {
@@ -298,12 +295,12 @@ class DependencyGraph (
       new Graph[DependencyNode](graph.vertices, graph.edges ++ newEdges)
     }
 
-    new DependencyGraph(this.text, this.nodes, this.dependencies,
+    new DependencyGraph(this.nodes, this.dependencies,
         edgifyPrepositions(distributeConjunctions(collapseJunctions(collapseMultiwordPrepositions(this.graph)))))
   }
 
   def collapseXNsubj =
-    new DependencyGraph(this.text, this.nodes, this.dependencies,
+    new DependencyGraph(this.nodes, this.dependencies,
       new Graph[DependencyNode](graph.edges.map { dep =>
         if (dep.label.equals("xsubj") || dep.label.equals("nsubj"))
           new Dependency(dep.source, dep.dest, "subj")
@@ -324,7 +321,7 @@ class DependencyGraph (
           sorted.map(_.postag).mkString(" of "), Interval.span(sorted.map(_.indices)), sorted.iterator.map(_.offset).min)
     }
 
-    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapse(pred(_))(merge))
+    new DependencyGraph(this.nodes, this.dependencies, graph.collapse(pred(_))(merge))
   }
 
   /**
@@ -363,7 +360,7 @@ class DependencyGraph (
       (implicit merge: Traversable[DependencyNode]=>DependencyNode) = {
     val components = adjacentComponents(edge => pred(edge))
     val graph = this.graph.collapseGroups(components)(merge)
-    new DependencyGraph(this.text, this.nodes, this.dependencies, graph)
+    new DependencyGraph(this.nodes, this.dependencies, graph)
   }
 
   def collapseNounGroups(dividors: List[String] = List.empty) = {
@@ -398,7 +395,7 @@ class DependencyGraph (
       if part.size > 1
     } yield(part.toSet))(scala.collection.breakOut)
 
-    new DependencyGraph(this.text, this.nodes, this.dependencies, graph.collapseGroups(groupsToCollapse))
+    new DependencyGraph(this.nodes, this.dependencies, graph.collapseGroups(groupsToCollapse))
   }
 
   def directedAdjacentCollapse(labels: Set[String]): DependencyGraph = {
@@ -408,7 +405,7 @@ class DependencyGraph (
     // It is often a mistake due to a strange parse.  It may also be an unusual edge.
     val components = adjacentComponents(pred) filter (this.graph.areConnected)
     val graph = this.graph.collapseGroups(components)(DependencyNode.directedMerge(this.graph))
-    new DependencyGraph(this.text, this.nodes, this.dependencies, graph)
+    new DependencyGraph(this.nodes, this.dependencies, graph)
   }
 
   def directedAdjacentCollapse(label: String): DependencyGraph = directedAdjacentCollapse(Set(label))
@@ -423,7 +420,6 @@ class DependencyGraph (
       new DependencyNode(node.text, f(node.postag), node.indices, node.offset)
 
     new DependencyGraph(
-      this.text,
       this.nodes.map(mapNode),
       this.dependencies.map(_.mapNodes(mapNode)), graph.map(mapNode))
   }
@@ -600,11 +596,11 @@ object DependencyGraph {
         (nodes, Dependencies.deserialize(string))
       }
     }
-
+    
     try {
-      val (nodes, deps) = rec(string, immutable.SortedSet[DependencyNode]())
+      val (nodes, deps) = rec(string.trim, immutable.SortedSet[DependencyNode]())
       val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
-      new DependencyGraph((depNodes ++ nodes).iterator.map(_.text).mkString(" "), nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
+      new DependencyGraph(nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
     }
     catch {
       case e => throw new DependencyGraph.SerializationException(
@@ -612,6 +608,8 @@ object DependencyGraph {
     }
   }
 
+  // WARNING: this won't restore the actual sentence text because
+  // there is no offset information stored in CONLL format.
   def fromCONLL(iterator: Iterator[String]): DependencyGraph = {
     val section = iterator.takeWhile(!_.trim.isEmpty).toIndexedSeq
 
@@ -619,7 +617,7 @@ object DependencyGraph {
     val nodes = section.map { line =>
       val Array(index, string, lemma, postag, _, _, _) = line.split("\t")
       val node = new DependencyNode(string, postag, index.toInt - 1, offset)
-      offset += string.length
+      offset += string.length + 1
 
       node
     }

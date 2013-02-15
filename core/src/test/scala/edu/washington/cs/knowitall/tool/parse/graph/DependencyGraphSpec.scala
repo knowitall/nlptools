@@ -47,7 +47,9 @@ object DependencyGraphSpecTest extends Specification {
 
   {
     // pathological nn edges (nn components with non-adjacent nodes)
-    val dgraph = DependencyGraph.deserialize("nsubj(relays_VBZ_1_0, Paul_NNP_0_0); prep_to(relays_VBZ_1_0, us_PRP_3_0); det(will_NN_6_0, the_DT_4_0); amod(will_NN_6_0, good_JJ_5_0); dobj(relays_VBZ_1_0, will_NN_6_0); poss(Father_NNP_10_0, our_PRP$_8_0); amod(Father_NNP_10_0, heavenly_JJ_9_0); prep_of(will_NN_6_0, Father_NNP_10_0); det(Jesus_NNP_14_0, the_DT_12_0); nn(Jesus_NNP_14_0, Lord_NNP_13_0); prep_of(will_NN_6_0, Jesus_NNP_14_0); conj_and(Father_NNP_10_0, Jesus_NNP_14_0); punct(relays_VBZ_1_0, _,_15_0); xcomp(relays_VBZ_1_0, saying_VBG_16_0); punct(BE_VB_19_0, _,_17_0); nsubj(BE_VB_19_0, PEACE_NNP_18_0); nsubj(LOVE_JJ_25_0, PEACE_NNP_18_0); parataxis(saying_VBG_16_0, BE_VB_19_0); det(BRETHREN_NN_22_0, THE_DT_21_0); prep_to(BE_VB_19_0, BRETHREN_NN_22_0); punct(BE_VB_19_0, _,_23_0); parataxis(saying_VBG_16_0, LOVE_JJ_25_0); conj_and(BE_VB_19_0, LOVE_JJ_25_0); nn(FATHER_NNP_32_0, FAITH_NNP_27_0); punct(FAITH_NNP_27_0, _,_28_0); nn(GOD_NNP_30_0, FROM_NNP_29_0); conj(FAITH_NNP_27_0, GOD_NNP_30_0); det(FATHER_NNP_32_0, THE_DT_31_0); prep_with(LOVE_JJ_25_0, FATHER_NNP_32_0); det(CHRIST-Eph_NNP_37_0, THE_DT_34_0); nn(CHRIST-Eph_NNP_37_0, LORD_NNP_35_0); nn(CHRIST-Eph_NNP_37_0, JESUS_NNP_36_0); prep_with(LOVE_JJ_25_0, CHRIST-Eph_NNP_37_0); conj_and(FATHER_NNP_32_0, CHRIST-Eph_NNP_37_0); num(CHRIST-Eph_NNP_37_0, 6:23_CD_38_0); punct(relays_VBZ_1_0, ._._39_0)")
+    "deserializes ok" in {
+      DependencyGraph.deserialize("nsubj(relays_VBZ_1_0, Paul_NNP_0_0); prep_to(relays_VBZ_1_0, us_PRP_3_0); det(will_NN_6_0, the_DT_4_0); amod(will_NN_6_0, good_JJ_5_0); dobj(relays_VBZ_1_0, will_NN_6_0); poss(Father_NNP_10_0, our_PRP$_8_0); amod(Father_NNP_10_0, heavenly_JJ_9_0); prep_of(will_NN_6_0, Father_NNP_10_0); det(Jesus_NNP_14_0, the_DT_12_0); nn(Jesus_NNP_14_0, Lord_NNP_13_0); prep_of(will_NN_6_0, Jesus_NNP_14_0); conj_and(Father_NNP_10_0, Jesus_NNP_14_0); punct(relays_VBZ_1_0, _,_15_0); xcomp(relays_VBZ_1_0, saying_VBG_16_0); punct(BE_VB_19_0, _,_17_0); nsubj(BE_VB_19_0, PEACE_NNP_18_0); nsubj(LOVE_JJ_25_0, PEACE_NNP_18_0); parataxis(saying_VBG_16_0, BE_VB_19_0); det(BRETHREN_NN_22_0, THE_DT_21_0); prep_to(BE_VB_19_0, BRETHREN_NN_22_0); punct(BE_VB_19_0, _,_23_0); parataxis(saying_VBG_16_0, LOVE_JJ_25_0); conj_and(BE_VB_19_0, LOVE_JJ_25_0); nn(FATHER_NNP_32_0, FAITH_NNP_27_0); punct(FAITH_NNP_27_0, _,_28_0); nn(GOD_NNP_30_0, FROM_NNP_29_0); conj(FAITH_NNP_27_0, GOD_NNP_30_0); det(FATHER_NNP_32_0, THE_DT_31_0); prep_with(LOVE_JJ_25_0, FATHER_NNP_32_0); det(CHRIST-Eph_NNP_37_0, THE_DT_34_0); nn(CHRIST-Eph_NNP_37_0, LORD_NNP_35_0); nn(CHRIST-Eph_NNP_37_0, JESUS_NNP_36_0); prep_with(LOVE_JJ_25_0, CHRIST-Eph_NNP_37_0); conj_and(FATHER_NNP_32_0, CHRIST-Eph_NNP_37_0); num(CHRIST-Eph_NNP_37_0, 6:23_CD_38_0); punct(relays_VBZ_1_0, ._._39_0)") must not(throwA[Exception])
+    }
   }
   
   {
@@ -133,6 +135,13 @@ object DependencyGraphSpecTest extends Specification {
     graph.graph must_== graphOld.graph
   }
   
+  "deserialize text with correct offsets" in {
+    val pickled = "(._._5_26); nsubj(here_RB_3_14, Michael_NNP_0_0); cop(here_RB_3_14, is_VBZ_1_8); neg(here_RB_3_14, n't_RB_2_10); advmod(here_RB_3_14, anymore_RB_4_19)"
+    val graph = DependencyGraph.deserialize(pickled)
+    
+    graph.text must_== "Michael isn't here anymore."
+  }
+  
   "serializes to CONLL" in {
     implicit val stemmer = new Stemmer {
       def stem(word: String) = word.toLowerCase
@@ -158,8 +167,7 @@ object DependencyGraphSpecTest extends Specification {
     }
     val pickled = "nsubj(wanted_VBD_1_2, I_PRP_0_0); xcomp(wanted_VBD_1_2, go_VB_3_12); aux(go_VB_3_12, to_TO_2_9); prep(go_VB_3_12, to_TO_4_15); pobj(to_TO_4_15, store_NN_6_22); det(store_NN_6_22, the_DT_5_18); prep(store_NN_6_22, for_IN_7_28); pobj(for_IN_7_28, cream_NN_10_41); det(cream_NN_10_41, some_DT_8_32); nn(cream_NN_10_41, ice_NN_9_37)"
     val graph = DependencyGraph.deserialize(pickled)
-    println(graph.serialize)
-    println(DependencyGraph.fromCONLL(graph.toCONLL))
+    val newg = DependencyGraph.fromCONLL(graph.toCONLL)
     DependencyGraph.fromCONLL(graph.toCONLL) must_== graph
   }
 
