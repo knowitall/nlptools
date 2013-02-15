@@ -23,7 +23,10 @@ class Token(val string: String, val offset: Int) {
     case _ => false
   }
   
-  def interval = Interval.open(offset, offset + string.length)
+  @deprecated
+  def interval = offsets
+  
+  def offsets = Interval.open(offset, offset + string.length)
 }
 
 object Token {
