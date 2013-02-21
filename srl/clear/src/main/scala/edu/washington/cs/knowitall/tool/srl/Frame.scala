@@ -21,7 +21,7 @@ case class Argument(node: DependencyNode, role: Role) {
 }
 
 abstract class Role(val description: String) {
-  def label = this.getClass.getName.replaceAll("_", "-")
+  def label = this.getClass.getSimpleName.replaceAll("_", "-").takeWhile(_ != '$')
 }
 object Roles {
   def apply(label: String) = {
@@ -45,7 +45,7 @@ object Roles {
       case "AM-TMP" => AM_TMP
       case "C-arg" => C_ARG
       case "R-arg" => R_ARG
-
+      case _ => UnknownRole(label)
     }
   }
   case object A0 extends Role("subject")
@@ -67,4 +67,5 @@ object Roles {
   case object AM_TMP extends Role("temporal")
   case object C_ARG extends Role("continuity of an argument/adjunct of type arg")
   case object R_ARG extends Role("reference to an actual argument/adjunct of type arg")
+  case class UnknownRole(override val label: String) extends Role(label)
 }
