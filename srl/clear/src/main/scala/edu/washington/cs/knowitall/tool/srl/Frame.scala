@@ -25,6 +25,9 @@ abstract class Role(val description: String) {
 }
 object Roles {
   def apply(label: String) = {
+    val APattern = """A(\d+)""".r
+    val CPattern = """C-A(\d+)""".r
+    val RPattern = """R-A(\d+)""".r
     label match {
       case "A0" => A0
       case "A1" => A1
@@ -32,6 +35,8 @@ object Roles {
       case "A3" => A3
       case "A4" => A4
       case "A5" => A5
+      case CPattern(n) => C(n.toInt)
+      case RPattern(n) => R(n.toInt)
       case "AM-ADV" => AM_ADV
       case "AM-DIR" => AM_DIR
       case "AM-DIS" => AM_DIS
@@ -44,8 +49,8 @@ object Roles {
       case "AM-PRP" => AM_PRP
       case "AM-REC" => AM_REC
       case "AM-TMP" => AM_TMP
-      case "C-arg" => C_ARG
-      case "R-arg" => R_ARG
+      case "C" => C_ARG
+      case "R" => R_ARG
       case _ => UnknownRole(label)
     }
   }
@@ -55,6 +60,8 @@ object Roles {
   case object A3 extends Role("???")
   case object A4 extends Role("???")
   case object A5 extends Role("???")
+  case class C(n: Int) extends Role("continuation")
+  case class R(n: Int) extends Role("reference")
   case object AM_ADV extends Role("adverbial modification")
   case object AM_DIR extends Role("direction")
   case object AM_DIS extends Role("discourse marker")
