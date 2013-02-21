@@ -7,13 +7,13 @@ import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
 case class Frame(relation: Relation, arguments: Seq[Argument]) {
   override def toString = relation.toString + ":" + arguments.mkString("[", ", ", "]")
 }
-case class Relation(node: DependencyNode, name: String, sense: Int) {
-  override def toString = name + "." + String.format("%02d", int2Integer(sense))
+case class Relation(node: DependencyNode, name: String, sense: String) {
+  override def toString = name + "." + sense
 }
 object Relation {
   def fromString(node: DependencyNode, string: String) = {
     val Array(name, sense) = string.split("\\.")
-    Relation(node, name, sense.toInt)
+    Relation(node, name, sense)
   }
 }
 case class Argument(node: DependencyNode, role: Role) {
@@ -31,6 +31,7 @@ object Roles {
       case "A2" => A2
       case "A3" => A3
       case "A4" => A4
+      case "A5" => A5
       case "AM-ADV" => AM_ADV
       case "AM-DIR" => AM_DIR
       case "AM-DIS" => AM_DIS
@@ -53,6 +54,7 @@ object Roles {
   case object A2 extends Role("indirect object")
   case object A3 extends Role("???")
   case object A4 extends Role("???")
+  case object A5 extends Role("???")
   case object AM_ADV extends Role("adverbial modification")
   case object AM_DIR extends Role("direction")
   case object AM_DIS extends Role("discourse marker")
