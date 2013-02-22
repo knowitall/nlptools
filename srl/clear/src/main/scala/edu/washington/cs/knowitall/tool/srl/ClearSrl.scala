@@ -1,46 +1,28 @@
-package edu.washington.cs.knowitall
-package tool
-package srl
+package edu.washington.cs.knowitall.tool.srl
 
 import java.util.zip.ZipInputStream
+
+import scala.Option.option2Iterable
+import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.JavaConverters.asScalaIteratorConverter
-import com.googlecode.clearnlp.component.dep.CDEPPassParser
-import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
-import com.googlecode.clearnlp.dependency.DEPNode
-import scala.collection.JavaConverters._
-import com.googlecode.clearnlp.dependency.DEPTree
-import edu.washington.cs.knowitall.common.Resource.using
-import edu.washington.cs.knowitall.collection.immutable.Interval
-import edu.washington.cs.knowitall.tool.parse.graph.Dependency
-import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
-import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
-import edu.washington.cs.knowitall.tool.postag.Postagger
-import edu.washington.cs.knowitall.tool.postag.ClearPostagger
-import edu.washington.cs.knowitall.tool.parse.ClearParser
-import com.googlecode.clearnlp.component.srl.CRolesetClassifier
-import com.googlecode.clearnlp.component.srl.CSRLabeler
-import com.googlecode.clearnlp.component.pos.CPOSTagger
-import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
-import edu.washington.cs.knowitall.tool.tokenize.ClearTokenizer
-import com.googlecode.clearnlp.component.srl.CPredIdentifier
-import edu.washington.cs.knowitall.tool.postag.PostaggedToken
-import edu.washington.cs.knowitall.tool.parse.DependencyParser
 import scala.io.Source
 
+import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
+import com.googlecode.clearnlp.component.srl.CPredIdentifier
+import com.googlecode.clearnlp.component.srl.CRolesetClassifier
+import com.googlecode.clearnlp.component.srl.CSRLabeler
+import com.googlecode.clearnlp.dependency.DEPNode
+import com.googlecode.clearnlp.dependency.DEPTree
+
+import edu.washington.cs.knowitall.collection.immutable.Interval
+import edu.washington.cs.knowitall.common.Resource.using
+import edu.washington.cs.knowitall.tool.parse.ClearParser
+import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
+
 class ClearSrl {
-  /*
-  val clearPostag = using(this.getClass.getResource("/edu/washington/cs/knowitall/tool/postag/ontonotes-en-pos-1.3.0.jar").openStream()) { input =>
-    new CPOSTagger(new ZipInputStream(input));
-  }
-  */
   val clearMorpha = using(this.getClass.getResource("/edu/washington/cs/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
     new CEnglishMPAnalyzer(new ZipInputStream(input))
   }
-  /*
-  val clearDepParser = using(this.getClass.getResource("/edu/washington/cs/knowitall/tool/parse/ontonotes-en-dep-1.3.0.jar").openStream()) { input =>
-    new CDEPPassParser(new ZipInputStream(input))
-  }
-  */
   val clearRoles = using(this.getClass.getResource("ontonotes-en-role-1.3.0.jar").openStream()) { input =>
     new CRolesetClassifier(new ZipInputStream(input))
   }
@@ -104,13 +86,14 @@ class ClearSrl {
 object ClearSrlMain extends App {
   val parser = new ClearParser()
   val srl = new ClearSrl()
-  val text = "Michael Schmitz wants to move to france and buy a yacht."
-  val someGraph = "nn(Schmitz_NNP_1_8, Michael_NNP_0_0); nsubj(wants_VBZ_2_16, Schmitz_NNP_1_8); xcomp(wants_VBZ_2_16, move_VB_4_25); punct(wants_VBZ_2_16, ._._11_55); aux(move_VB_4_25, to_TO_3_22); prep(move_VB_4_25, to_IN_5_30); cc(move_VB_4_25, and_CC_7_40); conj(move_VB_4_25, buy_VB_8_44); pobj(to_IN_5_30, france_NN_6_33); dobj(buy_VB_8_44, yacht_NN_10_50); det(yacht_NN_10_50, a_DT_9_48)"
-  // val graph = parser.dependencyGraph(text)
   val source = Source.stdin
   for (line <- source.getLines) {
     val graph = parser.dependencyGraph(line)
     println(graph.serialize)
-    srl.apply(graph) foreach println
+    val frames = srl.apply(graph)
+    frames foreach println
+    frames map (_.serialize) foreach println
+    val hierarchy = FrameHierarchy.fromFrames(graph, frames.toIndexedSeq)
+    hierarchy foreach println
   }
 }

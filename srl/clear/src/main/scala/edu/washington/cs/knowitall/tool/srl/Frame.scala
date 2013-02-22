@@ -3,24 +3,61 @@ package edu.washington.cs.knowitall.tool.srl
 import edu.washington.cs.knowitall.collection.immutable.Interval
 import edu.washington.cs.knowitall.tool.tokenize.Token
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
+import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
 
 case class Frame(relation: Relation, arguments: Seq[Argument]) {
   override def toString = relation.toString + ":" + arguments.mkString("[", ", ", "]")
+  def serialize = relation.serialize + ":" + arguments.map(_.serialize).mkString("[", ", ", "]")
 }
+object Frame {
+  val pickledRegex = """([^:]*):\[(.*)\]""".r
+  def deserialize(dgraph: DependencyGraph)(pickled: String) = {
+    pickled match {
+      case pickledRegex(relation, arguments) =>
+        val rel = Relation.deserialize(dgraph)(relation)
+        val args = arguments.split(",\\s+") map Argument.deserialize(dgraph)
+        Frame(rel, args)
+      case _ => throw new IllegalArgumentException("Could not deserialize: " + pickled)
+    }
+  }
+}
+
 case class Relation(node: DependencyNode, name: String, sense: String) {
+  require(!(name matches """.*[:\[\]].*"""))
   override def toString = name + "." + sense
+  def serialize = name + "_" + node.index + "." + sense
 }
 object Relation {
   def fromString(node: DependencyNode, string: String) = {
     val Array(name, sense) = string.split("\\.")
     Relation(node, name, sense)
   }
+
+  def deserialize(dgraph: DependencyGraph)(pickled: String) = {
+    val Array(label, sense) = pickled.split("\\.")
+    val Array(name, nodeIndex) = label.split("_")
+
+    val node = dgraph.nodes.find(_.index == nodeIndex.toInt).get
+    Relation(node, name, sense)
+  }
 }
+
 case class Argument(node: DependencyNode, role: Role) {
   override def toString = role + "=" + node.string
+  def serialize = role + "=" + node.string + "_" + node.index
+}
+object Argument {
+  def deserialize(dgraph: DependencyGraph)(pickled: String) = {
+    val (roleString, rest) = pickled.span(_ != '=')
+    val Array(string, nodeIndex) = rest.drop(1).split("_")
+    val node = dgraph.nodes.find(_.index == nodeIndex.toInt).get
+    require(node.text == string, node.text + " != " + string)
+    Argument(node, Roles(roleString))
+  }
 }
 
 abstract class Role(val description: String) {
+  override def toString = label
   def label = this.getClass.getSimpleName.replaceAll("_", "-").takeWhile(_ != '$')
 }
 object Roles {
