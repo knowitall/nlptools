@@ -14,10 +14,10 @@ object StanfordNerTest extends Specification {
     val text = "This is an example sentence for the Stanford named entity recognizer ."
     val split = text.split(" ")
     val tokens = Tokenizer.computeOffsets(split, text)
-    
+
     val ner = StanfordNer.withDefaultModel
     val types = ner(tokens)
-    
+
     types.size == 1
     types.head.interval == Interval.open(36, 44)
   }
