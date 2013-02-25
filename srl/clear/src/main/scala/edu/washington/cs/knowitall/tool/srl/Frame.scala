@@ -8,6 +8,7 @@ import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
 case class Frame(relation: Relation, arguments: Seq[Argument]) {
   override def toString = relation.toString + ":" + arguments.mkString("[", ", ", "]")
   def serialize = relation.serialize + ":" + arguments.map(_.serialize).mkString("[", ", ", "]")
+  def argument(role: Role): Option[Argument] = this.arguments.find(_.role == role)
 }
 object Frame {
   val pickledRegex = """([^:]*):\[(.*)\]""".r
@@ -20,6 +21,7 @@ object Frame {
       case _ => throw new IllegalArgumentException("Could not deserialize: " + pickled)
     }
   }
+  
 }
 
 case class Relation(node: DependencyNode, name: String, sense: String) {
