@@ -88,8 +88,6 @@ object Roles {
       case "AM-PRP" => AM_PRP
       case "AM-REC" => AM_REC
       case "AM-TMP" => AM_TMP
-      case "C" => C_ARG
-      case "R" => R_ARG
       case _ => UnknownRole(label)
     }
   }
@@ -113,7 +111,5 @@ object Roles {
   case object AM_PRP extends Role("purpose")
   case object AM_REC extends Role("recipricol")
   case object AM_TMP extends Role("temporal")
-  case object C_ARG extends Role("continuity of an argument/adjunct of type arg")
-  case object R_ARG extends Role("reference to an actual argument/adjunct of type arg")
   case class UnknownRole(override val label: String) extends Role(label)
 }

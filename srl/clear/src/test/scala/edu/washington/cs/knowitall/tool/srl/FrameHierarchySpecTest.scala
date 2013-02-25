@@ -40,7 +40,6 @@ object FrameHierarchySpecTest extends Specification {
         "mistake_4.01:[A0=people_1, C-V=make_2]",
         "become_9.01:[A1=people_1, AM-TMP=over_6, AM-MOD=can_8, A2=immune_10]") map Frame.deserialize(dgraph)
       val hierarchy = FrameHierarchy.fromFrames(dgraph, frames)
-      println(hierarchy)
       hierarchy.size must_== 2
     }
   }

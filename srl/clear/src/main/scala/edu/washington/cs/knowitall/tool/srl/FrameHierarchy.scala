@@ -7,7 +7,7 @@ case class FrameHierarchy(frame: Frame, children: Seq[FrameHierarchy]) {
 }
 
 object FrameHierarchy {
-  def fromFrames(dgraph: DependencyGraph, frames: IndexedSeq[Frame]) = {
+  def fromFrames(dgraph: DependencyGraph, frames: Seq[Frame]) = {
     if (frames.isEmpty) Seq.empty
     else {
       val framesWithIndex = frames.zipWithIndex
