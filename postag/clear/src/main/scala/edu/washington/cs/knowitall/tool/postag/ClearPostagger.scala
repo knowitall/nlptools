@@ -13,7 +13,9 @@ import edu.washington.cs.knowitall.tool.tokenize.ClearTokenizer
 import edu.washington.cs.knowitall.tool.tokenize.Token
 
 class ClearPostagger(override val tokenizer: Tokenizer = new ClearTokenizer) extends Postagger(tokenizer) {
-  val clearPosTagger = using (this.getClass.getResource("ontonotes-en-pos-1.3.0.jar").openStream()) { input =>
+  val clearPosUrl = this.getClass.getResource("ontonotes-en-pos-1.3.0.jar")
+  require(clearPosUrl != null, "clear pos model not found")
+  val clearPosTagger = using (clearPosUrl.openStream()) { input =>
     new CPOSTagger(new ZipInputStream(input));
   }
 

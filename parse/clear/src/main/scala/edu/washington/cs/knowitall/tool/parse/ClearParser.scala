@@ -23,10 +23,15 @@ import edu.washington.cs.knowitall.tool.postag.Postagger
 import edu.washington.cs.knowitall.tool.postag.ClearPostagger
 
 class ClearParser(val postagger: Postagger = new ClearPostagger()) extends DependencyParser {
-  val clearMorpha = using(this.getClass.getResource("/edu/washington/cs/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
+  val clearMorphaUrl = this.getClass.getResource("/edu/washington/cs/knowitall/tool/tokenize/dictionary-1.2.0.zip")
+  require(clearMorphaUrl != null, "cannot find clear dep model")
+  val clearMorpha = using(clearMorphaUrl.openStream()) { input =>
     new CEnglishMPAnalyzer(new ZipInputStream(input))
   }
-  val clearDepParser = using (this.getClass.getResource("ontonotes-en-dep-1.3.0.jar").openStream()) { input =>
+
+  val clearDepUrl = this.getClass.getResource("/knowitall/models/clear/ontonotes-en-dep-1.3.0.jar")
+  require(clearDepUrl != null, "cannot find clear dep model")
+  val clearDepParser = using (clearDepUrl.openStream()) { input =>
     new CDEPPassParser(new ZipInputStream(input))
   }
 
