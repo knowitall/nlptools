@@ -21,7 +21,6 @@ object Frame {
       case _ => throw new IllegalArgumentException("Could not deserialize: " + pickled)
     }
   }
-  
 }
 
 case class Relation(node: DependencyNode, name: String, sense: String) {
@@ -65,8 +64,8 @@ abstract class Role(val description: String) {
 object Roles {
   def apply(label: String) = {
     val APattern = """A(\d+)""".r
-    val CPattern = """C-A(\d+)""".r
-    val RPattern = """R-A(\d+)""".r
+    val CPattern = """C-(\w+)""".r
+    val RPattern = """R-(\w+)""".r
     label match {
       case "A0" => A0
       case "A1" => A1
@@ -74,8 +73,8 @@ object Roles {
       case "A3" => A3
       case "A4" => A4
       case "A5" => A5
-      case CPattern(n) => C(n.toInt)
-      case RPattern(n) => R(n.toInt)
+      case CPattern(s) => new C(s)
+      case RPattern(s) => new R(s)
       case "AM-ADV" => AM_ADV
       case "AM-DIR" => AM_DIR
       case "AM-DIS" => AM_DIS
@@ -97,8 +96,12 @@ object Roles {
   case object A3 extends Role("???")
   case object A4 extends Role("???")
   case object A5 extends Role("???")
-  case class C(n: Int) extends Role("continuation")
-  case class R(n: Int) extends Role("reference")
+  case class C(string: String) extends Role("continuation") {
+    def role: Role = Roles(string)
+  }
+  case class R(string: String) extends Role("reference") {
+    def role: Role = Roles(string)
+  }
   case object AM_ADV extends Role("adverbial modification")
   case object AM_DIR extends Role("direction")
   case object AM_DIS extends Role("discourse marker")
@@ -111,5 +114,7 @@ object Roles {
   case object AM_PRP extends Role("purpose")
   case object AM_REC extends Role("recipricol")
   case object AM_TMP extends Role("temporal")
-  case class UnknownRole(override val label: String) extends Role(label)
+  case class UnknownRole(val role: String) extends Role(role) {
+    override def label = role
+  }
 }

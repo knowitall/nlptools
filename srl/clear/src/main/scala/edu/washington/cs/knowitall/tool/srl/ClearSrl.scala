@@ -23,13 +23,13 @@ class ClearSrl {
   val clearMorpha = using(this.getClass.getResource("/edu/washington/cs/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
     new CEnglishMPAnalyzer(new ZipInputStream(input))
   }
-  val clearRoles = using(this.getClass.getResource("ontonotes-en-role-1.3.0.jar").openStream()) { input =>
+  val clearRoles = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-role-1.3.0.jar").openStream()) { input =>
     new CRolesetClassifier(new ZipInputStream(input))
   }
-  val clearPred = using(this.getClass.getResource("ontonotes-en-pred-1.3.0.jar").openStream()) { input =>
+  val clearPred = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-pred-1.3.0.jar").openStream()) { input =>
     new CPredIdentifier(new ZipInputStream(input))
   }
-  val clearSrl = using(this.getClass.getResource("ontonotes-en-srl-1.3.0.jar").openStream()) { input =>
+  val clearSrl = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-srl-1.3.0.jar").openStream()) { input =>
     new CSRLabeler(new ZipInputStream(input))
   }
 
