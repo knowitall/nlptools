@@ -64,8 +64,8 @@ abstract class Role(val description: String) {
 object Roles {
   def apply(label: String) = {
     val APattern = """A(\d+)""".r
-    val CPattern = """C-(\w+)""".r
-    val RPattern = """R-(\w+)""".r
+    val CPattern = """C-([-a-zA-Z_0-9]+)""".r
+    val RPattern = """R-([-a-zA-Z_0-9]+)""".r
     label match {
       case "A0" => A0
       case "A1" => A1
