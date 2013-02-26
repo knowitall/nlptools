@@ -3,6 +3,9 @@ package edu.washington.cs.knowitall.tool.srl
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
 
 case class FrameHierarchy(frame: Frame, children: Seq[FrameHierarchy]) {
+  def height: Int =
+    if (children.isEmpty) 1
+    else 1 + children.iterator.map(_.height).max
   override def toString = frame.toString + (if (children.size > 0) (" < " + children.mkString(", ")) else "")
 }
 
@@ -33,7 +36,7 @@ object FrameHierarchy {
 
         for ((frameIndex, childrenIndices) <- targetDescendants) {
           val frame = frames(frameIndex)
-          val children = childrenIndices map hierarchies
+          val children = childrenIndices flatMap hierarchies.get
           hierarchies --= childrenIndices
 
           hierarchies += frameIndex -> FrameHierarchy(frame, children)

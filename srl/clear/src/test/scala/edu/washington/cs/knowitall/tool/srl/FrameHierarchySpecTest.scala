@@ -43,4 +43,18 @@ object FrameHierarchySpecTest extends Specification {
       hierarchy.size must_== 2
     }
   }
+
+  {
+    val sentence = "John is beginning to want to blow his nose."
+    ("no errors with: '" + sentence + "'") in {
+      val dgraph = DependencyGraph.deserialize("nsubj(beginning_VBG_2_8, John_NNP_0_0); aux(beginning_VBG_2_8, is_VBZ_1_5); xcomp(beginning_VBG_2_8, want_VB_4_21); punct(beginning_VBG_2_8, ._._9_42); aux(want_VB_4_21, to_TO_3_18); xcomp(want_VB_4_21, blow_VB_6_29); aux(blow_VB_6_29, to_TO_5_26); dobj(blow_VB_6_29, nose_NN_8_38); poss(nose_NN_8_38, his_PRP$_7_34)")
+      val frames = IndexedSeq(
+        "begin_2.01:[A0=John_0, A1=want_4]",
+        "want_4.01:[A0=John_0, A1=blow_6]",
+        "blow_6.09:[A0=John_0, A1=nose_8]") map Frame.deserialize(dgraph)
+      val hierarchy = FrameHierarchy.fromFrames(dgraph, frames)
+      hierarchy.size must_== 1
+      hierarchy.head.height == 3
+    }
+  }
 }
