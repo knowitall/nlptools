@@ -18,7 +18,7 @@ object FrameHierarchy {
       // find all ancestor -> descendant relationships
       val descendants = framesWithIndex.map {
         case (frame, index) =>
-          val inferiors = dgraph.graph.inferiors(frame.relation.node)
+          val inferiors = dgraph.graph.inferiors(frame.relation.node, dedge => !(dedge.source == frame.relation.node && dedge.label == "conj"))
           val children = framesWithIndex.filter {
             case (child, index) =>
               frame != child &&
