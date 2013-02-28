@@ -11,7 +11,7 @@ import java.net.URL
 
 class ClearTokenizer(modelUrl: URL = ClearTokenizer.defaultModelUrl)
 extends Tokenizer {
-  require(modelUrl != null, "model url is null")
+  require(modelUrl != null, "tokenizer model url is null")
 
   val tokenizer =
     using(modelUrl.openStream()) { inputStream =>
