@@ -98,9 +98,11 @@ object Roles {
   case object A5 extends Role("???")
   case class C(string: String) extends Role("continuation") {
     def role: Role = Roles(string)
+    override def label = "C-" + string
   }
   case class R(string: String) extends Role("reference") {
     def role: Role = Roles(string)
+    override def label = "R-" + string
   }
   case object AM_ADV extends Role("adverbial modification")
   case object AM_DIR extends Role("direction")

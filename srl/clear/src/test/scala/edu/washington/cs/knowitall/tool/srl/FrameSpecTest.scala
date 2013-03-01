@@ -14,7 +14,8 @@ object FrameSpecTest extends Specification {
   }
 
   val serializationTests = List(
-      SerializationTest("nsubj(flew_VBD_1_10, MichaJohn_NNP_0_0); prep(flew_VBD_1_10, from_IN_2_15); prep(flew_VBD_1_10, to_IN_4_27); pobj(from_IN_2_15, Europe_NNP_3_20)", "fly_1.01:[A1=MichaJohn_0, AM_DIR=from_2, AM_DIR=to_4]")
+      SerializationTest("nsubj(flew_VBD_1_10, MichaJohn_NNP_0_0); prep(flew_VBD_1_10, from_IN_2_15); prep(flew_VBD_1_10, to_IN_4_27); pobj(from_IN_2_15, Europe_NNP_3_20)", "fly_1.01:[A1=MichaJohn_0, AM_DIR=from_2, AM_DIR=to_4]"),
+      SerializationTest("nsubj(turned_VBD_1_8, Michael_NNP_0_0); dobj(turned_VBD_1_8, light_NN_3_19); prt(turned_VBD_1_8, off_RP_4_25); punct(turned_VBD_1_8, ._._5_28); det(light_NN_3_19, the_DT_2_15)", "turn_1.01:[A0=Michael_0, A1=light_3, C-V=off_4]")
   )
 
   for (test <- serializationTests) {
