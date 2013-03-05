@@ -44,7 +44,7 @@ extends Token(string, offset) {
   def isPlainAdjective = postag == "JJ"
   def isComparativeAdjective = postag == "JJR"
   def isSuperlativeAdjective = postag == "JJS"
-  def isAdjective = postag == "JJ" || isComparativeAdjective || isSuperlativeAdjective
+  def isAdjective = isPlainAdjective || isComparativeAdjective || isSuperlativeAdjective
 
   def isPersonalPronoun = postag == "PRP"
   def isPossessivePronoun = postag == "PRP$"
