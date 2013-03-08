@@ -24,6 +24,25 @@ abstract class Chunker(val postagger: postag.Postagger) {
   }
 }
 
+object Chunker {
+  def joinOf(chunks: Seq[ChunkedToken]): Seq[ChunkedToken] = {
+    var mutableChunks = chunks
+    
+    for (index <- Range(0, chunks.size)) {
+      val chunk = chunks(index)
+      if (chunk.string.toLowerCase == "of" && chunk.postag == "IN" &&
+          (index > 0 && (chunks(index - 1).chunk endsWith "NP")) && 
+          (index < chunks.length && chunks(index + 1).chunk == "B-NP")) {
+        val nextChunk = chunks(index + 1)
+        mutableChunks = mutableChunks.updated(index, new ChunkedToken("I-NP", chunk.postag, chunk.string, chunk.offset))
+        mutableChunks = mutableChunks.updated(index + 1, new ChunkedToken("I-NP", nextChunk.postag, nextChunk.string, nextChunk.offset))
+      }
+    }
+    
+    mutableChunks
+  }
+}
+
 abstract class ChunkerMain
 extends LineProcessor("chunker") {
   def chunker: Chunker
