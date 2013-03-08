@@ -8,10 +8,6 @@ object NlpToolsBuild extends Build {
     breezeTokenize, breezeSentence, breezeConf,
     morphaStemmer, snowballStemmer)
 
-  val junit = "junit" % "junit" % "4.11"
-
-  lazy val core = Project(id = "nlptools-core", base = file("core"))
-
   val opennlp = "org.apache.opennlp" % "opennlp-tools" % "1.5.2-incubating"
 
   val stanfordModelGroup = "edu.washington.cs.knowitall.stanford-corenlp"
@@ -30,6 +26,18 @@ object NlpToolsBuild extends Build {
     version      := buildVersion,
     scalaVersion := buildScalaVersion
   )
+
+  val junit = "junit" % "junit" % "4.11"
+  val commonScala = "edu.washington.cs.knowitall.common-scala" %% "common-scala" % "1.0.9"
+  val specs2 = "org.specs2" %% "specs2" % "1.12.3"
+  val scopt = "com.github.scopt" %% "scopt" % "2.1.0"
+  val slf4j = "org.slf4j" % "slf4j-api" % "1.7.2"
+  val unfilteredFilter = "net.databinder" %% "unfiltered-filter" % "0.6.5"
+  val unfilteredJetty = "net.databinder" %% "unfiltered-jetty" % "0.6.5"
+
+  lazy val core = Project(id = "nlptools-core", base = file("core"), settings = buildSettings ++ Seq(
+    libraryDependencies ++= Seq(junit, commonScala, scopt, slf4j, specs2, unfilteredFilter, unfilteredJetty)
+  ))
 
   // OpenNLP
 
@@ -99,7 +107,7 @@ object NlpToolsBuild extends Build {
       libraryDependencies ++= Seq(stanford,
         stanfordModelGroup % "stanford-sutime-models" % stanfordVersion ,
         stanfordModelGroup % "stanford-ner-models" % stanfordVersion ,
-        stanfordModelGroup % "stanford-dcoref-models" % stanfordVersion ))
+        stanfordModelGroup % "stanford-dcoref-models" % stanfordVersion, scopt ))
   ) dependsOn(stanfordParse)
 
 /*
