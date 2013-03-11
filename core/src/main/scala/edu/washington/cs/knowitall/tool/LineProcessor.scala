@@ -1,8 +1,5 @@
 package edu.washington.cs.knowitall.tool
 
-import unfiltered.request._
-import unfiltered.response._
-import unfiltered.filter.Planify
 import edu.washington.cs.knowitall.common.Timing
 import java.io.File
 import java.util.Scanner
@@ -34,7 +31,7 @@ abstract class LineProcessor(name: String) {
 
   def run(config: Config) {
     init(config)
-    if (config.server) runServer(config)
+    if (config.server) new LineProcessorServer(this.getClass.getSimpleName(), config.port, process)
     else runCli(config)
   }
 
@@ -67,14 +64,20 @@ abstract class LineProcessor(name: String) {
     scanner.close()
     writer.close()
   }
+}
 
-  def runServer(config: Config) = {
-    val port = config.port
+// This is a separate class so that optional dependencies are not loaded
+// unless a server instance is being create.
+class LineProcessorServer(name: String, port: Int, process: String => String) {
+  import unfiltered.request._
+  import unfiltered.response._
+  import unfiltered.filter.Planify
 
+  def run {
     val plan = Planify {
       case Path(Seg(p :: Nil)) => ResponseString(p)
       case req @ PUT(_) => ResponseString(process(Body.string(req)))
-      case req @ GET(_) => ResponseString("Post a line to process for: " + this.getClass.getSimpleName)
+      case req @ GET(_) => ResponseString("Post a line to process for: " + name)
     }
 
     unfiltered.jetty.Http(port).filter(plan).run()
