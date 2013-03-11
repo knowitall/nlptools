@@ -18,15 +18,7 @@ object NlpToolsBuild extends Build {
   val clearVersion = "1.3.0"
   val clear = "com.googlecode.clearnlp" % "clearnlp" % clearVersion
 
-  val buildOrganization = "edu.knowitall.nlptools"
-  val buildVersion = "2.4.0-SNAPSHOT"
-  val buildScalaVersion = "2.9.2"
-  val buildSettings = Defaults.defaultSettings ++ Seq (
-    organization := buildOrganization,
-    version      := buildVersion,
-    scalaVersion := buildScalaVersion
-  )
-
+  // dependencies
   val junit = "junit" % "junit" % "4.11"
   val commonScala = "edu.washington.cs.knowitall.common-scala" %% "common-scala" % "1.0.9"
   val specs2 = "org.specs2" %% "specs2" % "1.12.3"
@@ -35,8 +27,19 @@ object NlpToolsBuild extends Build {
   val unfilteredFilter = "net.databinder" %% "unfiltered-filter" % "0.6.5"
   val unfilteredJetty = "net.databinder" %% "unfiltered-jetty" % "0.6.5"
 
+
+  val buildOrganization = "edu.knowitall.nlptools"
+  val buildVersion = "2.4.0-SNAPSHOT"
+  val buildScalaVersion = "2.9.2"
+  val buildSettings = Defaults.defaultSettings ++ Seq (
+    organization := buildOrganization,
+    version      := buildVersion,
+    scalaVersion := buildScalaVersion,
+    libraryDependencies ++= Seq(junit % "test", specs2 % "test", unfilteredFilter % "provided", unfilteredJetty % "provided")
+  )
+
   lazy val core = Project(id = "nlptools-core", base = file("core"), settings = buildSettings ++ Seq(
-    libraryDependencies ++= Seq(junit, commonScala, scopt, slf4j, specs2, unfilteredFilter, unfilteredJetty)
+    libraryDependencies ++= Seq(commonScala, scopt, slf4j)
   ))
 
   // OpenNLP
