@@ -8,7 +8,7 @@ import org.junit.Assert._
 import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
-import collection.immutable.graph.Graph._
+import edu.knowitall.collection.immutable.graph.Graph._
 import edu.washington.cs.knowitall.tool.stem.Stemmer
 
 @RunWith(classOf[JUnitRunner])

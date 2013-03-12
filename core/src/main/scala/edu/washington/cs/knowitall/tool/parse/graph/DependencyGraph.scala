@@ -5,12 +5,12 @@ package graph
 
 import scala.collection.immutable
 import org.slf4j.LoggerFactory
-import collection.immutable.Interval
-import collection.immutable.graph.Graph
-import collection.immutable.graph.Graph._
+import edu.knowitall.collection.immutable.Interval
+import edu.knowitall.collection.immutable.graph.Graph
+import edu.knowitall.collection.immutable.graph.Graph._
 import tool.postag.Postagger
-import edu.washington.cs.knowitall.collection.immutable.graph.{DownEdge, UpEdge}
-import edu.washington.cs.knowitall.collection.immutable.graph.Direction
+import edu.knowitall.collection.immutable.graph.{DownEdge, UpEdge}
+import edu.knowitall.collection.immutable.graph.Direction
 import edu.washington.cs.knowitall.tool.stem.Stemmer
 
 /** A representation of a graph over dependencies.

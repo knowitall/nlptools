@@ -5,7 +5,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-import edu.washington.cs.knowitall.common.Resource.using
+import edu.knowitall.common.Resource.using
 
 /** A confidence function for ranking how likely an extraction is correct.
   * 

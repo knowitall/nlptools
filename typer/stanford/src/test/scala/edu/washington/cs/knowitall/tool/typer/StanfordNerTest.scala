@@ -6,7 +6,7 @@ import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
-import edu.washington.cs.knowitall.collection.immutable.Interval
+import edu.knowitall.collection.immutable.Interval
 
 @RunWith(classOf[JUnitRunner])
 object StanfordNerTest extends Specification {

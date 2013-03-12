@@ -9,7 +9,7 @@ import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
-import edu.washington.cs.knowitall.collection.immutable.graph.UpEdge
+import edu.knowitall.collection.immutable.graph.UpEdge
 
 @RunWith(classOf[JUnitRunner])
 object DirectedEdgeSpecTest extends Specification {

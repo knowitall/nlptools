@@ -1,6 +1,6 @@
 package edu.washington.cs.knowitall.tool.typer
 
-import edu.washington.cs.knowitall.collection.immutable.Interval
+import edu.knowitall.collection.immutable.Interval
 import edu.washington.cs.knowitall.tool.tokenize.Token
 
 abstract class Typer[E <: Token](val name: String, val source: String) {

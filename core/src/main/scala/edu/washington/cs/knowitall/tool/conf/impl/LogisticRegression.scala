@@ -8,7 +8,7 @@ import java.util.Scanner
 
 import scala.io.Source
 
-import edu.washington.cs.knowitall.common.Resource.using
+import edu.knowitall.common.Resource.using
 import edu.washington.cs.knowitall.tool.conf.ConfidenceFunction
 import edu.washington.cs.knowitall.tool.conf.FeatureSet
 

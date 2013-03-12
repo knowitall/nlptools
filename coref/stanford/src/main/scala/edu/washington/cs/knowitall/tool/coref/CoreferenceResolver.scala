@@ -2,7 +2,7 @@ package edu.washington.cs.knowitall
 package tool
 package coref
 
-import collection.immutable.Interval
+import edu.knowitall.collection.immutable.Interval
 import edu.washington.cs.knowitall.tool.postag.Postagger
 
 /*

@@ -2,8 +2,8 @@ package edu.washington.cs.knowitall
 package tool
 package tokenize
 
-import edu.washington.cs.knowitall.common.HashCodeHelper
-import edu.washington.cs.knowitall.collection.immutable.Interval
+import edu.knowitall.common.HashCodeHelper
+import edu.knowitall.collection.immutable.Interval
 
 /** The most simple representation of a token.  A token has a string
   * and a character offset in the original text.
@@ -22,10 +22,10 @@ class Token(val string: String, val offset: Int) {
       this.offset == that.offset
     case _ => false
   }
-  
-  @deprecated
+
+  @deprecated("Use offsets instead.", "2.4.0")
   def interval = offsets
-  
+
   def offsets = Interval.open(offset, offset + string.length)
 }
 

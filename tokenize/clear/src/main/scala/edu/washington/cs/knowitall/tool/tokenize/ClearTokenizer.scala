@@ -3,7 +3,7 @@ package tool
 package tokenize
 
 import scala.collection.JavaConversions._
-import edu.washington.cs.knowitall.common.Resource.using
+import edu.knowitall.common.Resource.using
 import com.googlecode.clearnlp.engine.EngineGetter
 import com.googlecode.clearnlp.tokenization.EnglishTokenizer
 import java.util.zip.ZipInputStream

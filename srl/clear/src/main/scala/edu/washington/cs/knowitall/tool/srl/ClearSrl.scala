@@ -14,8 +14,8 @@ import com.googlecode.clearnlp.component.srl.CSRLabeler
 import com.googlecode.clearnlp.dependency.DEPNode
 import com.googlecode.clearnlp.dependency.DEPTree
 
-import edu.washington.cs.knowitall.collection.immutable.Interval
-import edu.washington.cs.knowitall.common.Resource.using
+import edu.knowitall.collection.immutable.Interval
+import edu.knowitall.common.Resource.using
 import edu.washington.cs.knowitall.tool.parse.ClearParser
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
 

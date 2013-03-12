@@ -7,7 +7,7 @@ import scala.collection.JavaConverters.asScalaIteratorConverter
 import com.googlecode.clearnlp.component.pos.CPOSTagger
 import com.googlecode.clearnlp.dependency.DEPNode
 import com.googlecode.clearnlp.dependency.DEPTree
-import edu.washington.cs.knowitall.common.Resource.using
+import edu.knowitall.common.Resource.using
 import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
 import edu.washington.cs.knowitall.tool.tokenize.ClearTokenizer
 import edu.washington.cs.knowitall.tool.tokenize.Token

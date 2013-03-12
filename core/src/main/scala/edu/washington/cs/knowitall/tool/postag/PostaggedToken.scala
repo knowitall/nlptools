@@ -1,7 +1,7 @@
 package edu.washington.cs.knowitall
 package tool.postag
 
-import edu.washington.cs.knowitall.common.HashCodeHelper
+import edu.knowitall.common.HashCodeHelper
 import edu.washington.cs.knowitall.tool.tokenize.Token
 
 /** A representation for a part-of-speech tagged token.  POS tokens

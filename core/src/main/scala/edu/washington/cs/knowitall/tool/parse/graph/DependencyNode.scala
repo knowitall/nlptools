@@ -3,10 +3,10 @@ package tool
 package parse
 package graph
 
-import collection.immutable.graph.Graph
-import collection.immutable.graph.Graph._
+import edu.knowitall.collection.immutable.graph.Graph
+import edu.knowitall.collection.immutable.graph.Graph._
 import scala.collection.immutable.SortedSet
-import collection.immutable.Interval
+import edu.knowitall.collection.immutable.Interval
 import tool.stem.{ Stemmer, IdentityStemmer }
 import tool.postag.PostaggedToken
 

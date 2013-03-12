@@ -11,9 +11,9 @@ import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
-import collection.immutable.graph._
-import collection.immutable.graph.pattern._
-import collection.immutable.graph.Graph._
+import edu.knowitall.collection.immutable.graph._
+import edu.knowitall.collection.immutable.graph.pattern._
+import edu.knowitall.collection.immutable.graph.Graph._
 
 import tool.stem.IdentityStemmer.instance
 

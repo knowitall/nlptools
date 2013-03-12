@@ -17,7 +17,7 @@ import com.googlecode.clearnlp.nlp.NLPDecode
 import com.googlecode.clearnlp.dependency.DEPTree
 import com.googlecode.clearnlp.dependency.DEPNode
 import edu.washington.cs.knowitall.tool.tokenize.ClearTokenizer
-import edu.washington.cs.knowitall.common.Resource.using
+import edu.knowitall.common.Resource.using
 import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
 import edu.washington.cs.knowitall.tool.postag.Postagger
 import edu.washington.cs.knowitall.tool.postag.ClearPostagger

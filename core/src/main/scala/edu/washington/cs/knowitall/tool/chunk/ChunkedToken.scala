@@ -1,7 +1,7 @@
 package edu.washington.cs.knowitall
 package tool.chunk
 
-import edu.washington.cs.knowitall.common.HashCodeHelper
+import edu.knowitall.common.HashCodeHelper
 import edu.washington.cs.knowitall.tool.postag.PostaggedToken
 
 /** A representation of a chunked token.  A chunked token has all the

@@ -3,9 +3,9 @@ package tool
 package parse
 package graph
 
-import collection.immutable.graph._
-import collection.immutable.graph.Graph._
-import collection.immutable.graph.pattern._
+import edu.knowitall.collection.immutable.graph._
+import edu.knowitall.collection.immutable.graph.Graph._
+import edu.knowitall.collection.immutable.graph.pattern._
 import scala.util.matching.Regex
 import java.util.regex.{Pattern => JPattern}
 import tool.stem.Stemmer

@@ -8,7 +8,7 @@ import scala.Array.canBuildFrom
 import scala.Option.option2Iterable
 import scala.collection.JavaConversions.asScalaSet
 import org.maltparser.MaltParserService
-import edu.washington.cs.knowitall.collection.immutable.Interval
+import edu.knowitall.collection.immutable.Interval
 import edu.washington.cs.knowitall.tool.parse.graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode

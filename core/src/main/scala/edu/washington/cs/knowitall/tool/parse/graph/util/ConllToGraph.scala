@@ -1,7 +1,7 @@
 package edu.washington.cs.knowitall.tool.parse.graph.util
 
 import java.io.PrintWriter
-import edu.washington.cs.knowitall.common.Resource.using
+import edu.knowitall.common.Resource.using
 import java.io.File
 import scala.io.Source
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph

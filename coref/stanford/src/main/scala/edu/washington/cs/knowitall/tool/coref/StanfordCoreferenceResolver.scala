@@ -10,7 +10,7 @@ import scala.collection.JavaConversions.mapAsJavaMap
 import scala.collection.JavaConversions.mapAsScalaMap
 import scala.collection.JavaConversions.seqAsJavaList
 
-import common.ling.Word
+import edu.knowitall.common.ling.Word
 import edu.stanford.nlp.dcoref.CorefChain
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation
@@ -19,7 +19,7 @@ import edu.stanford.nlp.ling.CoreLabel
 import edu.stanford.nlp.pipeline.Annotation
 import edu.stanford.nlp.pipeline.StanfordCoreNLP
 import edu.stanford.nlp.util.CoreMap
-import edu.washington.cs.knowitall.common.Resource.using
+import edu.knowitall.common.Resource.using
 
 class StanfordCoreferenceResolver extends CoreferenceResolver {
   lazy val corenlp = {

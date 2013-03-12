@@ -1,6 +1,6 @@
 package edu.washington.cs.knowitall.tool.srl
 
-import edu.washington.cs.knowitall.collection.immutable.Interval
+import edu.knowitall.collection.immutable.Interval
 import edu.washington.cs.knowitall.tool.tokenize.Token
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
 import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph

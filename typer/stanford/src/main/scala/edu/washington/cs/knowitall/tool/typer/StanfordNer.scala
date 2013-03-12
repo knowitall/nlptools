@@ -6,8 +6,8 @@ import java.net.URL
 import edu.stanford.nlp.ie.AbstractSequenceClassifier
 import edu.stanford.nlp.ie.crf.CRFClassifier
 import edu.stanford.nlp.util.Triple
-import edu.washington.cs.knowitall.collection.immutable.Interval
-import edu.washington.cs.knowitall.common.Resource.using
+import edu.knowitall.collection.immutable.Interval
+import edu.knowitall.common.Resource.using
 import edu.washington.cs.knowitall.tool.tokenize._
 import java.io.BufferedInputStream
 import java.io.FileInputStream

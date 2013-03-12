@@ -2,7 +2,7 @@ package edu.washington.cs.knowitall
 package tool
 package segment
 
-import _root_.edu.washington.cs.knowitall.collection.immutable.Interval
+import _root_.edu.knowitall.collection.immutable.Interval
 
 /** A sentencer breaks text into sentences.
   */

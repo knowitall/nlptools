@@ -1,6 +1,6 @@
 package edu.washington.cs.knowitall.tool
 
-import edu.washington.cs.knowitall.common.Timing
+import edu.knowitall.common.Timing
 import java.io.File
 import java.util.Scanner
 import java.io.PrintWriter

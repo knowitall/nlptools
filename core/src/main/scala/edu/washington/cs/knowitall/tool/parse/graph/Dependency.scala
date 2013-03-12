@@ -3,7 +3,7 @@ package tool
 package parse
 package graph
 
-import collection.immutable.graph.Graph._
+import edu.knowitall.collection.immutable.graph.Graph._
 import stem.Stemmer
 import scala.util.matching.Regex
 import scala.collection.immutable.SortedSet
