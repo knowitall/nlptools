@@ -132,7 +132,7 @@ class DependencyGraph (
         )
       }
       catch {
-        case e => DependencyGraph.logger.error("could not collapse pobj.", e)
+        case e: Throwable => DependencyGraph.logger.error("could not collapse pobj.", e)
       }
 
       // collapse edges (pcomp) preceeded by prep
@@ -144,7 +144,7 @@ class DependencyGraph (
         })
       }
       catch {
-        case e => DependencyGraph.logger.error("could not collapse pcomp.", e)
+        case e: Throwable => DependencyGraph.logger.error("could not collapse pcomp.", e)
       }
 
       g
@@ -282,7 +282,7 @@ class DependencyGraph (
                 dedge.edge.label == "xcomp" ||
                 (dedge.edge.label startsWith "prep")));
           if !(vertices contains dedge.end);
-          val v <- vertices;
+          v <- vertices;
           val newEdge = dedge match {
             case DownEdge(e) => e.copy(source = v)
             case UpEdge(e) => e.copy(dest = v)
@@ -596,14 +596,14 @@ object DependencyGraph {
         (nodes, Dependencies.deserialize(string))
       }
     }
-    
+
     try {
       val (nodes, deps) = rec(string.trim, immutable.SortedSet[DependencyNode]())
       val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
       new DependencyGraph(nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
     }
     catch {
-      case e => throw new DependencyGraph.SerializationException(
+      case e: Throwable => throw new DependencyGraph.SerializationException(
                     "Could not deserialize graph: " + string, e)
     }
   }

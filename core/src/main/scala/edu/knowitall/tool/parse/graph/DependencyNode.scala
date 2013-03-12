@@ -91,7 +91,7 @@ object DependencyNode {
       Interval.union(sorted.map(_.tokenInterval))
     }
     catch {
-      case e =>
+      case e: Throwable =>
         throw new IllegalArgumentException("A set of non-adjacent intervals cannot be merged: " + e.toString)
     }
 
@@ -116,7 +116,7 @@ object DependencyNode {
       Interval.union(sorted.map(_.tokenInterval))
     }
     catch {
-      case e =>
+      case e: Throwable =>
         throw new IllegalArgumentException("A set of non-adjacent intervals cannot be merged: " + e.toString)
     }
 
@@ -126,7 +126,7 @@ object DependencyNode {
   def deserialize(string: String) = {
     val Array(text, postag, index, offset) = try (string.split("_"))
     catch {
-      case e => throw new SerializationException("could not deserialize dependency node: " + string, e);
+      case e: Throwable => throw new SerializationException("could not deserialize dependency node: " + string, e);
     }
 
     new DependencyNode(text, postag, index.toInt, offset.toInt)

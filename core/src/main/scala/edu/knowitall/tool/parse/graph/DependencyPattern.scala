@@ -93,6 +93,8 @@ object DependencyPattern {
         case Success(matchers, _) => new DependencyPattern(matchers)
         case fail: Failure =>
           throw new IllegalArgumentException("improper pattern syntax. " + fail.msg + ": " + s)
+        case error: Error =>
+          throw new IllegalArgumentException("error on pattern syntax '" + s + "': " + error.toString)
       }
     }
   }
@@ -113,7 +115,7 @@ object DependencyPattern {
       }
     }
     catch {
-      case e => e.printStackTrace(); throw new DependencyPatternSerializationException(e.getMessage(), e)
+      case e: Throwable => e.printStackTrace(); throw new DependencyPatternSerializationException(e.getMessage(), e)
     }
   }
 
