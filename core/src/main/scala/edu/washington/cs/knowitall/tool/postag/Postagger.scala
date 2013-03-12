@@ -1,8 +1,8 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package postag
 
-import edu.washington.cs.knowitall._
+import edu.knowitall._
 import scala.collection.immutable
 
 /** A POS tagger takes tokenized input and associates a part of speech

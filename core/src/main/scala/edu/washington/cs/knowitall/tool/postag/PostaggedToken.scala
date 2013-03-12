@@ -1,8 +1,8 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool.postag
 
 import edu.knowitall.common.HashCodeHelper
-import edu.washington.cs.knowitall.tool.tokenize.Token
+import edu.knowitall.tool.tokenize.Token
 
 /** A representation for a part-of-speech tagged token.  POS tokens
   * use PENN-treebank style tags.

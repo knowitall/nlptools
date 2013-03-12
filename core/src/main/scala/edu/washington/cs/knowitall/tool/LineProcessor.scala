@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall.tool
+package edu.knowitall.tool
 
 import edu.knowitall.common.Timing
 import java.io.File

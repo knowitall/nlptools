@@ -1,16 +1,16 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package parse
 
 import scala.collection.JavaConverters.seqAsJavaListConverter
 import edu.stanford.nlp.ling.Word
 import edu.stanford.nlp.parser.charniak.CharniakParser
-import edu.washington.cs.knowitall.tool.parse.BaseStanfordParser.CollapseType
-import edu.washington.cs.knowitall.tool.tokenize.OpenNlpTokenizer
-import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
+import edu.knowitall.tool.parse.BaseStanfordParser.CollapseType
+import edu.knowitall.tool.tokenize.OpenNlpTokenizer
+import edu.knowitall.tool.tokenize.Tokenizer
 import graph.Dependency
-import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
-import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
+import edu.knowitall.tool.parse.graph.DependencyGraph
+import edu.knowitall.tool.parse.graph.DependencyNode
 import java.lang.ProcessBuilder
 import java.io.PrintWriter
 

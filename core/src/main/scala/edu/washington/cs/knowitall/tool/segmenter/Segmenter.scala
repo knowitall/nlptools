@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package segment
 

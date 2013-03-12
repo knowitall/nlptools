@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall.tool.conf.impl
+package edu.knowitall.tool.conf.impl
 
 import java.io.InputStream
 import java.io.OutputStream
@@ -9,8 +9,8 @@ import java.util.Scanner
 import scala.io.Source
 
 import edu.knowitall.common.Resource.using
-import edu.washington.cs.knowitall.tool.conf.ConfidenceFunction
-import edu.washington.cs.knowitall.tool.conf.FeatureSet
+import edu.knowitall.tool.conf.ConfidenceFunction
+import edu.knowitall.tool.conf.FeatureSet
 
 /**
  * An implementation of logistic regression of features that can be

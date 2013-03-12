@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall.tool.srl
+package edu.knowitall.tool.srl
 
 import java.util.zip.ZipInputStream
 
@@ -16,11 +16,11 @@ import com.googlecode.clearnlp.dependency.DEPTree
 
 import edu.knowitall.collection.immutable.Interval
 import edu.knowitall.common.Resource.using
-import edu.washington.cs.knowitall.tool.parse.ClearParser
-import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
+import edu.knowitall.tool.parse.ClearParser
+import edu.knowitall.tool.parse.graph.DependencyGraph
 
 class ClearSrl {
-  val clearMorpha = using(this.getClass.getResource("/edu/washington/cs/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
+  val clearMorpha = using(this.getClass.getResource("/edu/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
     new CEnglishMPAnalyzer(new ZipInputStream(input))
   }
   val clearRoles = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-role-1.3.0.jar").openStream()) { input =>

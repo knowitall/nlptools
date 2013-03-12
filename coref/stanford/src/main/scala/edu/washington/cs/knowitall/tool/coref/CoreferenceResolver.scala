@@ -1,9 +1,9 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package coref
 
 import edu.knowitall.collection.immutable.Interval
-import edu.washington.cs.knowitall.tool.postag.Postagger
+import edu.knowitall.tool.postag.Postagger
 
 /*
  * A coreference resolver takes text as input and produces clusters

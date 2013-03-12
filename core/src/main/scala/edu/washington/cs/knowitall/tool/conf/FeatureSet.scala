@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall.tool.conf
+package edu.knowitall.tool.conf
 import scala.collection.immutable.SortedMap
 
 /** FeatureSet represents a set of features on T that can be

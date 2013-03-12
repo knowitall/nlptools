@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package conf
 
@@ -6,7 +6,7 @@ import breeze.classify.LogisticClassifier
 import breeze.data.Example
 import breeze.linalg.DenseVector
 import breeze.optimize.FirstOrderMinimizer.OptParams
-import edu.washington.cs.knowitall.tool.conf.impl.LogisticRegression
+import edu.knowitall.tool.conf.impl.LogisticRegression
 
 class BreezeLogisticRegressionTrainer[E](features: FeatureSet[E, Double]) extends ConfidenceTrainer[E](features) {
   def trainBreezeClassifier(instances: Iterable[Labelled[E]], optParams: OptParams) = {

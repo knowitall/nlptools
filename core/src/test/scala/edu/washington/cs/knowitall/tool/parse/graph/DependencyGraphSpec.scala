@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package parse
 package graph
@@ -9,7 +9,7 @@ import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import edu.knowitall.collection.immutable.graph.Graph._
-import edu.washington.cs.knowitall.tool.stem.Stemmer
+import edu.knowitall.tool.stem.Stemmer
 
 @RunWith(classOf[JUnitRunner])
 object DependencyGraphSpecTest extends Specification {

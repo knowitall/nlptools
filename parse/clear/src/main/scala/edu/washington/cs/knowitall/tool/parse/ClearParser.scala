@@ -1,13 +1,13 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package parse
 
 import scala.collection.JavaConverters._
-import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
-import edu.washington.cs.knowitall.tool.tokenize.Token
+import edu.knowitall.tool.tokenize.Tokenizer
+import edu.knowitall.tool.tokenize.Token
 import graph.Dependency
-import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
-import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
+import edu.knowitall.tool.parse.graph.DependencyGraph
+import edu.knowitall.tool.parse.graph.DependencyNode
 import java.lang.ProcessBuilder
 import java.io.PrintWriter
 import com.googlecode.clearnlp.component.pos.CPOSTagger
@@ -16,15 +16,15 @@ import java.util.zip.ZipInputStream
 import com.googlecode.clearnlp.nlp.NLPDecode
 import com.googlecode.clearnlp.dependency.DEPTree
 import com.googlecode.clearnlp.dependency.DEPNode
-import edu.washington.cs.knowitall.tool.tokenize.ClearTokenizer
+import edu.knowitall.tool.tokenize.ClearTokenizer
 import edu.knowitall.common.Resource.using
 import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
-import edu.washington.cs.knowitall.tool.postag.Postagger
-import edu.washington.cs.knowitall.tool.postag.ClearPostagger
+import edu.knowitall.tool.postag.Postagger
+import edu.knowitall.tool.postag.ClearPostagger
 
 class ClearParser(val postagger: Postagger = new ClearPostagger()) extends DependencyParser {
-  val clearMorphaUrl = this.getClass.getResource("/edu/washington/cs/knowitall/tool/tokenize/dictionary-1.2.0.zip")
-  require(clearMorphaUrl != null, "cannot find clear dep model")
+  val clearMorphaUrl = this.getClass.getResource("/edu/knowitall/tool/tokenize/dictionary-1.2.0.zip")
+  require(clearMorphaUrl != null, "cannot find clear dict model")
   val clearMorpha = using(clearMorphaUrl.openStream()) { input =>
     new CEnglishMPAnalyzer(new ZipInputStream(input))
   }

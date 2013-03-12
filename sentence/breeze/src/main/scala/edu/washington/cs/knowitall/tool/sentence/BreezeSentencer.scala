@@ -1,13 +1,13 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package sentence
 
 import breeze.text.segment.JavaSentenceSegmenter
-import edu.washington.cs.knowitall.tool.segment.Segmenter
-import edu.washington.cs.knowitall.tool.segment.SegmenterMain
-import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
-import edu.washington.cs.knowitall.tool.segment.Segment
-import edu.washington.cs.knowitall.tool.tokenize.Token
+import edu.knowitall.tool.segment.Segmenter
+import edu.knowitall.tool.segment.SegmenterMain
+import edu.knowitall.tool.tokenize.Tokenizer
+import edu.knowitall.tool.segment.Segment
+import edu.knowitall.tool.tokenize.Token
 
 class BreezeSentencer extends Segmenter {
   val sentencer = new JavaSentenceSegmenter()

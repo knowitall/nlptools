@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package typer
 
@@ -8,7 +8,7 @@ import edu.stanford.nlp.ie.crf.CRFClassifier
 import edu.stanford.nlp.util.Triple
 import edu.knowitall.collection.immutable.Interval
 import edu.knowitall.common.Resource.using
-import edu.washington.cs.knowitall.tool.tokenize._
+import edu.knowitall.tool.tokenize._
 import java.io.BufferedInputStream
 import java.io.FileInputStream
 import java.util.zip.GZIPInputStream
@@ -16,7 +16,6 @@ import java.util.zip.GZIPInputStream
 class StanfordNer(private val classifier: AbstractSequenceClassifier[_]) extends Typer[Token]("Stanford", "Stanford") {
   def apply(text: String, seq: Seq[Token]) = {
 import scala.collection.JavaConverters._
-    
     val response = classifier.classifyToCharacterOffsets(text).asScala
 
     var tags = List.empty[Type]
@@ -36,16 +35,16 @@ import scala.collection.JavaConverters._
 
     tags
   }
-  
+
   def apply(seq: Seq[Token]) = apply(seq.iterator.map(_.string).mkString(" "), seq)
 }
 
 object StanfordNer {
   final val defaultModelUrl = StanfordNer.getClass().getResource("/edu/stanford/nlp/models/ner/english.all.3class.distsim.prop")
   require(defaultModelUrl != null, "resource could not be found")
- 
-  def fromModelUrl(url: URL) = {
-    using (new FileInputStream("/home/michael/english.all.3class.distsim.crf.ser.gz")) { stream =>
+
+ def fromModelUrl(url: URL) = {
+    using (url.openStream()) { stream =>
       new StanfordNer(CRFClassifier.getClassifier(new BufferedInputStream(new GZIPInputStream(stream))))
     }
   }

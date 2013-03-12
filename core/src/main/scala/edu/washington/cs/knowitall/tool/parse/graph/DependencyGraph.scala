@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package parse
 package graph
@@ -11,7 +11,7 @@ import edu.knowitall.collection.immutable.graph.Graph._
 import tool.postag.Postagger
 import edu.knowitall.collection.immutable.graph.{DownEdge, UpEdge}
 import edu.knowitall.collection.immutable.graph.Direction
-import edu.washington.cs.knowitall.tool.stem.Stemmer
+import edu.knowitall.tool.stem.Stemmer
 
 /** A representation of a graph over dependencies.
   * This richer representation may include the text of the original sentence,

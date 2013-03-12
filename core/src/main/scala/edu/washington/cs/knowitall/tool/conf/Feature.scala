@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall.tool.conf
+package edu.knowitall.tool.conf
 
 /** An abstract representation for a feature used by the
   * confidence function.

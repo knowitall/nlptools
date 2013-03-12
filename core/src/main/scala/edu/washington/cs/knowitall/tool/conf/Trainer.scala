@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall.tool.conf
+package edu.knowitall.tool.conf
 
 abstract class Trainer[E, V](val features: FeatureSet[E, V]) {
   val apply = train _

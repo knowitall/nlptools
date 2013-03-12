@@ -1,6 +1,6 @@
-package edu.washington.cs.knowitall.tool.srl
+package edu.knowitall.tool.srl
 
-import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
+import edu.knowitall.tool.parse.graph.DependencyGraph
 
 case class FrameHierarchy(frame: Frame, children: Seq[FrameHierarchy]) {
   def height: Int =

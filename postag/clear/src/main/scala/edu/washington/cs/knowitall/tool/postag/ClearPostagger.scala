@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package postag
 
@@ -8,9 +8,9 @@ import com.googlecode.clearnlp.component.pos.CPOSTagger
 import com.googlecode.clearnlp.dependency.DEPNode
 import com.googlecode.clearnlp.dependency.DEPTree
 import edu.knowitall.common.Resource.using
-import edu.washington.cs.knowitall.tool.tokenize.Tokenizer
-import edu.washington.cs.knowitall.tool.tokenize.ClearTokenizer
-import edu.washington.cs.knowitall.tool.tokenize.Token
+import edu.knowitall.tool.tokenize.Tokenizer
+import edu.knowitall.tool.tokenize.ClearTokenizer
+import edu.knowitall.tool.tokenize.Token
 
 class ClearPostagger(override val tokenizer: Tokenizer = new ClearTokenizer) extends Postagger(tokenizer) {
   val clearPosUrl = this.getClass.getResource("/knowitall/models/clear/ontonotes-en-pos-1.3.0.jar")

@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall.tool.conf
+package edu.knowitall.tool.conf
 
 /** A representation of a labelled extraction. 
   * 

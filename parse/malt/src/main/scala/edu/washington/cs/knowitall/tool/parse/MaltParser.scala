@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall
+package edu.knowitall
 package tool
 package parse
 
@@ -9,7 +9,7 @@ import scala.Option.option2Iterable
 import scala.collection.JavaConversions.asScalaSet
 import org.maltparser.MaltParserService
 import edu.knowitall.collection.immutable.Interval
-import edu.washington.cs.knowitall.tool.parse.graph.Dependency
+import edu.knowitall.tool.parse.graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode
 import postag.OpenNlpPostagger

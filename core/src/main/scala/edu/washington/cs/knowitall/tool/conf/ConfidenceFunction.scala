@@ -1,4 +1,4 @@
-package edu.washington.cs.knowitall.tool.conf
+package edu.knowitall.tool.conf
 
 import java.io.BufferedOutputStream
 import java.io.File

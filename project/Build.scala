@@ -28,7 +28,7 @@ object NlpToolsBuild extends Build {
   val unfilteredJetty = "net.databinder" %% "unfiltered-jetty" % "0.6.5"
 
 
-  val buildOrganization = "edu.knowitall.nlptools"
+  val buildOrganization = "edu.washington.cs.knowitall.nlptools"
   val buildVersion = "2.4.0-SNAPSHOT"
   val buildScalaVersion = "2.9.2"
   val buildSettings = Defaults.defaultSettings ++ Seq (

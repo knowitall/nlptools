@@ -1,9 +1,9 @@
-package edu.washington.cs.knowitall.tool.srl
+package edu.knowitall.tool.srl
 
 import edu.knowitall.collection.immutable.Interval
-import edu.washington.cs.knowitall.tool.tokenize.Token
-import edu.washington.cs.knowitall.tool.parse.graph.DependencyNode
-import edu.washington.cs.knowitall.tool.parse.graph.DependencyGraph
+import edu.knowitall.tool.tokenize.Token
+import edu.knowitall.tool.parse.graph.DependencyNode
+import edu.knowitall.tool.parse.graph.DependencyGraph
 
 case class Frame(relation: Relation, arguments: Seq[Argument]) {
   override def toString = relation.toString + ":" + arguments.mkString("[", ", ", "]")

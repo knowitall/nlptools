@@ -1,7 +1,7 @@
-package edu.washington.cs.knowitall.tool.typer
+package edu.knowitall.tool.typer
 
 import edu.knowitall.collection.immutable.Interval
-import edu.washington.cs.knowitall.tool.tokenize.Token
+import edu.knowitall.tool.tokenize.Token
 
 abstract class Typer[E <: Token](val name: String, val source: String) {
   def apply(seq: Seq[E]): Seq[Type]
