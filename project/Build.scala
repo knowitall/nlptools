@@ -8,6 +8,15 @@ object NlpToolsBuild extends Build {
     breezeTokenize, breezeSentence, breezeConf,
     morphaStemmer, snowballStemmer)
 
+
+  // settings
+  val scalaVersions = Seq("2.9.2", "2.10.0")
+  override lazy val settings = super.settings ++ Seq(
+    crossScalaVersions := scalaVersions
+  )
+
+
+  // dependency helpers
   val opennlp = "org.apache.opennlp" % "opennlp-tools" % "1.5.2-incubating"
 
   val stanfordModelGroup = "edu.washington.cs.knowitall.stanford-corenlp"
@@ -17,6 +26,7 @@ object NlpToolsBuild extends Build {
   val clearModelGroup = "edu.washington.cs.knowitall.clearnlp"
   val clearVersion = "1.3.0"
   val clear = "com.googlecode.clearnlp" % "clearnlp" % clearVersion
+
 
   // dependencies
   val junit = "junit" % "junit" % "4.11"
@@ -28,15 +38,19 @@ object NlpToolsBuild extends Build {
   val unfilteredJetty = "net.databinder" %% "unfiltered-jetty" % "0.6.5"
 
 
+  // parent build definition
   val buildOrganization = "edu.washington.cs.knowitall.nlptools"
   val buildVersion = "2.4.0-SNAPSHOT"
   val buildScalaVersion = "2.9.2"
   val buildSettings = Defaults.defaultSettings ++ Seq (
     organization := buildOrganization,
     version      := buildVersion,
-    scalaVersion := buildScalaVersion,
+    crossScalaVersions := scalaVersions,
+    scalaVersion <<= (crossScalaVersions) { versions => versions.head },
     libraryDependencies ++= Seq(junit % "test", specs2 % "test", unfilteredFilter % "provided", unfilteredJetty % "provided")
   )
+
+  // Core
 
   lazy val core = Project(id = "nlptools-core", base = file("core"), settings = buildSettings ++ Seq(
     libraryDependencies ++= Seq(commonScala, scopt, slf4j)
