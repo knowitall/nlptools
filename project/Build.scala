@@ -2,10 +2,12 @@ import sbt._
 import Keys._
 object NlpToolsBuild extends Build {
   // settings
-  val scalaVersions = Seq("2.9.2", "2.10.0")
+  val buildOrganization = "edu.washington.cs.knowitall.nlptools"
+  val buildVersion = "2.4.1-SNAPSHOT"
+  val buildScalaVersions = Seq("2.9.2", "2.10.0")
 
   lazy val root = Project(id = "nlptools", base = file(".")) settings (
-    crossScalaVersions := scalaVersions,
+    crossScalaVersions := buildScalaVersions,
     publish := { },
     publishLocal := { }
   ) aggregate(core,
@@ -17,7 +19,7 @@ object NlpToolsBuild extends Build {
 
 
   override lazy val settings = super.settings ++ Seq(
-    crossScalaVersions := scalaVersions
+    crossScalaVersions := buildScalaVersions
   )
 
 
@@ -49,13 +51,10 @@ object NlpToolsBuild extends Build {
 
 
   // parent build definition
-  val buildOrganization = "edu.washington.cs.knowitall.nlptools"
-  val buildVersion = "2.4.1-SNAPSHOT"
-  val buildScalaVersion = "2.9.2"
   val buildSettings = Defaults.defaultSettings ++ Seq (
     organization := buildOrganization,
     version      := buildVersion,
-    crossScalaVersions := scalaVersions,
+    crossScalaVersions := buildScalaVersions,
     scalaVersion <<= (crossScalaVersions) { versions => versions.head },
     libraryDependencies ++= Seq(junit % "test", specs2 % "test", unfilteredFilter % "provided", unfilteredJetty % "provided"),
     publishMavenStyle := true,
