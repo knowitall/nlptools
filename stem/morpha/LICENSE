@@ -1,11 +1,13 @@
 This licence accompanied the original LEX files from which Morpha.java was
 generated.
 
+All supplemental code is copyright under Apache 2.0.
+
 Copyright (c) 1995-2001 University of Sheffield, University of Sussex
 All rights reserved.
 
 Redistribution and use of source and derived binary forms are permitted
-provided that: 
+provided that:
 - they are not used in commercial products
 - the above copyright notice and this paragraph are duplicated in
 all such forms
