@@ -1,16 +1,21 @@
 import sbt._
 import Keys._
 object NlpToolsBuild extends Build {
-  lazy val root = Project(id = "nlptools", base = file(".")) aggregate(core,
-    opennlpSentence, opennlpTokenize, opennlpPostag, opennlpChunk, opennlpParse,
-    stanfordTokenize, stanfordPostag, stanfordParse, stanfordCoref,
-    clearTokenize, clearPostag, clearParse, clearSrl,
-    breezeTokenize, breezeSentence, breezeConf,
-    morphaStemmer, snowballStemmer)
-
-
   // settings
   val scalaVersions = Seq("2.9.2", "2.10.0")
+
+  lazy val root = Project(id = "nlptools", base = file(".")) settings (
+    crossScalaVersions := scalaVersions,
+    publish := { },
+    publishLocal := { }
+  ) aggregate(core,
+      opennlpSentence, opennlpTokenize, opennlpPostag, opennlpChunk, opennlpParse,
+      stanfordTokenize, stanfordPostag, stanfordParse, stanfordCoref,
+      clearTokenize, clearPostag, clearParse, clearSrl,
+      breezeTokenize, breezeSentence, breezeConf,
+      morphaStemmer, snowballStemmer)
+
+
   override lazy val settings = super.settings ++ Seq(
     crossScalaVersions := scalaVersions
   )
