@@ -50,7 +50,7 @@ object NlpToolsBuild extends Build {
 
   // parent build definition
   val buildOrganization = "edu.washington.cs.knowitall.nlptools"
-  val buildVersion = "2.4.0-SNAPSHOT"
+  val buildVersion = "2.4.0"
   val buildScalaVersion = "2.9.2"
   val buildSettings = Defaults.defaultSettings ++ Seq (
     organization := buildOrganization,
