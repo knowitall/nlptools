@@ -53,7 +53,7 @@ class LogisticRegression[T](
   }
 
   def save(writer: PrintWriter): Unit = {
-    for ((name, weight) <- featureWeights) {
+    for ((name, weight) <- featureWeights.toSeq.sortBy(_._1)) {
       writer.println(name + "\t" + weight)
     }
 
