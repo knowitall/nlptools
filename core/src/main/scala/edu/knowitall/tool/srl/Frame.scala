@@ -61,6 +61,8 @@ abstract class Role(val description: String) {
   override def toString = label
   def label = this.getClass.getSimpleName.replaceAll("_", "-").takeWhile(_ != '$')
 }
+abstract class ArgumentRole(description: String) extends Role(description)
+abstract class ArgumentModifierRole(description: String) extends Role(description)
 object Roles {
   def apply(label: String) = {
     val APattern = """A(\d+)""".r
@@ -90,12 +92,12 @@ object Roles {
       case _ => UnknownRole(label)
     }
   }
-  case object A0 extends Role("subject")
-  case object A1 extends Role("object")
-  case object A2 extends Role("indirect object")
-  case object A3 extends Role("???")
-  case object A4 extends Role("???")
-  case object A5 extends Role("???")
+  case object A0 extends ArgumentRole("subject")
+  case object A1 extends ArgumentRole("object")
+  case object A2 extends ArgumentRole("indirect object")
+  case object A3 extends ArgumentRole("???")
+  case object A4 extends ArgumentRole("???")
+  case object A5 extends ArgumentRole("???")
   case class C(string: String) extends Role("continuation") {
     def role: Role = Roles(string)
     override def label = "C-" + string
@@ -104,18 +106,18 @@ object Roles {
     def role: Role = Roles(string)
     override def label = "R-" + string
   }
-  case object AM_ADV extends Role("adverbial modification")
-  case object AM_DIR extends Role("direction")
-  case object AM_DIS extends Role("discourse marker")
-  case object AM_EXT extends Role("extent")
-  case object AM_LOC extends Role("location")
-  case object AM_MNR extends Role("manner")
-  case object AM_MOD extends Role("general modification")
-  case object AM_NEG extends Role("negation")
-  case object AM_PRD extends Role("secondary predicate")
-  case object AM_PRP extends Role("purpose")
-  case object AM_REC extends Role("recipricol")
-  case object AM_TMP extends Role("temporal")
+  case object AM_ADV extends ArgumentModifierRole("adverbial modification")
+  case object AM_DIR extends ArgumentModifierRole("direction")
+  case object AM_DIS extends ArgumentModifierRole("discourse marker")
+  case object AM_EXT extends ArgumentModifierRole("extent")
+  case object AM_LOC extends ArgumentModifierRole("location")
+  case object AM_MNR extends ArgumentModifierRole("manner")
+  case object AM_MOD extends ArgumentModifierRole("general modification")
+  case object AM_NEG extends ArgumentModifierRole("negation")
+  case object AM_PRD extends ArgumentModifierRole("secondary predicate")
+  case object AM_PRP extends ArgumentModifierRole("purpose")
+  case object AM_REC extends ArgumentModifierRole("recipricol")
+  case object AM_TMP extends ArgumentModifierRole("temporal")
   case class UnknownRole(val role: String) extends Role(role) {
     override def label = role
   }
