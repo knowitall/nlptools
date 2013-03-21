@@ -31,7 +31,7 @@ abstract class LineProcessor(name: String) {
 
   def run(config: Config) {
     init(config)
-    if (config.server) new LineProcessorServer(this.getClass.getSimpleName(), config.port, process)
+    if (config.server) (new LineProcessorServer(this.getClass.getSimpleName(), config.port, process)).run()
     else runCli(config)
   }
 
@@ -73,10 +73,12 @@ class LineProcessorServer(name: String, port: Int, process: String => String) {
   import unfiltered.response._
   import unfiltered.filter.Planify
 
-  def run {
+  def run() {
     val plan = Planify {
       case Path(Seg(p :: Nil)) => ResponseString(p)
-      case req @ PUT(_) => ResponseString(process(Body.string(req)))
+      case req @ POST(_) => process.synchronized {
+        ResponseString(process(Body.string(req)))
+      }
       case req @ GET(_) => ResponseString("Post a line to process for: " + name)
     }
 

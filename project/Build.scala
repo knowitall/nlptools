@@ -1,9 +1,13 @@
 import sbt._
 import Keys._
+
+import sbtassembly.Plugin._
+import AssemblyKeys._
+
 object NlpToolsBuild extends Build {
   // settings
   val buildOrganization = "edu.washington.cs.knowitall.nlptools"
-  val buildVersion = "2.4.1-SNAPSHOT"
+  val buildVersion = "2.4.0"
   val buildScalaVersions = Seq("2.9.2", "2.10.0")
 
   lazy val root = Project(id = "nlptools", base = file(".")) settings (
@@ -48,6 +52,7 @@ object NlpToolsBuild extends Build {
   val slf4j = "org.slf4j" % "slf4j-api" % "1.7.2"
   val unfilteredFilter = "net.databinder" %% "unfiltered-filter" % "0.6.5"
   val unfilteredJetty = "net.databinder" %% "unfiltered-jetty" % "0.6.5"
+  val dispatch = "net.databinder.dispatch" %% "dispatch-core" % "0.9.5"
 
 
   // parent build definition
@@ -56,7 +61,8 @@ object NlpToolsBuild extends Build {
     version      := buildVersion,
     crossScalaVersions := buildScalaVersions,
     scalaVersion <<= (crossScalaVersions) { versions => versions.head },
-    libraryDependencies ++= Seq(junit % "test", specs2 % "test", unfilteredFilter % "provided", unfilteredJetty % "provided"),
+    libraryDependencies ++= Seq(junit % "test", specs2 % "test", 
+      dispatch % "provided", unfilteredFilter % "provided", unfilteredJetty % "provided"),
     publishMavenStyle := true,
     publishTo <<= version { (v: String) =>
       val nexus = "https://oss.sonatype.org/"
@@ -77,7 +83,7 @@ object NlpToolsBuild extends Build {
        <developer>
           <name>Michael Schmitz</name>
         </developer>
-      </developers>))
+      </developers>)) ++ assemblySettings
 
   // Core
 
@@ -174,6 +180,16 @@ object NlpToolsBuild extends Build {
       libraryDependencies ++= Seq(stanford, stanfordModelGroup % "stanford-ner-models" % stanfordVersion ))
   ) dependsOn(core)
 */
+
+  // Malt
+
+  lazy val maltParse = Project(
+    id = "nlptools-parse-malt",
+    base = file("parse/malt"),
+    settings = buildSettings ++ Seq(
+      licenses := Seq("Malt Parser License" -> url("http://www.maltparser.org/license.html")),
+      libraryDependencies ++= Seq("org.maltparser" % "maltparser" % "1.7.2"))
+  ) dependsOn(morphaStemmer, opennlpPostag)
 
   // Clear
 

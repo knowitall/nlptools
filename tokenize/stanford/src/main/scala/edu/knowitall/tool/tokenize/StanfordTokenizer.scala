@@ -14,7 +14,7 @@ class StanfordTokenizer extends Tokenizer {
       new CoreLabelTokenFactory(),
       "").map { stoken =>
     new Token(stoken.word, stoken.beginPosition())
-  }.toSeq
+  }.toList
 }
 
 object StanfordTokenizerMain extends TokenizerMain {

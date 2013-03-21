@@ -32,3 +32,13 @@ abstract class DependencyParserMain extends LineProcessor("parser") {
     dependencyParser.dependencyGraph(line).serialize
   }
 }
+
+class RemoteDependencyParser(urlString: String) extends DependencyParser {
+  import dispatch._
+  val svc = url(urlString)
+
+  def dependencyGraph(sentence: String) = {
+    val response = Http(svc << sentence OK as.String).apply()
+    DependencyGraph.deserialize(response)
+  }
+}

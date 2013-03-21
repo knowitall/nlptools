@@ -51,7 +51,7 @@ extends Token(string, offset) {
   def isPronoun = isPersonalPronoun || isPossessivePronoun
 
   def isPossessive = isPossessivePronoun || postag == "POS"
-    
+
   def isDeterminer = postag == "DT"
   def isCardinalNumber = postag == "CD"
   def isSuperlativeAdverb = postag == "RBS"
@@ -60,7 +60,7 @@ extends Token(string, offset) {
   def isCoordinatingConjunction = postag == "CC"
   def isConjunction = isSubordinatingConjunction || isCoordinatingConjunction
   def isPreposition = postag == "IN"
-    
+
   val punctuation = Set("#", "$", "''", "(", ")", ",", ".", ":", "``")
 }
 

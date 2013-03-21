@@ -19,7 +19,7 @@ import edu.knowitall.common.Resource.using
 import edu.knowitall.tool.parse.ClearParser
 import edu.knowitall.tool.parse.graph.DependencyGraph
 
-class ClearSrl {
+class ClearSrl extends Srl {
   val clearMorpha = using(this.getClass.getResource("/edu/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
     new CEnglishMPAnalyzer(new ZipInputStream(input))
   }
@@ -33,7 +33,7 @@ class ClearSrl {
     new CSRLabeler(new ZipInputStream(input))
   }
 
-  def apply(graph: DependencyGraph) = {
+  def apply(graph: DependencyGraph): Seq[Frame] = {
     val tree = new DEPTree()
 
     graph.nodes.zipWithIndex.foreach {
@@ -83,17 +83,7 @@ class ClearSrl {
   }
 }
 
-object ClearSrlMain extends App {
-  val parser = new ClearParser()
-  val srl = new ClearSrl()
-  val source = Source.stdin
-  for (line <- source.getLines) {
-    val graph = parser.dependencyGraph(line)
-    println(graph.serialize)
-    val frames = srl.apply(graph)
-    frames foreach println
-    frames map (_.serialize) foreach println
-    val hierarchy = FrameHierarchy.fromFrames(graph, frames.toIndexedSeq)
-    hierarchy foreach println
-  }
+object ClearSrlMain extends SrlMain {
+  override val dependencyParser = new ClearParser()
+  override val srl = new ClearSrl()
 }

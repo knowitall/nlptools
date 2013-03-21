@@ -65,7 +65,7 @@ class DependencyNode(string: String, postag: String, val tokenInterval: Interval
   def toFullString = this.text + "_" + this.postag + "_" + this.tokenInterval.mkString("_")
 
   def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, tokenInterval, offset)
-  def serialize = {
+  override def serialize = {
     if (tokenInterval.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple tokenInterval")
     def clean(string: String): String = string.replaceAll(";", ":")
     clean(text).replaceAll("[[_()][^\\p{Graph}]]", "") + "_" + clean(postag) + "_" + tokenInterval.start + "_" + offset;

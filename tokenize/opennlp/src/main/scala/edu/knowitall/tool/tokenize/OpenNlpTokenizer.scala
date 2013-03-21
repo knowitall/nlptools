@@ -20,7 +20,7 @@ class OpenNlpTokenizer(val model: TokenizerModel) extends Tokenizer {
 
     assume(positions.length == strings.length)
 
-    for ((pos, string) <- (positions.iterator zip strings.iterator).toSeq)
+    for ((pos, string) <- (positions.iterator zip strings.iterator).toList)
     yield new Token(string, pos.getStart)
   }
 }
