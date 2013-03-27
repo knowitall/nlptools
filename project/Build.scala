@@ -65,6 +65,7 @@ object NlpToolsBuild extends Build {
     scalaVersion <<= (crossScalaVersions) { versions => versions.head },
     libraryDependencies ++= Seq(junit % "test", specs2 % "test", 
       dispatch % "provided", unfilteredFilter % "provided", unfilteredJetty % "provided"),
+    scalacOptions ++= Seq("-unchecked", "-deprecation"),
     publishMavenStyle := true,
     publishTo <<= version { (v: String) =>
       val nexus = "https://oss.sonatype.org/"
