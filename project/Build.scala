@@ -8,7 +8,7 @@ object NlpToolsBuild extends Build {
   // settings
   val buildOrganization = "edu.washington.cs.knowitall.nlptools"
   val buildVersion = "2.4.0"
-  val buildScalaVersions = Seq("2.9.2", "2.10.0")
+  val buildScalaVersions = Seq("2.9.2", "2.10.1")
 
   lazy val root = Project(id = "nlptools", base = file(".")) settings (
     crossScalaVersions := buildScalaVersions,
@@ -42,6 +42,8 @@ object NlpToolsBuild extends Build {
   val clearModelGroup = "edu.washington.cs.knowitall.clearnlp"
   val clearVersion = "1.3.0"
   val clear = "com.googlecode.clearnlp" % "clearnlp" % clearVersion
+
+  val breezeVersion = "0.2"
 
 
   // dependencies
@@ -237,7 +239,7 @@ object NlpToolsBuild extends Build {
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear,
-        "org.scalanlp" %% "breeze-process" % "0.1"))
+        "org.scalanlp" %% "breeze-process" % breezeVersion))
   ) dependsOn(core)
 
   lazy val breezeSentence = Project(
@@ -246,7 +248,7 @@ object NlpToolsBuild extends Build {
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear,
-        "org.scalanlp" %% "breeze-process" % "0.1"))
+        "org.scalanlp" %% "breeze-process" % breezeVersion))
   ) dependsOn(core)
 
   lazy val breezeConf = Project(
@@ -255,8 +257,8 @@ object NlpToolsBuild extends Build {
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear,
-        "org.scalanlp" %% "breeze-process" % "0.1",
-        "org.scalanlp" %% "breeze-learn" % "0.1"))
+        "org.scalanlp" %% "breeze-process" % breezeVersion,
+        "org.scalanlp" %% "breeze-learn" % breezeVersion))
   ) dependsOn(core)
 
   // Stemmers

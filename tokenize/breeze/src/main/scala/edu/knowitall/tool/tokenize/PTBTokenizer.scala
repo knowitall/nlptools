@@ -6,7 +6,7 @@ import scala.collection.JavaConversions._
 import breeze.text.tokenize.{ PTBTokenizer => BreezePTBTokenizer }
 
 class PTBTokenizer extends Tokenizer {
-  val tokenizer = BreezePTBTokenizer()
+  val tokenizer = BreezePTBTokenizer
 
   def tokenize(sentence: String): Seq[Token] = {
     val strings = tokenizer(sentence) map {
@@ -20,7 +20,6 @@ class PTBTokenizer extends Tokenizer {
       case "''" => "\""
       case s => s
     }
-    println(strings)
     Tokenizer.computeOffsets(strings, sentence)
   }
 }
