@@ -19,6 +19,11 @@ object Tokenizer {
     var offset: Int = 0
     var tokens: Seq[Token] = Seq.empty
 
+    // remove leading spaces
+    val (spaces, rest) = sent.span(_.isWhitespace)
+    offset += spaces.size
+    sent = rest
+
     for (string <- strings) {
       val leftOffset = offset
       assume(sent startsWith string)
