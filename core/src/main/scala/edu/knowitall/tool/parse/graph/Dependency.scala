@@ -59,7 +59,7 @@ object Dependency {
         label)
   }
   catch {
-    case e => throw new Dependency.SerializationException("could not deserialize dependency: " + string, e)
+    case e: Throwable => throw new Dependency.SerializationException("could not deserialize dependency: " + string, e)
   }
 
 

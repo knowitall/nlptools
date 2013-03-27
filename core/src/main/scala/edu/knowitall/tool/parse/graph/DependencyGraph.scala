@@ -283,7 +283,7 @@ class DependencyGraph (
                 (dedge.edge.label startsWith "prep")));
           if !(vertices contains dedge.end);
           v <- vertices;
-          val newEdge = dedge match {
+          newEdge = dedge match {
             case DownEdge(e) => e.copy(source = v)
             case UpEdge(e) => e.copy(dest = v)
           };
@@ -350,7 +350,7 @@ class DependencyGraph (
       // for each connect nn component
       group <- groups
       // split the component by POS tag
-      val nodes = group.toList.sorted
+      nodes = group.toList.sorted
       part <- splitByAdjacency(nodes)
       if part.size > 1
     } yield(part.toSet))(scala.collection.breakOut)
@@ -389,7 +389,7 @@ class DependencyGraph (
       // for each connect nn component
       group <- groups
       // split the component by POS tag
-      val nodes = group.toList.sorted
+      nodes = group.toList.sorted
       dividorSplit <- splitByDividor(nodes)
       part <- splitByPos(dividorSplit)
       if part.size > 1

@@ -62,8 +62,8 @@ object ClearParser {
       sourceNode <- tree.iterator.asScala.toList
       if sourceNode.hasHead
       if sourceNode.id != 0
-      val label = sourceNode.getLabel
-      val destNode = sourceNode.getHead
+      label = sourceNode.getLabel
+      destNode = sourceNode.getHead
       if destNode.id != 0
     } yield {
       new Dependency(nodeMap(destNode.id), nodeMap(sourceNode.id), label)
