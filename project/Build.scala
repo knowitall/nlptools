@@ -17,6 +17,7 @@ object NlpToolsBuild extends Build {
   ) aggregate(core,
       opennlpSentence, opennlpTokenize, opennlpPostag, opennlpChunk, opennlpParse,
       stanfordTokenize, stanfordPostag, stanfordParse, stanfordCoref,
+      maltParse,
       clearTokenize, clearPostag, clearParse, clearSrl,
       breezeTokenize, breezeSentence, breezeConf,
       morphaStemmer, snowballStemmer)
