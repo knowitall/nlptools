@@ -84,6 +84,5 @@ class ClearSrl extends Srl {
 }
 
 object ClearSrlMain extends SrlMain {
-  override val dependencyParser = new ClearParser()
   override val srl = new ClearSrl()
 }

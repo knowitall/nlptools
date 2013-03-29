@@ -9,11 +9,10 @@ abstract class Srl {
 }
 
 abstract class SrlMain extends LineProcessor("srl") {
-  def dependencyParser: DependencyParser
   def srl: Srl
 
   override def process(line : String) = {
-    val dgraph = dependencyParser(line)
+    val dgraph = DependencyGraph.deserialize(line)
     (srl(dgraph) map (_.serialize)).mkString("\n")
   }
 }
