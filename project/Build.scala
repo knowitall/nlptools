@@ -38,7 +38,7 @@ object NlpToolsBuild extends Build {
 
   val stanfordModelGroup = "edu.washington.cs.knowitall.stanford-corenlp"
   val stanfordVersion = "1.3.4"
-  val stanford = "edu.stanford.nlp" % "stanford-corenlp" % stanfordVersion
+  val stanford = "edu.stanford.nlp" % "stanford-corenlp" % stanfordVersion exclude("xom", "xom")
 
   val clearModelGroup = "edu.washington.cs.knowitall.clearnlp"
   val clearVersion = "1.3.0"
@@ -162,7 +162,8 @@ object NlpToolsBuild extends Build {
     base = file("parse/stanford"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl2),
-      libraryDependencies ++= Seq(stanford, stanfordModelGroup % "stanford-parse-models" % stanfordVersion ))
+      libraryDependencies ++= Seq(stanford, stanfordModelGroup % "stanford-parse-models" % stanfordVersion),
+      mainClass in assembly := Some("edu.knowitall.tool.parse.StanfordParserMain"))
   ) dependsOn(stanfordPostag)
 
   lazy val stanfordCoref = Project(
@@ -176,6 +177,7 @@ object NlpToolsBuild extends Build {
         stanfordModelGroup % "stanford-dcoref-models" % stanfordVersion, scopt ))
   ) dependsOn(stanfordParse)
 
+// Models do no work.
 /*
   lazy val stanfordTyper = Project(
     id = "nlptools-typer-stanford",
