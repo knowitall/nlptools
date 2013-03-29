@@ -2,13 +2,13 @@ package edu.knowitall
 package tool
 package parse
 
+import java.net.URL
+import edu.knowitall.common.Resource
 import opennlp.tools.cmdline.parser.ParserTool
 import opennlp.tools.parser._
 
 class OpenNlpParser(val model: ParserModel) extends ConstituencyParser {
-  def this(modelName: String = OpenNlpParser.defaultModelName) =
-    this(new ParserModel(
-        classOf[OpenNlpParser].getResourceAsStream(modelName)))
+  def this() = this(OpenNlpParser.loadDefaultModel())
 
   val parser = ParserFactory.create(model)
 
@@ -33,7 +33,19 @@ class OpenNlpParser(val model: ParserModel) extends ConstituencyParser {
 }
 
 object OpenNlpParser {
-  val defaultModelName = "/en-parser-chunking.bin"
+  private def defaultModelName = "/en-parser-chunking.bin"
+
+  val defaultModelUrl: URL = {
+    val url = this.getClass.getResource(defaultModelName)
+    require(url != null, "Could not load default parser model: " + defaultModelName)
+    url
+  }
+
+  def loadDefaultModel(): ParserModel = {
+    Resource.using(defaultModelUrl.openStream()) { stream =>
+      new ParserModel(stream)
+    }
+  }
 }
 
 object OpenNlpParserMain extends ConstituencyParserMain {

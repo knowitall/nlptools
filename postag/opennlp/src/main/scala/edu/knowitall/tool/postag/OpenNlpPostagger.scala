@@ -2,20 +2,20 @@ package edu.knowitall
 package tool
 package postag
 
+import java.net.URL
 import opennlp.tools.postag._
 import tool.tokenize.Token
+import edu.knowitall.common.Resource
 
 class OpenNlpPostagger(
   val model: POSModel,
   tokenizer: tokenize.Tokenizer)
 extends Postagger(tokenizer) {
 
-  def this(
-    modelName: String = "en-pos-maxent.bin",
-    tokenizer: tokenize.Tokenizer = new tokenize.OpenNlpTokenizer()) =
-    this(new POSModel(
-      classOf[OpenNlpPostagger].getClassLoader.getResourceAsStream(modelName)),
-      tokenizer)
+  def this(tokenizer: tokenize.Tokenizer) =
+    this(OpenNlpPostagger.loadDefaultModel(), tokenizer)
+
+  def this() = this(new tokenize.OpenNlpTokenizer())
 
 
   val tagger = new POSTaggerME(model)
@@ -24,6 +24,22 @@ extends Postagger(tokenizer) {
     val postags = tagger.tag(tokens.iterator.map(_.string).toArray)
     (tokens zip postags).map { case (token, postag) =>
       new PostaggedToken(token, postag)
+    }
+  }
+}
+
+object OpenNlpPostagger {
+  private def defaultModelName = "en-pos-maxent.bin"
+
+  val defaultModelUrl: URL = {
+    val url = this.getClass.getClassLoader.getResource(defaultModelName)
+    require(url != null, "Could not load default postagger model: " + defaultModelName)
+    url
+  }
+
+  def loadDefaultModel(): POSModel = {
+    Resource.using(defaultModelUrl.openStream()) { stream =>
+      new POSModel(stream)
     }
   }
 }

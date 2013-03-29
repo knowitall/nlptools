@@ -2,15 +2,18 @@ package edu.knowitall
 package tool
 package chunk
 
+import java.net.URL
 import opennlp.tools.chunker._
+import edu.knowitall.common.Resource
 
 class OpenNlpChunker(
   val model: ChunkerModel,
   postagger: postag.Postagger)
 extends Chunker(postagger) {
-  def this(modelName: String = "en-chunker.bin",
-    postagger: postag.Postagger = new postag.OpenNlpPostagger()) =
-    this(new ChunkerModel(OpenNlpChunker.loadModel(modelName)), postagger)
+  def this(postagger: postag.Postagger) =
+    this(OpenNlpChunker.loadDefaultModel(), postagger)
+
+  def this() = this(new postag.OpenNlpPostagger())
 
   val chunker = new ChunkerME(model)
 
@@ -21,13 +24,22 @@ extends Chunker(postagger) {
 }
 
 object OpenNlpChunker {
-  private def loadModel(name: String) = {
-    val resource = classOf[OpenNlpChunker].getClassLoader.getResourceAsStream(name)
-    if (resource == null) throw new IllegalArgumentException("could not find resource: " + name)
-    else resource
+  private def defaultModelName = "en-chunker.bin"
+  val defaultModelUrl: URL = {
+    val url = this.getClass.getClassLoader.getResource(defaultModelName)
+    require(url != null, "Could not load default chunker model: " + defaultModelName)
+    url
+  }
+
+  def loadDefaultModel(): ChunkerModel = loadModel(defaultModelUrl)
+
+  private def loadModel(url: URL): ChunkerModel = {
+    Resource.using(url.openStream()) { stream =>
+      new ChunkerModel(stream)
+    }
   }
 }
 
 object OpenNlpChunkerMain extends ChunkerMain {
-  lazy val chunker = new OpenNlpChunker("en-chunker.bin", new postag.OpenNlpPostagger())
+  lazy val chunker = new OpenNlpChunker()
 }
