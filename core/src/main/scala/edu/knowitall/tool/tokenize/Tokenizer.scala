@@ -39,6 +39,20 @@ object Tokenizer {
     tokens
   }
 
+  /** Rebuild the original text from tokens.  This will maintain
+    * the original spacing, although different forms of spacing
+    * such as tabs will become standard spaces. */
+  def originalText(tokens: Iterable[Token]) = {
+    val builder = new StringBuilder()
+
+    for (token <- tokens) {
+      builder.append(" " * (token.offset - builder.length))
+      builder.append(token.string)
+    }
+
+    builder.toString()
+  }
+
   private[this] val tokenRegex = """(.+)@(\d+)""".r
   def deserialize(pickled: String): Seq[Token] = {
     val split = pickled.split("\\s+")
