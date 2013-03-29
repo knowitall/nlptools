@@ -83,5 +83,6 @@ class LineProcessorServer(name: String, port: Int, process: String => String) {
     }
 
     unfiltered.jetty.Http(port).filter(plan).run()
+    System.out.println("Server started on port: " + port);
   }
 }
