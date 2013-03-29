@@ -14,8 +14,9 @@ import java.io.FileInputStream
 import java.util.zip.GZIPInputStream
 
 class StanfordNer(private val classifier: AbstractSequenceClassifier[_]) extends Typer[Token]("Stanford", "Stanford") {
-  def apply(text: String, seq: Seq[Token]) = {
-import scala.collection.JavaConverters._
+  def apply(seq: Seq[Token]) = {
+    val text = Tokenizer.originalText(seq)
+    import scala.collection.JavaConverters._
     val response = classifier.classifyToCharacterOffsets(text).asScala
 
     var tags = List.empty[Type]
@@ -24,8 +25,8 @@ import scala.collection.JavaConverters._
       val nerType = triple.first
 
       // find actual token offsets from NER offsets
-      val start = seq.find(_.interval.start == nerInterval.start).map(_.interval.start)
-      val end = seq.find(_.interval.end == nerInterval.end).map(_.interval.end)
+      val start = seq.find(_.offsets.start == nerInterval.start).map(_.offsets.start)
+      val end = seq.find(_.offsets.end == nerInterval.end).map(_.offsets.end)
 
       for (s <- start; e <- end) {
         val typ = new Type(this.name + nerType, "Stanford", Interval.open(s, e), text.substring(nerInterval.start, nerInterval.end))
@@ -35,8 +36,6 @@ import scala.collection.JavaConverters._
 
     tags
   }
-
-  def apply(seq: Seq[Token]) = apply(seq.iterator.map(_.string).mkString(" "), seq)
 }
 
 object StanfordNer {
