@@ -261,8 +261,8 @@ object NlpToolsBuild extends Build {
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear,
-        "org.scalanlp" %% "breeze-process" % breezeVersion,
-        "org.scalanlp" %% "breeze-learn" % breezeVersion))
+        "org.scalanlp" %% "breeze-process" % breezeVersion exclude("com.codecommit", "anti-xml_2.9.1"),
+        "org.scalanlp" %% "breeze-learn" % breezeVersion exclude("com.codecommit", "anti-xml_2.9.1")))
   ) dependsOn(core)
 
   // Stemmers
