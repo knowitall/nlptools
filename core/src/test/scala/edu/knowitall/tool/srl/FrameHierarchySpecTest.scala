@@ -71,4 +71,17 @@ object FrameHierarchySpecTest extends Specification {
       hierarchy.head.height == 2
     }
   }
+
+  {
+    val sentence = "John said Fred works on Sunday."
+    ("no errors with: '" + sentence + "'") in {
+      val dgraph = DependencyGraph.deserialize("nsubj(said_VBD_1_5, John_NNP_0_0); ccomp(said_VBD_1_5, works_VBZ_3_15); punct(said_VBD_1_5, ._._6_30); nsubj(works_VBZ_3_15, Fred_NNP_2_10); prep(works_VBZ_3_15, on_IN_4_21); pobj(on_IN_4_21, Sunday_NNP_5_24)")
+      val frames = IndexedSeq(
+        "say_1.01:[A0=John_0, A1=works_3]",
+        "work_3.01:[A0=Fred_2, A1=on_4]") map Frame.deserialize(dgraph)
+      val hierarchy = FrameHierarchy.fromFrames(dgraph, frames)
+      hierarchy.size must_== 1
+      hierarchy.head.height == 2
+    }
+  }
 }
