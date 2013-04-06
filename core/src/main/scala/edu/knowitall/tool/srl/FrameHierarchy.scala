@@ -1,6 +1,7 @@
 package edu.knowitall.tool.srl
 
 import edu.knowitall.tool.parse.graph.DependencyGraph
+import edu.knowitall.collection.immutable.graph.Direction
 
 case class FrameHierarchy(frame: Frame, children: Seq[FrameHierarchy]) {
   def height: Int =
@@ -21,11 +22,17 @@ object FrameHierarchy {
           val inferiors = dgraph.graph.inferiors(frame.relation.node, dedge => !(dedge.source == frame.relation.node && dedge.label == "conj"))
           val children = framesWithIndex.filter {
             case (child, index) =>
-              frame != child &&
-                // first arguments must match
-                frame.argument(Roles.A0) == child.argument(Roles.A0) &&
-                // child frame must be beneath parent frame relation in dependency graph
-                (inferiors contains child.relation.node)
+              frame != child && (
+                  // first arguments must match
+                  (frame.argument(Roles.A0) == child.argument(Roles.A0)) &&
+                  // child frame must be beneath parent frame relation in dependency graph
+                  (inferiors contains child.relation.node) ||
+                  // all child nodes are in the inferiors
+                  (child.nodes.forall(inferiors contains _)) &&
+                  // relations are connected by ccomp
+                  (dgraph.graph.neighbors(frame.relation.node,
+                      dedge => dedge.dir == Direction.Down && dedge.edge.label == "ccomp").contains(child.relation.node))
+                )
           }
           index -> children.map(_._2)
       }

@@ -7,6 +7,7 @@ import edu.knowitall.tool.parse.graph.DependencyGraph
 
 case class Frame(relation: Relation, arguments: Seq[Argument]) {
   override def toString = relation.toString + ":" + arguments.mkString("[", ", ", "]")
+  def nodes = arguments.map(_.node).toSet + relation.node
   def serialize = relation.serialize + ":" + arguments.map(_.serialize).mkString("[", ", ", "]")
   def argument(role: Role): Option[Argument] = this.arguments.find(_.role == role)
 }
@@ -35,8 +36,14 @@ object Relation {
   }
 
   def deserialize(dgraph: DependencyGraph)(pickled: String) = {
-    val Array(label, sense) = pickled.split("\\.")
-    val Array(name, nodeIndex) = label.split("_")
+    val (label, sense) = pickled.split("\\.") match {
+      case Array(label, sense) => (label, sense)
+      case _ => throw new MatchError("Could not deserialize relation: " + pickled)
+    }
+    val (name, nodeIndex) = label.split("_") match {
+      case Array(name, nodeIndex) => (name, nodeIndex)
+      case _ => throw new MatchError("Could not deserialize relation label: " + label)
+    }
 
     val node = dgraph.nodes.find(_.index == nodeIndex.toInt).get
     Relation(node, name, sense)
@@ -50,7 +57,10 @@ case class Argument(node: DependencyNode, role: Role) {
 object Argument {
   def deserialize(dgraph: DependencyGraph)(pickled: String) = {
     val (roleString, rest) = pickled.span(_ != '=')
-    val Array(string, nodeIndex) = rest.drop(1).split("_")
+    val (string, nodeIndex) = rest.drop(1).split("_") match {
+      case Array(string, nodeIndex) => (string, nodeIndex)
+      case _ => throw new MatchError("Could not deserialize argument: " + rest)
+    }
     val node = dgraph.nodes.find(_.index == nodeIndex.toInt).get
     require(node.text == string, node.text + " != " + string)
     Argument(node, Roles(roleString))
