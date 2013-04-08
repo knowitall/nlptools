@@ -34,19 +34,35 @@ object FrameHierarchy {
                       dedge => dedge.dir == Direction.Down && dedge.edge.label == "ccomp").contains(child.relation.node))
                 )
           }
-          index -> children.map(_._2)
+          index -> children.map(_._2).toSet
+      }.toMap
+
+      def transitiveClosure(hierarchy: Map[Int, Set[Int]]): Map[Int, Set[Int]] = {
+        val targets = hierarchy.map { case (parent, children) =>
+          val descendants = children flatMap hierarchy
+          // add children of children
+          if (descendants != children) parent -> (descendants ++ children)
+          // there is no change
+          else parent -> children
+        }
+
+        // unstable, continue
+        if (targets != hierarchy) transitiveClosure(targets)
+        // stable, stop
+        else targets
       }
 
+      val closure = transitiveClosure(descendants)
       var hierarchies = Map.empty[Int, FrameHierarchy]
-      for (i <- Range(0, descendants.iterator.map(_._2.size).max + 1)) {
-        val targetDescendants = descendants.filter(_._2.size == i)
+      for (i <- Range(0, closure.iterator.map(_._2.size).max + 1)) {
+        val targetDescendants = closure.filter(_._2.size == i)
 
         for ((frameIndex, childrenIndices) <- targetDescendants) {
           val frame = frames(frameIndex)
           val children = childrenIndices flatMap hierarchies.get
           hierarchies --= childrenIndices
 
-          hierarchies += frameIndex -> FrameHierarchy(frame, children)
+          hierarchies += frameIndex -> FrameHierarchy(frame, children.toSeq)
         }
       }
 

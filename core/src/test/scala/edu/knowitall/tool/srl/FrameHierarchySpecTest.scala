@@ -84,4 +84,19 @@ object FrameHierarchySpecTest extends Specification {
       hierarchy.head.height == 2
     }
   }
+
+  {
+    val sentence = "Mary said John wants to sleep under a tree."
+    ("no errors with: '" + sentence + "'") in {
+      val dgraph = DependencyGraph.deserialize("nsubj(said_VBD_1_5, Mary_NNP_0_0); ccomp(said_VBD_1_5, wants_VBZ_3_15); punct(said_VBD_1_5, ._._9_42); nsubj(wants_VBZ_3_15, John_NNP_2_10); xcomp(wants_VBZ_3_15, sleep_VB_5_24); aux(sleep_VB_5_24, to_TO_4_21); prep(sleep_VB_5_24, under_IN_6_30); pobj(under_IN_6_30, tree_NN_8_38); det(tree_NN_8_38, a_DT_7_36)")
+      val frames = IndexedSeq(
+        "say_1.01:[A0=Mary_0, A1=wants_3]",
+        "want_3.01:[A0=John_2, A1=sleep_5]",
+        "sleep_5.01:[A0=John_2, AM-LOC=under_6]") map Frame.deserialize(dgraph)
+      val hierarchy = FrameHierarchy.fromFrames(dgraph, frames)
+      hierarchy.size must_== 1
+      hierarchy.head.height == 3
+      hierarchy.head.toString must_== "say.01:[A0=Mary, A1=wants] < want.01:[A0=John, A1=sleep] < sleep.01:[A0=John, AM-LOC=under]"
+    }
+  }
 }
