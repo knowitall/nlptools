@@ -176,11 +176,11 @@ object NlpToolsBuild extends Build {
         stanfordModelGroup % "stanford-dcoref-models" % stanfordVersion, scopt ))
   ) dependsOn(stanfordParse)
 
-// Models do no work.
   lazy val stanfordTyper = Project(
     id = "nlptools-typer-stanford",
     base = file("typer/stanford"),
     settings = buildSettings ++ Seq(
+      licenses := Seq(gpl2),
       libraryDependencies ++= Seq(stanford, stanfordModelGroup % "stanford-ner-models" % stanfordVersion ))
   ) dependsOn(core)
 
