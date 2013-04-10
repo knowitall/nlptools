@@ -48,7 +48,7 @@ object NlpToolsBuild extends Build {
 
   // dependencies
   val junit = "junit" % "junit" % "4.11"
-  val commonScala = "edu.washington.cs.knowitall.common-scala" %% "common-scala" % "1.1.0"
+  val commonScala = "edu.washington.cs.knowitall.common-scala" %% "common-scala" % "1.1.1"
   val specs2 = "org.specs2" %% "specs2" % "1.12.3"
   val scopt = "com.github.scopt" %% "scopt" % "2.1.0"
   val slf4j = "org.slf4j" % "slf4j-api" % "1.7.2"
