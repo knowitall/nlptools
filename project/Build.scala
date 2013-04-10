@@ -16,12 +16,11 @@ object NlpToolsBuild extends Build {
     publishLocal := { }
   ) aggregate(core,
       opennlpSentence, opennlpTokenize, opennlpPostag, opennlpChunk, opennlpParse,
-      stanfordTokenize, stanfordPostag, stanfordParse, stanfordCoref,
+      stanfordTokenize, stanfordPostag, stanfordParse, stanfordCoref, stanfordTyper,
       maltParse,
       clearTokenize, clearPostag, clearParse, clearSrl,
       breezeTokenize, breezeSentence, breezeConf,
       morphaStemmer, snowballStemmer)
-
 
   override lazy val settings = super.settings ++ Seq(
     crossScalaVersions := buildScalaVersions
@@ -38,7 +37,7 @@ object NlpToolsBuild extends Build {
 
   val stanfordModelGroup = "edu.washington.cs.knowitall.stanford-corenlp"
   val stanfordVersion = "1.3.4"
-  val stanford = "edu.stanford.nlp" % "stanford-corenlp" % stanfordVersion exclude("xom", "xom")
+  val stanford = "edu.stanford.nlp" % "stanford-corenlp" % stanfordVersion
 
   val clearModelGroup = "edu.washington.cs.knowitall.clearnlp"
   val clearVersion = "1.3.0"
@@ -64,7 +63,7 @@ object NlpToolsBuild extends Build {
     version      := buildVersion,
     crossScalaVersions := buildScalaVersions,
     scalaVersion <<= (crossScalaVersions) { versions => versions.head },
-    libraryDependencies ++= Seq(junit % "test", specs2 % "test", 
+    libraryDependencies ++= Seq(junit % "test", specs2 % "test",
       dispatch % "provided", unfilteredFilter % "provided", unfilteredJetty % "provided"),
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     publishMavenStyle := true,
@@ -178,14 +177,12 @@ object NlpToolsBuild extends Build {
   ) dependsOn(stanfordParse)
 
 // Models do no work.
-/*
   lazy val stanfordTyper = Project(
     id = "nlptools-typer-stanford",
     base = file("typer/stanford"),
     settings = buildSettings ++ Seq(
       libraryDependencies ++= Seq(stanford, stanfordModelGroup % "stanford-ner-models" % stanfordVersion ))
   ) dependsOn(core)
-*/
 
   // Malt
 
