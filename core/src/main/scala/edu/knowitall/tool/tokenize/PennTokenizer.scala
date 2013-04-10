@@ -9,12 +9,11 @@ import java.util.regex._
 /* The PennTokenizer was used to tokenize the Penn Treebank.
  * The following is a translation from a sed file.  This algorithm
  * is entirely deterministic.  It is composed of regular expression
- * replacements. 
+ * replacements.
  *
  * @author  Michael Schmitz
  */
-/*
-class PennTokenizer extends Tokenizer {
+object PennTokenizer extends Tokenizer {
   val replacements = List(
     // attempt to get correct directional quotes
     ("^\"", "`` "),
@@ -35,15 +34,17 @@ class PennTokenizer extends Tokenizer {
     (Pattern.compile(a), b)
   }
 
-  def tokenize(sentence: String) =
-    replacements.foldRight(sentence) { case ((t, r), s) =>
+  def tokenize(sentence: String) = {
+    val split = replacements.foldRight(sentence) { case ((t, r), s) =>
       t.matcher(s).replaceAll(r)
     }.trim.split("\\s+")
+
+    Tokenizer.computeOffsets(split, sentence)
+  }
 }
 
-object PennTokenizerMain extends LineProcessor {
-  val tokenizer = new PennTokenizer()
+object PennTokenizerMain extends LineProcessor("penn-tokenizer") {
+  val tokenizer = PennTokenizer
   override def process(sentence: String) =
     tokenizer.tokenize(sentence).mkString(" ")
 }
-*/
