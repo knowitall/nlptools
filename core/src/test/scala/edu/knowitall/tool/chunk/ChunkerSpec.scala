@@ -20,9 +20,7 @@ object ChunkerSpecTest extends Specification {
 
     val text = "John very quickly ran away from the deep blue reflection in the mirror."
     val tokens = Tokenizer.computeOffsets(strings, text)
-    val chunkedTokens = (tokens zip postags zip chunks).map { case ((token, postag), chunk) =>
-      new ChunkedToken(new PostaggedToken(token, postag), chunk)
-    }
+    val chunkedTokens = Chunker.tokensFrom(chunks, postags, tokens)
 
     Chunker.intervals(chunkedTokens).map(_.toString) must
       haveTheSameElementsAs(List("(NP,{0})", "(ADVP,{1})", "(ADVP,{2})", "(VP,{3})", "(ADVP,{4})", "(PP,{5})", "(NP,[6, 10))", "(PP,{10})", "(NP,[11, 13))", "(O,{13})"))

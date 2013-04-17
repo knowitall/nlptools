@@ -2,7 +2,7 @@ package edu.knowitall
 package tool
 package postag
 
-import edu.knowitall._
+import edu.knowitall.tool.tokenize._
 import scala.collection.immutable
 
 /** A POS tagger takes tokenized input and associates a part of speech
@@ -58,6 +58,10 @@ object Postagger {
     "where as", "as far as", "as well as")
 
   val prepositions = simplePrepositions ++ complexPrepositions
+
+  def tokensFrom(postags: Seq[String], tokens: Seq[Token]): Seq[PostaggedToken] = {
+    (postags zip tokens).map { case (postag, token) => new PostaggedToken(token, postag) }
+  }
 }
 
 abstract class PostaggerMain extends LineProcessor("postagger") {

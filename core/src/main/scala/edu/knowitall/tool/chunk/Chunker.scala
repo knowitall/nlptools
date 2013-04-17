@@ -3,6 +3,8 @@ package tool
 package chunk
 
 import edu.knowitall.collection.immutable.Interval
+import edu.knowitall.tool.postag._
+import edu.knowitall.tool.tokenize._
 
 /** A Chunker takes postagged text and adds a chunk tag, specifying
   * whether a noun or verb phrase is starting or continuing.
@@ -70,6 +72,11 @@ object Chunker {
     }
 
     helper(chunks.iterator.map(_.chunk))
+  }
+
+  def tokensFrom(chunks: Seq[String], postags: Seq[String], tokens: Seq[Token]) = {
+    val postaggedTokens = Postagger.tokensFrom(postags, tokens)
+    (chunks zip postaggedTokens).map { case (chunk, postaggedToken) => new ChunkedToken(postaggedToken, chunk) }
   }
 }
 
