@@ -49,7 +49,7 @@ object Chunker {
   def intervals(chunks: Seq[ChunkedToken]): Seq[(String, Interval)] = {
     def helper(chunks: Iterator[String]) = {
       var intervals = Vector.empty[(String, Interval)]
-      var iterator = chunks.zipWithIndex
+      var iterator: Iterator[(String, Int)] = chunks.zipWithIndex
       while (iterator.hasNext) {
         val interval = {
           val (nextToken, nextIndex) = iterator.next()
