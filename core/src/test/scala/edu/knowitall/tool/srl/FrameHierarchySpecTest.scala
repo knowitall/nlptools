@@ -7,7 +7,6 @@ import edu.knowitall.tool.parse.graph.DependencyGraph
 
 @RunWith(classOf[JUnitRunner])
 object FrameHierarchySpecTest extends Specification {
-  /*
   {
     val sentence = "John ran down the hill."
     "no nested frames are found in: '" + sentence + "'" in {
@@ -98,7 +97,6 @@ object FrameHierarchySpecTest extends Specification {
       hierarchy.head.toString must_== "say.01:[A0=Mary, A1=wants] < want.01:[A0=John, A1=sleep] < sleep.01:[A0=John, AM-LOC=under]"
     }
   }
-  */
 
   {
     val sentence = "Montevideo is the capital of Uruguay and is situated where the river Rio de la Plata flows into the South Atlantic ."
