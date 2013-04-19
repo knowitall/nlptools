@@ -33,7 +33,7 @@ object NlpToolsBuild extends Build {
 
 
   // dependency helpers
-  val opennlp = "org.apache.opennlp" % "opennlp-tools" % "1.5.2-incubating"
+  val opennlp = "org.apache.opennlp" % "opennlp-tools" % "1.5.3"
 
   val stanfordModelGroup = "edu.washington.cs.knowitall.stanford-corenlp"
   val stanfordVersion = "1.3.4"
