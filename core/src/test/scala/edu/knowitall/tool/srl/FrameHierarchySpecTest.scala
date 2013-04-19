@@ -7,6 +7,7 @@ import edu.knowitall.tool.parse.graph.DependencyGraph
 
 @RunWith(classOf[JUnitRunner])
 object FrameHierarchySpecTest extends Specification {
+  /*
   {
     val sentence = "John ran down the hill."
     "no nested frames are found in: '" + sentence + "'" in {
@@ -94,9 +95,21 @@ object FrameHierarchySpecTest extends Specification {
         "want_3.01:[A0=John_2, A1=sleep_5]",
         "sleep_5.01:[A0=John_2, AM-LOC=under_6]") map Frame.deserialize(dgraph)
       val hierarchy = FrameHierarchy.fromFrames(dgraph, frames)
-      hierarchy.size must_== 1
-      hierarchy.head.height == 3
       hierarchy.head.toString must_== "say.01:[A0=Mary, A1=wants] < want.01:[A0=John, A1=sleep] < sleep.01:[A0=John, AM-LOC=under]"
+    }
+  }
+  */
+
+  {
+    val sentence = "Montevideo is the capital of Uruguay and is situated where the river Rio de la Plata flows into the South Atlantic ."
+    ("no errors with: '" + sentence + "'") in {
+      val dgraph = DependencyGraph.deserialize("nsubj(is_VBZ_1_11, Montevideo_NNP_0_0); attr(is_VBZ_1_11, capital_NN_3_18); cc(is_VBZ_1_11, and_CC_6_37); conj(is_VBZ_1_11, situated_VBN_8_44); punct(is_VBZ_1_11, ._._21_115); det(capital_NN_3_18, the_DT_2_14); prep(capital_NN_3_18, of_IN_4_26); pobj(of_IN_4_26, Uruguay_NNP_5_29); auxpass(situated_VBN_8_44, is_VBZ_7_41); advcl(situated_VBN_8_44, flows_VBZ_16_85); det(river_NN_11_63, the_DT_10_59); appos(river_NN_11_63, Plata_NNP_15_79); nn(Plata_NNP_15_79, Rio_NNP_12_69); nn(Plata_NNP_15_79, de_NNP_13_73); nn(Plata_NNP_15_79, la_NNP_14_76); advmod(flows_VBZ_16_85, where_WRB_9_53); nsubj(flows_VBZ_16_85, river_NN_11_63); prep(flows_VBZ_16_85, into_IN_17_91); pobj(into_IN_17_91, Atlantic_NNP_20_106); det(Atlantic_NNP_20_106, the_DT_18_96); nn(Atlantic_NNP_20_106, South_NNP_19_100)")
+      val frames = IndexedSeq(
+        "be_1.01:[A1=Montevideo_0, A2=capital_3]",
+        "situate_8.01:[A1=Montevideo_0]",
+        "flow_16.01:[R-AM-LOC=where_9, A1=river_11, AM-DIR=into_17]") map Frame.deserialize(dgraph)
+      val hierarchy = FrameHierarchy.fromFrames(dgraph, frames)
+      hierarchy.map(_.toString) must haveTheSameElementsAs(Seq("be.01:[A1=Montevideo, A2=capital]", "flow.01:[R-AM-LOC=where, A1=river, AM-DIR=into]", "situate.01:[A1=Montevideo]"))
     }
   }
 }

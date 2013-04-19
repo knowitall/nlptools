@@ -24,10 +24,10 @@ object FrameHierarchy {
             case (child, index) =>
               frame != child && (
                   // first arguments must match
-                  (frame.argument(Roles.A0) == child.argument(Roles.A0)) &&
+                  (for (frameRole <- frame.argument(Roles.A0); childRole <- child.argument(Roles.A0)) yield (frameRole == childRole)).getOrElse(false) &&
                   // child frame must be beneath parent frame relation in dependency graph
                   (inferiors contains child.relation.node) ||
-                  // all child nodes are in the inferiors
+                  // all child nodes are in the inferiors of the relation
                   (child.nodes.forall(inferiors contains _)) &&
                   // relations are connected by ccomp
                   (dgraph.graph.neighbors(frame.relation.node,
