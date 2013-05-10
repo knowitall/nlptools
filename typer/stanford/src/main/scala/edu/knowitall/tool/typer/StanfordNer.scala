@@ -25,11 +25,11 @@ class StanfordNer(private val classifier: AbstractSequenceClassifier[_]) extends
       val nerType = triple.first
 
       // find actual token offsets from NER offsets
-      val start = seq.find(_.offsets.start == nerInterval.start).map(_.offsets.start)
-      val end = seq.find(_.offsets.end == nerInterval.end).map(_.offsets.end)
+      val start = seq.iterator.zipWithIndex.find(_._1.offsets.start == nerInterval.start).map(_._2)
+      val end = seq.iterator.zipWithIndex.find(_._1.offsets.end == nerInterval.end).map(_._2)
 
       for (s <- start; e <- end) {
-        val typ = new Type(this.name + nerType, "Stanford", Interval.open(s, e), text.substring(nerInterval.start, nerInterval.end))
+        val typ = new Type(this.name + nerType, "Stanford", Interval.closed(s, e), text.substring(nerInterval.start, nerInterval.end))
         tags ::= typ
       }
     }
