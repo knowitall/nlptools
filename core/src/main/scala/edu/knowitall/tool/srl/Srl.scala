@@ -23,6 +23,9 @@ class RemoteSrl(urlString: String) extends Srl {
 
   def apply(dgraph: DependencyGraph) = {
     val response = Http(svc << dgraph.serialize OK as.String).apply()
-    response.split("\\n").map(Frame.deserialize(dgraph))(scala.collection.breakOut)
+    if (response.isEmpty) Seq.empty
+    else {
+      response.split("\\n").map(Frame.deserialize(dgraph))(scala.collection.breakOut)
+    }
   }
 }
