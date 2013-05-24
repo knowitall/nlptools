@@ -36,13 +36,13 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
 
     // an array of arrays, where the first dimension is sentences
     // and the second is tokens
-    val tokens: Array[Array[CoreLabel]] = document.get[java.util.List[CoreMap], SentencesAnnotation](classOf[SentencesAnnotation]).map { sentence =>
-      sentence.get[java.util.List[CoreLabel], TokensAnnotation](classOf[TokensAnnotation]).toList.toArray
+    val tokens: Array[Array[CoreLabel]] = document.get(classOf[SentencesAnnotation]).map { sentence =>
+      sentence.get(classOf[TokensAnnotation]).toList.toArray
     }.toArray
 
     // stanford is doing some WEIRD stuff, look at the JavaDoc for get
     // somehow Java handles this without having to specify the types.
-    val coremaps = document.get[java.util.Map[java.lang.Integer, CorefChain], CorefChainAnnotation](classOf[CorefChainAnnotation])
+    val coremaps = document.get(classOf[CorefChainAnnotation])
 
     (for ((k, chain) <- coremaps) yield {
       val representitive = chain.getRepresentativeMention
