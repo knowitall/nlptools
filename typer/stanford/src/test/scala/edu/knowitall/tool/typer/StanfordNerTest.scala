@@ -19,6 +19,6 @@ object StanfordNerTest extends Specification {
     val types = ner(tokens)
 
     types.size == 1
-    types.head.tokenInterval == Interval.open(36, 44)
+    types.head.tokenInterval == Interval.singleton(7)
   }
 }
