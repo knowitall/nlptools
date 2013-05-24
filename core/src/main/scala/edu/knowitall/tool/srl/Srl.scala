@@ -1,5 +1,7 @@
 package edu.knowitall.tool.srl
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import edu.knowitall.tool.LineProcessor
 import edu.knowitall.tool.parse.DependencyParser
 import edu.knowitall.tool.parse.graph.DependencyGraph

@@ -4,6 +4,8 @@ package segment
 
 import _root_.edu.knowitall.collection.immutable.Interval
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 /** A sentencer breaks text into sentences.
   */
 abstract class Segmenter {

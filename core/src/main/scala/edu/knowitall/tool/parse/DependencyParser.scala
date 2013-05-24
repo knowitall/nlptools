@@ -4,6 +4,8 @@ package parse
 
 import graph._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 /** A trait for a tool that produces dependencies, such as the
   * Stanford dependency parser. */
 trait DependencyParser {

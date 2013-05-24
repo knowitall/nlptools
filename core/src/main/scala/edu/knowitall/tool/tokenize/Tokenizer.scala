@@ -2,6 +2,8 @@ package edu.knowitall
 package tool
 package tokenize
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 /** A tokenizer takes a sentence string as input and
   * seperates words (tokens) along word (token) boundaries.
   */
