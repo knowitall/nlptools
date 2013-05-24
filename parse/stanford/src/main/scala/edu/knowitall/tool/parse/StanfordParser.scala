@@ -2,15 +2,20 @@ package edu.knowitall
 package tool
 package parse
 
-import scala.collection.JavaConversions._
+import scala.Array.canBuildFrom
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.collectionAsScalaIterable
+import edu.knowitall.tool.postag.Postagger
+import edu.knowitall.tool.postag.StanfordPostagger
+import edu.stanford.nlp.ling.TaggedWord
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser
+import edu.stanford.nlp.trees.GrammaticalStructure
 import edu.stanford.nlp.trees.PennTreebankLanguagePack
+import edu.stanford.nlp.trees.Tree
 import graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode
-import edu.stanford.nlp.trees.GrammaticalStructure
-import tool.parse.BaseStanfordParser._
-import edu.stanford.nlp.trees.Tree
+import edu.knowitall.tool.parse.BaseStanfordParser.CollapseType
 
 /*
  * Subclasses of BaseStanfordParser must perform an optional post-processing step that applies
@@ -18,9 +23,9 @@ import edu.stanford.nlp.trees.Tree
 abstract class BaseStanfordParser extends DependencyParser {
   def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] = dependencyGraph(string, collapse).dependencies
 
-  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, None)
+  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, BaseStanfordParser.None)
 
-  override def dependencyGraph(string: String) = dependencyGraph(string, None)
+  override def dependencyGraph(string: String) = dependencyGraph(string, BaseStanfordParser.None)
   def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
 }
 
@@ -46,19 +51,32 @@ object StanfordParserMain extends DependencyParserMain {
   lazy val dependencyParser = new StanfordParser
 }
 
-class StanfordParser(lp: LexicalizedParser) extends BaseStanfordParser with ConstituencyParser {
-  def this() = this(LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"))
+class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends BaseStanfordParser with ConstituencyParser {
+  def this(postagger: Postagger = new StanfordPostagger()) = this(LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"), postagger)
 
   override def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] =
-    StanfordParser.dependencyHelper(lp.apply(string), collapse)._2
+    StanfordParser.dependencyHelper(lp.parse(postagToStanfordRepr(string)), collapse)._2
 
+  private def postagToStanfordRepr(string: String): java.util.List[TaggedWord] = {
+    val tokens = postagger(string)
+    val words = new java.util.ArrayList[TaggedWord](tokens.size)
+
+    tokens.foreach { token =>
+      val w = new TaggedWord(token.string, token.postag)
+      w.setBeginPosition(token.offsets.start)
+      w.setEndPosition(token.offsets.end)
+      words.add(w)
+    }
+
+    words
+  }
   override def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
-    val (nodes, deps) = StanfordParser.dependencyHelper(lp.apply(string), collapse)
+    val (nodes, deps) = StanfordParser.dependencyHelper(lp.parse(postagToStanfordRepr(string)), collapse)
     new DependencyGraph(nodes.toList.sortBy(_.indices), deps)
   }
 
   override def parse(string: String) = {
-    StanfordParser.convertTree(lp.apply(string))
+    StanfordParser.convertTree(lp.parse(postagToStanfordRepr(string)))
   }
 }
 
