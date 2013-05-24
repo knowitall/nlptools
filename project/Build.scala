@@ -8,7 +8,7 @@ object NlpToolsBuild extends Build {
   // settings
   val buildOrganization = "edu.washington.cs.knowitall.nlptools"
   val buildVersion = "2.4.2-SNAPSHOT"
-  val buildScalaVersions = Seq("2.10.1", "2.9.2")
+  val buildScalaVersions = Seq("2.10.1", "2.9.3")
 
   lazy val root = Project(id = "nlptools", base = file(".")) settings (
     crossScalaVersions := buildScalaVersions,
