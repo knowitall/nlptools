@@ -12,7 +12,7 @@ import edu.knowitall.tool.tokenize.Token
   * @param  postag  the PENN-style part-of-speech tag of the token
   * @param  chunk   the chunk tag of the token in BIO format
   */
-class PostaggedToken(val postag: String, string: String, offset: Int)
+class PostaggedToken(val postag: String, override val string: String, override val offset: Int)
 extends Token(string, offset) {
   def this(token: Token, postag: String) = this(postag, token.string, token.offset)
 
