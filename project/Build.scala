@@ -91,6 +91,9 @@ object NlpToolsBuild extends Build {
       dispatch % "provided", unfilteredFilter % "provided", unfilteredJetty % "provided"),
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     parallelExecution in ThisBuild := false,
+    javaOptions += "-Xms512M",
+    javaOptions += "-Xmx4G",
+    fork in test := true,
     publishMavenStyle := true,
     publishTo <<= version { (v: String) =>
       val nexus = "https://oss.sonatype.org/"
