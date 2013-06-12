@@ -93,7 +93,7 @@ object NlpToolsBuild extends Build {
     parallelExecution in ThisBuild := false,
     javaOptions += "-Xms512M",
     javaOptions += "-Xmx4G",
-    javaOptions += "-XX:MaxPermSize=256M",
+    javaOptions += "-XX:MaxPermSize=1G",
     fork in test := true,
     publishMavenStyle := true,
     publishTo <<= version { (v: String) =>
