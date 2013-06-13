@@ -1,6 +1,6 @@
 before_script:
   - 'echo $JAVA_OPTS'
-  - 'export JAVA_OPTS="-XX:MaxPermSize=1g -Xms512m -Xmx4g"'
+  - 'export JAVA_OPTS="-XX:MaxPermSize=1g -Xms512m -Xmx4g -XX:+UseConcMarkSweepGC -XX:+CMSPermGenSweepingEnabled -XX:+CMSClassUnloadingEnabled"'
 language: scala
 scala:
   - "2.9.3"
