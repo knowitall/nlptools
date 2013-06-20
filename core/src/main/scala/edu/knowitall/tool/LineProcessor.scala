@@ -1,22 +1,27 @@
 package edu.knowitall.tool
 
 import edu.knowitall.common.Timing
+
 import java.io.File
 import java.util.Scanner
 import java.io.PrintWriter
+
+import scala.io.Source
+import scala.io.Codec
 
 abstract class LineProcessor(name: String) {
   import scopt.immutable._
   import scopt.immutable.OptionParser._
 
-  case class Config(val server: Boolean = false, val port: Int = 8080, val outputFile: Option[File] = None, val inputFile: Option[File] = None)
+  case class Config(val server: Boolean = false, val port: Int = 8080, val outputFile: Option[File] = None, val inputFile: Option[File] = None, parallel: Boolean = false)
 
   val parser = new scopt.immutable.OptionParser[Config](name) {
     def options = Seq(
       flag("server", "run as a server") { (c: Config) => c.copy(server = true) },
       intOpt("port", "which port to run the server on") { (port: Int, c: Config) => c.copy(port = port) },
       argOpt("input", "file to input from") { (path: String, c: Config) => c.copy(inputFile=Some(new File(path))) },
-      argOpt("output", "file to output to") { (path: String, c: Config) => c.copy(outputFile=Some(new File(path))) }
+      argOpt("output", "file to output to") { (path: String, c: Config) => c.copy(outputFile=Some(new File(path))) },
+      flag("parallel", "parallel execution") { (c: Config) => c.copy(parallel=true) }
     )
   }
 
@@ -43,9 +48,9 @@ abstract class LineProcessor(name: String) {
   def process(line: String): String
 
   def runCli(config: Config) {
-    val scanner = config.inputFile match {
-      case Some(file) => new Scanner(file, "UTF-8")
-      case None => new Scanner(System.in, "UTF-8")
+    val source = config.inputFile match {
+      case Some(file) => Source.fromFile(file)(Codec.UTF8)
+      case None => Source.fromInputStream(System.in)(Codec.UTF8)
     }
 
     val writer = config.outputFile match {
@@ -54,14 +59,18 @@ abstract class LineProcessor(name: String) {
     }
 
     val ns = Timing.time {
-      while (scanner.hasNextLine) {
-        handle(writer, scanner.nextLine)
+      val lines = {
+        if (config.parallel) source.getLines.toIndexedSeq.par
+        else source.getLines
+      }
+      for (line <- lines) {
+        handle(writer, line)
       }
     }
 
     System.err.println(Timing.Seconds.format(ns))
 
-    scanner.close()
+    source.close()
     writer.close()
   }
 }
