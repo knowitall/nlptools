@@ -25,7 +25,7 @@ object Frame {
 }
 
 case class Relation(node: DependencyNode, name: String, sense: String) {
-  require(!(name matches """.*[:\[\]].*"""))
+  require(!(name matches """.*[:\[\]].*"""), "Invalid relation name: " + name)
   override def toString = name + "." + sense
   def serialize = name + "_" + node.index + "." + sense
 }
