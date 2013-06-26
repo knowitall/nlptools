@@ -31,7 +31,10 @@ case class Relation(node: DependencyNode, name: String, sense: String) {
 }
 object Relation {
   def fromString(node: DependencyNode, string: String) = {
-    val Array(name, sense) = string.split("\\.")
+    val (name, sense) = string.split("\\.") match {
+      case Array(name, sense) => (name, sense)
+      case _ => throw new MatchError("Could not create relation with node " + node + " from string: " + string)
+    }
     Relation(node, name, sense)
   }
 
