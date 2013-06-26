@@ -30,9 +30,10 @@ case class Relation(node: DependencyNode, name: String, sense: String) {
   def serialize = name + "_" + node.index + "." + sense
 }
 object Relation {
+  val relationRegex = "(.*)\\.(.*)".r
   def fromString(node: DependencyNode, string: String) = {
-    val (name, sense) = string.split("\\.") match {
-      case Array(name, sense) => (name, sense)
+    val (name, sense) = string match {
+      case relationRegex(name, sense) => (name, sense)
       case _ => throw new MatchError("Could not create relation with node " + node + " from string: " + string)
     }
     Relation(node, name, sense)
