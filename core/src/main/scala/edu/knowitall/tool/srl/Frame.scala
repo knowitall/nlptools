@@ -36,7 +36,13 @@ object Relation {
       case relationRegex(name, sense) => (name, sense)
       case _ => throw new MatchError("Could not create relation with node " + node + " from string: " + string)
     }
-    Relation(node, name, sense)
+
+    // replace restricted characters
+    def cleanName = name
+      .replaceAll("\\[", "(")
+      .replaceAll("\\]", ")")
+      .replaceAll(":", "-")
+    Relation(node, cleanName, sense)
   }
 
   def deserialize(dgraph: DependencyGraph)(pickled: String) = {
