@@ -92,8 +92,9 @@ object NlpToolsBuild extends Build {
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     parallelExecution in ThisBuild := false,
     javaOptions += "-Xms512M",
-    javaOptions += "-Xmx4G",
-    javaOptions += "-XX:MaxPermSize=1G",
+    javaOptions += "-Xmx2G",
+    javaOptions += "-XX:MaxPermSize=512M",
+    javaOptions += "-XX:ReservedCodeCacheSize=512M",
     fork in test := true,
     publishMavenStyle := true,
     publishTo <<= version { (v: String) =>
