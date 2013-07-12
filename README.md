@@ -1,17 +1,18 @@
 # UW NLPTools
 
 This is a collection of natural language processing tools wrapped behind common
-interfaces.  The client can easily use the wrapped libraries through an
-elegant scala interface.  It's also a breeze to switch implementations since
-all implementations of a particular tool extend a common trait.
+interfaces.  The client can easily use the wrapped libraries through elegant
+scala interfaces.  It's also a breeze to switch implementations of a particular
+tool since all implementations of a particular tool extend a common trait.
 
 This toolkit also aims to minimize the size of transitive dependencies.  Each
-tool is broken into its own component so you can choose what you want to use.
-Each component contains the requisite modules but no more, saving you from
-searching for models but also protecting you from a dependencies with hundreds
-of megabytes of transitive dependencies.  If you want to avoid the default
-models, that's OK too.  They are a transitive dependency of the tool so you can
-exclude them with a maven exclusion.
+tool is broken into its own component so you can choose what you want to use
+through dependency management.  Each component contains the requisite modules
+but no more, saving you from needing to search for models while also protecting
+you from a dependencies that are hundreds of megabytes in order to contain
+every possible model.  If you want to avoid the default models, that's OK too.
+They are a transitive dependency of the tool so you can exclude them within
+your dependency manager.
 
 Licensing can be a nightmare.  Each tool is split into its own component with
 the most permissive license allowable by the dependencies.  Licenses are all
