@@ -48,7 +48,7 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
     clearMorpha.process(tree)
     clearDepParser.process(tree)
 
-    ClearParser.graphFromTree(string, tree, tokens)
+    ClearParser.graphFromTree(tree, tokens)
   }
   
   /**
@@ -67,7 +67,7 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
 }
 
 object ClearParser {
-  def graphFromTree(string: String, tree: DEPTree, tokens: Seq[Token]) = {
+  def graphFromTree(tree: DEPTree, tokens: Seq[Token]) = {
     val nodeMap = (for ((node, i) <- tree.iterator.asScala.zipWithIndex) yield {
       if (i == 0) node.id -> new DependencyNode(node.form, node.pos, -1, -1)
       else node.id -> new DependencyNode(node.form, node.pos, i - 1, tokens(i - 1).offset)
