@@ -32,12 +32,16 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
 
   val clearDepUrl = this.getClass.getResource("/knowitall/models/clear/ontonotes-en-dep-1.3.0.jar")
   require(clearDepUrl != null, "cannot find clear dep model")
-  val clearDepParser = using (clearDepUrl.openStream()) { input =>
+  val clearDepParser = using(clearDepUrl.openStream()) { input =>
     new CDEPPassParser(new ZipInputStream(input))
   }
 
   override def dependencyGraph(string: String) = {
     val tokens = postagger.postag(string)
+    dependencyGraphPostagged(tokens)
+  }
+
+  def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     val tree = new DEPTree()
     tokens.zipWithIndex.foreach { case (token, i) =>
       val node = new DEPNode(i + 1, token.string)
@@ -50,19 +54,10 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
 
     ClearParser.graphFromTree(tree, tokens)
   }
-  
-  /**
-   * Throws UnsupportedOperationException
-   */
-  def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
-    throw new UnsupportedOperationException()
-  }
-  
-  /**
-   * Throws UnsupportedOperationException
-   */
+
   def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph = {
-    throw new UnsupportedOperationException()
+    val postaggedTokens = postagger.postagTokens(tokens)
+    dependencyGraphPostagged(postaggedTokens)
   }
 }
 
