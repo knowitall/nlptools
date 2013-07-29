@@ -4,6 +4,9 @@ package parse
 
 import graph._
 
+import postag.PostaggedToken
+import tokenize.Token
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /** A trait for a tool that produces dependencies, such as the
@@ -11,6 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait DependencyParser {
   def apply(string: String) = dependencyGraph(string)
 
+  @deprecated("Use dependencyGraph(string).dependencies", "2.4.3")
   def dependencies(string: String): Iterable[Dependency] = {
     this.dependencyGraph(string).dependencies
   }
@@ -27,7 +31,7 @@ abstract class DependencyParserMain extends LineProcessor("parser") {
 
   override def init(config: Config) {
     // for timing purposes
-    dependencyParser.dependencies("I want to initialize the parser.")
+    dependencyParser.dependencyGraph("I want to initialize the parser.")
   }
 
   override def process(line : String) = {
