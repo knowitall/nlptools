@@ -20,6 +20,7 @@ import edu.knowitall.tool.tokenize.ClearTokenizer
 import edu.knowitall.common.Resource.using
 import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
 import edu.knowitall.tool.postag.Postagger
+import edu.knowitall.tool.postag.PostaggedToken
 import edu.knowitall.tool.postag.ClearPostagger
 
 class ClearParser(val postagger: Postagger = new ClearPostagger()) extends DependencyParser {
@@ -48,6 +49,20 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
     clearDepParser.process(tree)
 
     ClearParser.graphFromTree(string, tree, tokens)
+  }
+  
+  /**
+   * Throws UnsupportedOperationException
+   */
+  def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
+    throw new UnsupportedOperationException()
+  }
+  
+  /**
+   * Throws UnsupportedOperationException
+   */
+  def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph = {
+    throw new UnsupportedOperationException()
   }
 }
 

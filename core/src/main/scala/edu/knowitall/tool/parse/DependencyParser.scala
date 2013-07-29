@@ -24,6 +24,16 @@ trait DependencyParser {
     * creating a DependencyGraph from an `Iterable[Dependency]` because it
     * will have the source text. */
   def dependencyGraph(string: String): DependencyGraph
+  
+  /**
+   * Create a graph of the dependencies from POS-tagged tokens.
+   */
+  def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph
+  
+  /**
+   * Create a graph of the dependencies from Tokens.
+   */
+  def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph
 }
 
 abstract class DependencyParserMain extends LineProcessor("parser") {
@@ -46,5 +56,19 @@ class RemoteDependencyParser(urlString: String) extends DependencyParser {
   def dependencyGraph(sentence: String) = {
     val response = Http(svc << sentence OK as.String).apply()
     DependencyGraph.deserialize(response)
+  }
+  
+  /**
+   * Throws UnsupportedOperationException
+   */
+  def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
+    throw new UnsupportedOperationException()
+  }
+  
+  /**
+   * Throws UnsupportedOperationException
+   */
+  def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph = {
+    throw new UnsupportedOperationException()
   }
 }

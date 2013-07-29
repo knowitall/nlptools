@@ -14,6 +14,8 @@ import graph.DependencyGraph
 import graph.DependencyNode
 import postag.OpenNlpPostagger
 import postag.Postagger
+import postag.PostaggedToken
+import tokenize.Token
 import stem.MorphaStemmer
 import scala.collection.immutable.SortedSet
 
@@ -122,5 +124,19 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
     val deps = dependencies(sentence)
     val nodes: Set[DependencyNode] = deps.flatMap(dep => Set(dep.source, dep.dest))(scala.collection.breakOut)
     new DependencyGraph(nodes, deps)
+  }
+
+  /**
+   * Throws UnsupportedOperationException
+   */
+  def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
+    throw new UnsupportedOperationException()
+  }
+
+  /**
+   * Throws UnsupportedOperationException
+   */
+  def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph = {
+    throw new UnsupportedOperationException()
   }
 }

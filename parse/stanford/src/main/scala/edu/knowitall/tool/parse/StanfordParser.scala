@@ -15,6 +15,8 @@ import edu.stanford.nlp.trees.Tree
 import graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode
+import postag.PostaggedToken
+import tokenize.Token
 import edu.knowitall.tool.parse.BaseStanfordParser.CollapseType
 
 /*
@@ -27,6 +29,20 @@ abstract class BaseStanfordParser extends DependencyParser {
 
   override def dependencyGraph(string: String) = dependencyGraph(string, BaseStanfordParser.None)
   def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
+  
+  /**
+   * Throws UnsupportedOperationException
+   */
+  def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
+    throw new UnsupportedOperationException()
+  }
+  
+  /**
+   * Throws UnsupportedOperationException
+   */
+  def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph = {
+    throw new UnsupportedOperationException()
+  }
 }
 
 object BaseStanfordParser {
