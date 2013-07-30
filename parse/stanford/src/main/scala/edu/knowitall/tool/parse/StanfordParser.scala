@@ -30,21 +30,21 @@ abstract class BaseStanfordParser extends DependencyParser {
   @deprecated("Use dependencyGraph(string).dependencies", "2.4.3")
   override def dependencies(string: String): Iterable[Dependency] = dependencies(string, BaseStanfordParser.None)
 
-  override def dependencyGraph(string: String) = dependencyGraph(string, BaseStanfordParser.None)
-  
   override def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     dependencyGraphPostagged(tokens, BaseStanfordParser.None)
   }
   
-  override def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph = {
-    dependencyGraphTokenized(tokens, BaseStanfordParser.None)
+  def dependencyGraphPostagged(tokens: Seq[PostaggedToken], collapse: CollapseType): DependencyGraph
+  
+  def dependencyGraph(string: String, collapse: CollapseType) = {
+    val postaggedTokens = postagger.postag(string)
+    dependencyGraphPostagged(postaggedTokens, collapse)
   }
   
-  def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
-  
-  def dependencyGraphTokenized(tokens: Seq[Token], collapse: CollapseType): DependencyGraph
-   
-  def dependencyGraphPostagged(tokens: Seq[PostaggedToken], collapse: CollapseType): DependencyGraph
+  def dependencyGraphTokenized(tokens: Seq[Token], collapse: CollapseType) = {
+    val postaggedTokens = postagger.postagTokens(tokens)
+    dependencyGraphPostagged(postaggedTokens, collapse)
+  }
 }
 
 object BaseStanfordParser {
@@ -89,20 +89,10 @@ class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends Ba
 
     words
   }
-  
-  def dependencyGraphTokenized(tokens: Seq[Token], collapse: CollapseType) = {
-    val postaggedTokens = postagger.postagTokens(tokens)
-    dependencyGraphPostagged(postaggedTokens, collapse)
-  }
    
   override def dependencyGraphPostagged(tokens: Seq[PostaggedToken], collapse: CollapseType) = {
     val (nodes, deps) = StanfordParser.dependencyHelper(lp.parse(postagToStanfordRepr(tokens)), collapse)
     new DependencyGraph(nodes.toList.sortBy(_.indices), deps)
-  }
-  
-  override def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
-    val tokens = postagger.postag(string)
-    dependencyGraphPostagged(tokens, collapse)
   }
 
   override def parse(string: String) = {
