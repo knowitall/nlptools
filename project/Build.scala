@@ -300,7 +300,7 @@ object NlpToolsBuild extends Build {
         "Academic License (for original lex files)" -> url("http://www.informatics.sussex.ac.uk/research/groups/nlp/carroll/morph.tar.gz"),
         "Apache 2.0 (for supplemental code)" -> url("http://www.opensource.org/licenses/bsd-3-clause")),
       libraryDependencies ++= Seq(clear,
-        "edu.washington.cs.knowitall" % "morpha-stemmer" % "1.0.4"))
+        "edu.washington.cs.knowitall" % "morpha-stemmer" % "1.0.5"))
   ) dependsOn(core)
 
   lazy val snowballStemmer = Project(
