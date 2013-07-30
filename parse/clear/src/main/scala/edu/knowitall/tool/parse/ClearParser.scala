@@ -36,11 +36,6 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
     new CDEPPassParser(new ZipInputStream(input))
   }
 
-  override def dependencyGraph(string: String) = {
-    val tokens = postagger.postag(string)
-    dependencyGraphPostagged(tokens)
-  }
-
   def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     val tree = new DEPTree()
     tokens.zipWithIndex.foreach { case (token, i) =>
@@ -53,11 +48,6 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
     clearDepParser.process(tree)
 
     ClearParser.graphFromTree(tree, tokens)
-  }
-
-  def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph = {
-    val postaggedTokens = postagger.postagTokens(tokens)
-    dependencyGraphPostagged(postaggedTokens)
   }
 }
 
