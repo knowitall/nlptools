@@ -5,6 +5,7 @@ package parse
 import graph._
 
 import postag.PostaggedToken
+import postag.Postagger
 import tokenize.Token
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -12,28 +13,39 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /** A trait for a tool that produces dependencies, such as the
   * Stanford dependency parser. */
 trait DependencyParser {
-  def apply(string: String) = dependencyGraph(string)
-
-  @deprecated("Use dependencyGraph(string).dependencies", "2.4.3")
-  def dependencies(string: String): Iterable[Dependency] = {
-    this.dependencyGraph(string).dependencies
-  }
-
-  /**
-    * Create a graph of the dependencies.  This has more information than
-    * creating a DependencyGraph from an `Iterable[Dependency]` because it
-    * will have the source text. */
-  def dependencyGraph(string: String): DependencyGraph
+  
+  def postagger: Postagger
   
   /**
    * Create a graph of the dependencies from POS-tagged tokens.
    */
   def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph
   
+  def apply(string: String) = dependencyGraph(string)
+
+  /**
+   * Create a graph of the dependencies.  This has more information than
+   * creating a DependencyGraph from an `Iterable[Dependency]` because it
+   * will have the source text.
+   */
+  def dependencyGraph(string: String): DependencyGraph = {
+    val postaggedTokens = postagger.postag(string) 
+    dependencyGraphPostagged(postaggedTokens)
+  }
+  
   /**
    * Create a graph of the dependencies from Tokens.
    */
-  def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph
+  def dependencyGraphTokenized(tokens: Seq[Token]) = {
+    val postaggedTokens = postagger.postagTokens(tokens)
+    dependencyGraphPostagged(postaggedTokens)
+  }
+
+  @deprecated("Use dependencyGraph(string).dependencies", "2.4.3")
+  def dependencies(string: String): Iterable[Dependency] = {
+    this.dependencyGraph(string).dependencies
+  }
+
 }
 
 abstract class DependencyParserMain extends LineProcessor("parser") {
@@ -53,7 +65,9 @@ class RemoteDependencyParser(urlString: String) extends DependencyParser {
   import dispatch._
   val svc = url(urlString)
 
-  def dependencyGraph(sentence: String) = {
+  override def postagger = throw new UnsupportedOperationException()
+  
+  override def dependencyGraph(sentence: String) = {
     val response = Http(svc << sentence OK as.String).apply()
     DependencyGraph.deserialize(response)
   }
@@ -61,14 +75,14 @@ class RemoteDependencyParser(urlString: String) extends DependencyParser {
   /**
    * Throws UnsupportedOperationException
    */
-  def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
+  override def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     throw new UnsupportedOperationException()
   }
   
   /**
    * Throws UnsupportedOperationException
    */
-  def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph = {
+  override def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph = {
     throw new UnsupportedOperationException()
   }
 }
