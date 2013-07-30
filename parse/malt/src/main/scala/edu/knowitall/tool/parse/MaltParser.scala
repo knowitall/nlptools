@@ -28,7 +28,10 @@ object MaltParserMain extends DependencyParserMain {
   lazy val dependencyParser = new MaltParser(model);
 }
 
-class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL, tagger: Postagger = new OpenNlpPostagger, logFile: Option[File] = None) extends DependencyParser {
+class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL, 
+    val postagger: Postagger = new OpenNlpPostagger, 
+    val logFile: Option[File] = None) extends DependencyParser {
+  
   val parser = initializeMaltParserService()
   val stemmer = MorphaStemmer
 
@@ -76,20 +79,6 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
       // replace unicode single quotes
       replaceAll("[\u2018\u2019\u201a\u201b\u275b\u275c]", "'")
   }
-
-  override def dependencies(sentence: String): Iterable[Dependency] = {
-    val trimmed = clean(sentence)
-    if (trimmed.isEmpty) Iterable.empty
-    else {
-      val tokens = tagger.postag(trimmed)
-      dependenciesPostagged(tokens)
-    }
-  }
-    
-  private def dependenciesTokenized(tokens: Seq[Token]): Iterable[Dependency] = {
-    val postaggedTokens = tagger.postagTokens(tokens)
-    dependenciesPostagged(postaggedTokens)
-  }
   
   private def dependenciesPostagged(tokens: Seq[PostaggedToken]): Iterable[Dependency] = {
  
@@ -131,20 +120,8 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
     deps
   }
 
-  override def dependencyGraph(sentence: String): DependencyGraph = {
-    val deps = dependencies(sentence)
-    val nodes: Set[DependencyNode] = deps.flatMap(dep => Set(dep.source, dep.dest))(scala.collection.breakOut)
-    new DependencyGraph(nodes, deps)
-  }
-
   def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     val deps = dependenciesPostagged(tokens)
-    val nodes: Set[DependencyNode] = deps.flatMap(dep => Set(dep.source, dep.dest))(scala.collection.breakOut)
-    new DependencyGraph(nodes, deps)
-  }
-
-  def dependencyGraphTokenized(tokens: Seq[Token]): DependencyGraph = {
-    val deps = dependenciesTokenized(tokens)
     val nodes: Set[DependencyNode] = deps.flatMap(dep => Set(dep.source, dep.dest))(scala.collection.breakOut)
     new DependencyGraph(nodes, deps)
   }
