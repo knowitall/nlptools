@@ -2,6 +2,8 @@ package edu.knowitall
 package tool
 package chunk
 
+import scala.util.matching.Regex
+
 import edu.knowitall.collection.immutable.Interval
 import edu.knowitall.tool.postag._
 import edu.knowitall.tool.tokenize._
@@ -29,14 +31,17 @@ abstract class Chunker(val postagger: postag.Postagger) {
 }
 
 object Chunker {
-  def joinOf(chunks: Seq[ChunkedToken]): Seq[ChunkedToken] = {
+  def join(stringRegex: Regex, postag: String)(chunks: Seq[ChunkedToken]): Seq[ChunkedToken] = {
     var mutableChunks = chunks
 
     for (index <- Range(0, chunks.size)) {
       val chunk = chunks(index)
-      if (chunk.string.toLowerCase == "of" && chunk.postag == "IN" &&
+      println(chunk)
+      println(stringRegex.pattern.matcher(chunk.string).matches())
+      println(chunk.postag == postag)
+      if (stringRegex.pattern.matcher(chunk.string).matches() && chunk.postag == postag &&
           (index > 0 && (chunks(index - 1).chunk endsWith "NP")) &&
-          (index < chunks.length && chunks(index + 1).chunk == "B-NP")) {
+          (index < chunks.length && (chunks(index + 1).chunk endsWith "-NP"))) {
         val nextChunk = chunks(index + 1)
         mutableChunks = mutableChunks.updated(index, new ChunkedToken("I-NP", chunk.postag, chunk.string, chunk.offset))
         mutableChunks = mutableChunks.updated(index + 1, new ChunkedToken("I-NP", nextChunk.postag, nextChunk.string, nextChunk.offset))
@@ -45,6 +50,9 @@ object Chunker {
 
     mutableChunks
   }
+
+  def joinOf(chunks: Seq[ChunkedToken]) = join("of".r, "IN")(chunks)
+  def joinPos(chunks: Seq[ChunkedToken]) = join("'|'s".r, "POS")(chunks)
 
   def intervals(chunks: Seq[ChunkedToken]): Seq[(String, Interval)] = {
     def helper(chunks: Iterator[String]) = {
