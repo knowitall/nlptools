@@ -36,9 +36,6 @@ object Chunker {
 
     for (index <- Range(0, chunks.size)) {
       val chunk = chunks(index)
-      println(chunk)
-      println(stringRegex.pattern.matcher(chunk.string).matches())
-      println(chunk.postag == postag)
       if (stringRegex.pattern.matcher(chunk.string).matches() && chunk.postag == postag &&
           (index > 0 && (chunks(index - 1).chunk endsWith "NP")) &&
           (index < chunks.length && (chunks(index + 1).chunk endsWith "-NP"))) {
