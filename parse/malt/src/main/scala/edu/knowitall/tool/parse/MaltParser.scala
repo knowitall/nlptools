@@ -14,6 +14,8 @@ import graph.DependencyGraph
 import graph.DependencyNode
 import postag.OpenNlpPostagger
 import postag.Postagger
+import postag.PostaggedToken
+import tokenize.Token
 import stem.MorphaStemmer
 import scala.collection.immutable.SortedSet
 
@@ -26,7 +28,10 @@ object MaltParserMain extends DependencyParserMain {
   lazy val dependencyParser = new MaltParser(model);
 }
 
-class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL, tagger: Postagger = new OpenNlpPostagger, logFile: Option[File] = None) extends DependencyParser {
+class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL, 
+    val postagger: Postagger = new OpenNlpPostagger, 
+    val logFile: Option[File] = None) extends DependencyParser {
+  
   val parser = initializeMaltParserService()
   val stemmer = MorphaStemmer
 
@@ -74,52 +79,49 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
       // replace unicode single quotes
       replaceAll("[\u2018\u2019\u201a\u201b\u275b\u275c]", "'")
   }
+  
+  private def dependenciesPostagged(tokens: Seq[PostaggedToken]): Iterable[Dependency] = {
+ 
+    val nodes = tokens.iterator.zipWithIndex.map { case (t, i) =>
+      new DependencyNode(t, Interval.singleton(i))
+    }.toIndexedSeq
 
-  override def dependencies(sentence: String): Iterable[Dependency] = {
-    val trimmed = clean(sentence)
-    if (trimmed.isEmpty) Iterable.empty
-    else {
-      val tokens = tagger.postag(trimmed).iterator.zipWithIndex.map { case (t, i) =>
-        new DependencyNode(t, Interval.singleton(i))
-      }.toIndexedSeq
+    val lemmatized = nodes.map(stemmer.stemToken)
 
-      val lemmatized = tokens.map(stemmer.stemToken)
+    val maltTokens: Array[String] = lemmatized.iterator.zipWithIndex.map { case (ltok, i) =>
+      Iterable(i+1,
+          ltok.token.string,
+          ltok.lemma,
+          ltok.token.postag,
+          ltok.token.postag,
+          "-").mkString("\t")
+    }.toArray[String]
+    val structure = parser.parse(maltTokens)
 
-      val maltTokens: Array[String] = lemmatized.iterator.zipWithIndex.map { case (ltok, i) =>
-        Iterable(i+1,
-            ltok.token.string,
-            ltok.lemma,
-            ltok.token.postag,
-            ltok.token.postag,
-            "-").mkString("\t")
-      }.toArray[String]
-      val structure = parser.parse(maltTokens)
+    val tables = structure.getSymbolTables
 
-      val tables = structure.getSymbolTables
+    val deps: SortedSet[Dependency] = structure.getEdges.flatMap { edge =>
+      if (edge.getSource.getIndex == 0 || edge.getTarget.getIndex == 0) {
+        // skip the root
+        None
+      }
+      else {
+        val source = nodes(edge.getSource.getIndex - 1)
+        val dest = nodes(edge.getTarget.getIndex - 1)
 
-      val deps: SortedSet[Dependency] = structure.getEdges.flatMap { edge =>
-        if (edge.getSource.getIndex == 0 || edge.getTarget.getIndex == 0) {
-          // skip the root
-          None
-        }
-        else {
-          val source = tokens(edge.getSource.getIndex - 1)
-          val dest = tokens(edge.getTarget.getIndex - 1)
+        val types = edge.getLabelTypes
+        val labels = types.map(edge.getLabelSymbol)
+        val label = labels.head
 
-          val types = edge.getLabelTypes
-          val labels = types.map(edge.getLabelSymbol)
-          val label = labels.head
+        Some(new Dependency(source, dest, label))
+      }
+    }(scala.collection.breakOut)
 
-          Some(new Dependency(source, dest, label))
-        }
-      }(scala.collection.breakOut)
-
-      deps
-    }
+    deps
   }
 
-  override def dependencyGraph(sentence: String): DependencyGraph = {
-    val deps = dependencies(sentence)
+  def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
+    val deps = dependenciesPostagged(tokens)
     val nodes: Set[DependencyNode] = deps.flatMap(dep => Set(dep.source, dep.dest))(scala.collection.breakOut)
     new DependencyGraph(nodes, deps)
   }

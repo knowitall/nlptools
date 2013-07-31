@@ -20,6 +20,7 @@ import edu.knowitall.tool.tokenize.ClearTokenizer
 import edu.knowitall.common.Resource.using
 import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
 import edu.knowitall.tool.postag.Postagger
+import edu.knowitall.tool.postag.PostaggedToken
 import edu.knowitall.tool.postag.ClearPostagger
 
 class ClearParser(val postagger: Postagger = new ClearPostagger()) extends DependencyParser {
@@ -31,12 +32,11 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
 
   val clearDepUrl = this.getClass.getResource("/knowitall/models/clear/ontonotes-en-dep-1.3.0.jar")
   require(clearDepUrl != null, "cannot find clear dep model")
-  val clearDepParser = using (clearDepUrl.openStream()) { input =>
+  val clearDepParser = using(clearDepUrl.openStream()) { input =>
     new CDEPPassParser(new ZipInputStream(input))
   }
 
-  override def dependencyGraph(string: String) = {
-    val tokens = postagger.postag(string)
+  def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     val tree = new DEPTree()
     tokens.zipWithIndex.foreach { case (token, i) =>
       val node = new DEPNode(i + 1, token.string)
@@ -47,12 +47,12 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
     clearMorpha.process(tree)
     clearDepParser.process(tree)
 
-    ClearParser.graphFromTree(string, tree, tokens)
+    ClearParser.graphFromTree(tree, tokens)
   }
 }
 
 object ClearParser {
-  def graphFromTree(string: String, tree: DEPTree, tokens: Seq[Token]) = {
+  def graphFromTree(tree: DEPTree, tokens: Seq[Token]) = {
     val nodeMap = (for ((node, i) <- tree.iterator.asScala.zipWithIndex) yield {
       if (i == 0) node.id -> new DependencyNode(node.form, node.pos, -1, -1)
       else node.id -> new DependencyNode(node.form, node.pos, i - 1, tokens(i - 1).offset)

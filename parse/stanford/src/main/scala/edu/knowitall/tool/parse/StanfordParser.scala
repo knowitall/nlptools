@@ -15,18 +15,36 @@ import edu.stanford.nlp.trees.Tree
 import graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode
+import postag.PostaggedToken
+import tokenize.Token
 import edu.knowitall.tool.parse.BaseStanfordParser.CollapseType
 
 /*
  * Subclasses of BaseStanfordParser must perform an optional post-processing step that applies
  * Stanford's CC-compressed algorithm on the graph. */
 abstract class BaseStanfordParser extends DependencyParser {
+  
+  @deprecated("Use dependencyGraph(string, collapse).dependencies", "2.4.3")
   def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] = dependencyGraph(string, collapse).dependencies
 
+  @deprecated("Use dependencyGraph(string).dependencies", "2.4.3")
   override def dependencies(string: String): Iterable[Dependency] = dependencies(string, BaseStanfordParser.None)
 
-  override def dependencyGraph(string: String) = dependencyGraph(string, BaseStanfordParser.None)
-  def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph
+  override def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
+    dependencyGraphPostagged(tokens, BaseStanfordParser.None)
+  }
+  
+  def dependencyGraphPostagged(tokens: Seq[PostaggedToken], collapse: CollapseType): DependencyGraph
+  
+  def dependencyGraph(string: String, collapse: CollapseType) = {
+    val postaggedTokens = postagger.postag(string)
+    dependencyGraphPostagged(postaggedTokens, collapse)
+  }
+  
+  def dependencyGraphTokenized(tokens: Seq[Token], collapse: CollapseType) = {
+    val postaggedTokens = postagger.postagTokens(tokens)
+    dependencyGraphPostagged(postaggedTokens, collapse)
+  }
 }
 
 object BaseStanfordParser {
@@ -54,11 +72,12 @@ object StanfordParserMain extends DependencyParserMain {
 class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends BaseStanfordParser with ConstituencyParser {
   def this(postagger: Postagger = new StanfordPostagger()) = this(LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"), postagger)
 
-  override def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] =
-    StanfordParser.dependencyHelper(lp.parse(postagToStanfordRepr(string)), collapse)._2
+  override def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] = {
+    val tokens = postagger.postag(string)
+    StanfordParser.dependencyHelper(lp.parse(postagToStanfordRepr(tokens)), collapse)._2
+  }
 
-  private def postagToStanfordRepr(string: String): java.util.List[TaggedWord] = {
-    val tokens = postagger(string)
+  private def postagToStanfordRepr(tokens: Seq[PostaggedToken]): java.util.List[TaggedWord] = {
     val words = new java.util.ArrayList[TaggedWord](tokens.size)
 
     tokens.foreach { token =>
@@ -70,13 +89,15 @@ class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends Ba
 
     words
   }
-  override def dependencyGraph(string: String, collapse: CollapseType): DependencyGraph = {
-    val (nodes, deps) = StanfordParser.dependencyHelper(lp.parse(postagToStanfordRepr(string)), collapse)
+   
+  override def dependencyGraphPostagged(tokens: Seq[PostaggedToken], collapse: CollapseType) = {
+    val (nodes, deps) = StanfordParser.dependencyHelper(lp.parse(postagToStanfordRepr(tokens)), collapse)
     new DependencyGraph(nodes.toList.sortBy(_.indices), deps)
   }
 
   override def parse(string: String) = {
-    StanfordParser.convertTree(lp.parse(postagToStanfordRepr(string)))
+    val tokens = postagger.postag(string)
+    StanfordParser.convertTree(lp.parse(postagToStanfordRepr(tokens)))
   }
 }
 
