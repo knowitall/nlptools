@@ -25,7 +25,12 @@ extends Tokenizer {
 }
 
 object ClearTokenizer {
-  val defaultModelUrl = classOf[ClearTokenizer].getResource("dictionary-1.2.0.zip")
+  val defaultModelUrl = {
+    val url = "dictionary-1.2.0.zip"
+    val resource = classOf[ClearTokenizer].getResource(url)
+    require(resource != null, "Could not find tokenizer models: " + url)
+    resource
+  }
 }
 
 object ClearTokenizerMain extends TokenizerMain {
