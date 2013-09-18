@@ -30,10 +30,12 @@ object NlpToolsBuild extends Build {
   // license helpers
   val apache2 = "Apache 2.0 " -> url("http://www.opensource.org/licenses/bsd-3-clause")
   val gpl2 = "GPL 2.0 " -> url("http://www.gnu.org/licenses/gpl-2.0.html")
-
+  val gpl3 = "GPL 3.0 " -> url("http://www.gnu.org/licenses/gpl-3.0.html")
 
   // dependency helpers
   val opennlp = "org.apache.opennlp" % "opennlp-tools" % "1.5.3" exclude("net.sf.jwordnet", "jwnl")
+
+  val weka = "nz.ac.waikato.cms.weka" % "weka-dev" % "3.7.9"
 
   val stanfordModelGroup = "edu.washington.cs.knowitall.stanford-corenlp"
   val stanfordVersion = "1.3.5"
@@ -288,6 +290,14 @@ object NlpToolsBuild extends Build {
       libraryDependencies ++= Seq(clear,
         breezeProcess,
         breezeLearn))
+  ) dependsOn(core)
+
+  lazy val wekaConf = Project(
+    id = "nlptools-conf-weka",
+    base = file("conf/weka"),
+    settings = buildSettings ++ Seq(
+      licenses := Seq(gpl3),
+      libraryDependencies ++= Seq(weka))
   ) dependsOn(core)
 
   // Stemmers
