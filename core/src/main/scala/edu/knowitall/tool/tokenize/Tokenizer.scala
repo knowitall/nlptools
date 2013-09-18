@@ -43,12 +43,22 @@ object Tokenizer {
 
   /** Rebuild the original text from tokens.  This will maintain
     * the original spacing, although different forms of spacing
-    * such as tabs will become standard spaces. */
-  def originalText(tokens: Iterable[Token]) = {
+    * such as tabs will become standard spaces. Optional argument
+    * startOffset specifies offset at which the original text
+    * began, which is useful for controlling whitespace
+    * at beginning of the rebuilt original text string. */
+  def originalText(tokens: Iterable[Token], startOffset: Int = 0) = {
+
+    // check that first token doesn't come before startOffset
+    tokens.headOption.foreach { t =>
+      require(t.offset >= startOffset,
+        s"Token must have offset >= startOffset. Given offset=${t.offset}, startOffset=$startOffset")
+    }
+    
     val builder = new StringBuilder()
 
     for (token <- tokens) {
-      builder.append(" " * (token.offset - builder.length))
+      builder.append(" " * (token.offset - builder.length - startOffset))
       builder.append(token.string)
     }
 
