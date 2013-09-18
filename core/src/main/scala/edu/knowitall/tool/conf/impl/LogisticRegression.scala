@@ -25,6 +25,10 @@ class LogisticRegression[T](
   val featureWeights: Map[String, Double],
   val intercept: Double) extends ConfidenceFunction[T](featureSet) {
 
+  featureSet.featureNames.foreach { name =>
+    require(featureWeights.keySet.contains(name), "No weight for feature: " + name)
+  }
+
   def this(featureSet: FeatureSet[T, Double], weights: Map[String, Double]) = {
     this(featureSet, weights - "Intercept", weights.getOrElse("Intercept", 0.0))
   }
