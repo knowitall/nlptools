@@ -75,10 +75,10 @@ object NlpToolsBuild extends Build {
     case x => x
   }
 
-  val slf4j = "org.slf4j" % "slf4j-api" % "1.7.2"
-  val unfilteredFilter = "net.databinder" %% "unfiltered-filter" % "0.6.8"
-  val unfilteredJetty = "net.databinder" %% "unfiltered-jetty" % "0.6.8"
-  val dispatch = "net.databinder.dispatch" %% "dispatch-core" % "0.10.0"
+  val slf4j = "org.slf4j" % "slf4j-api" % "1.7.3"
+  val unfilteredFilter = "net.databinder" %% "unfiltered-filter" % "0.7.0"
+  val unfilteredJetty = "net.databinder" %% "unfiltered-jetty" % "0.7.0"
+  val dispatch = "net.databinder.dispatch" %% "dispatch-core" % "0.11.0"
 
 
   // parent build definition
