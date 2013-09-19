@@ -2,13 +2,14 @@ package edu.knowitall
 package tool
 package conf
 
-import weka.classifiers.Classifier
+import weka.classifiers.AbstractClassifier
 import weka.core.Instances
 import java.io.OutputStream
+import weka.core.SerializationHelper
 
 class WekaConfidenceFunction[E](
   featureSet: FeatureSet[E, Double],
-  classifier: Classifier,
+  classifier: AbstractClassifier,
   converter: WekaInstanceConverter[E]) extends ConfidenceFunction[E](featureSet) {
 
   def apply(e: E) = {
@@ -17,6 +18,6 @@ class WekaConfidenceFunction[E](
   }
 
   def save(output: OutputStream): Unit = {
-    throw new UnsupportedOperationException()
+    SerializationHelper.write(output, classifier)
   }
 }
