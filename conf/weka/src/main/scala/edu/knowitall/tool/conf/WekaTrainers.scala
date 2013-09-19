@@ -3,59 +3,56 @@ package tool
 package conf
 
 import weka.core.Instance
-import weka.classifiers.Classifier
+import weka.classifiers.AbstractClassifier
 
-// TODO: Handle options for each classifier somehow.
-abstract class WekaConfidenceTrainer[E](features: FeatureSet[E, Double], options: String = "") extends ConfidenceTrainer[E](features) {
-  
-  protected def train(converter: WekaInstanceConverter[E]): WekaConfidenceFunction[E]
-  
+/**
+ * Subclasses implement newClassifier() to supply a new instance of the appropriate classifier.
+ *  
+ * "options" are passed directly to weka's AbstractClassifier.setOptions
+ * See weka docs for more info.
+ * See also weka.core.Utils.splitOptions
+ */
+abstract class WekaConfidenceTrainer[E](features: FeatureSet[E, Double], options: Seq[String])
+  extends ConfidenceTrainer[E](features) {
+
+  /**
+   * Returns a new instance of the classifier to be trained
+   */
+  protected def newClassifier(): AbstractClassifier
+
   def train(training: Iterable[Labelled[E]]): WekaConfidenceFunction[E] = {
     val converter = new WekaInstanceConverter(training, features)
-    train(converter)
+    val classifier = newClassifier()
+    classifier.setOptions(options.toArray)
+    classifier.buildClassifier(converter.trainingInstances)
+    new WekaConfidenceFunction(features, classifier, converter)
   }
 }
 
-class WekaLogisticTrainer[E](features: FeatureSet[E, Double]) extends WekaConfidenceTrainer[E](features) { 
+//
+// Convenience classes for training common weka classifiers
+//
 
-  import weka.classifiers.functions.Logistic
-  
-  override def train(converter: WekaInstanceConverter[E]): WekaConfidenceFunction[E] = { 
-    val logistic = new weka.classifiers.functions.Logistic()
-    logistic.buildClassifier(converter.trainingInstances)
-    new WekaConfidenceFunction(features, logistic, converter)
-  }
+class WekaLogisticTrainer[E](features: FeatureSet[E, Double], val options: Seq[String] = Nil)
+  extends WekaConfidenceTrainer[E](features, options) {
+
+  override def newClassifier() = new weka.classifiers.functions.Logistic()
 }
 
-class WekaJ48Trainer[E](features: FeatureSet[E, Double]) extends WekaConfidenceTrainer[E](features) {
-  
-  import weka.classifiers.trees.J48 
-  
-  override def train(converter: WekaInstanceConverter[E]): WekaConfidenceFunction[E] = {
-    val j48 = new weka.classifiers.trees.J48()
-    j48.buildClassifier(converter.trainingInstances)
-    new WekaConfidenceFunction(features, j48, converter)
-  }
+class WekaJ48Trainer[E](features: FeatureSet[E, Double], val options: Seq[String] = Nil)
+  extends WekaConfidenceTrainer[E](features, options) {
+
+  override def newClassifier() = new weka.classifiers.trees.J48()
 }
 
-class WekaREPTreeTrainer[E](features: FeatureSet[E, Double]) extends WekaConfidenceTrainer[E](features) {
-  
-  import weka.classifiers.trees.REPTree 
-  
-  override def train(converter: WekaInstanceConverter[E]): WekaConfidenceFunction[E] = { 
-    val repTree = new weka.classifiers.trees.REPTree()
-    repTree.buildClassifier(converter.trainingInstances)
-    new WekaConfidenceFunction(features, repTree, converter)
-  }
+class WekaREPTreeTrainer[E](features: FeatureSet[E, Double], val options: Seq[String] = Nil)
+  extends WekaConfidenceTrainer[E](features, options) {
+
+  override def newClassifier() = new weka.classifiers.trees.REPTree()
 }
 
-class WekaRandomForestTrainer[E](features: FeatureSet[E, Double]) extends WekaConfidenceTrainer[E](features) {
-  
-  import weka.classifiers.trees.RandomForest
-  
-  override def train(converter: WekaInstanceConverter[E]): WekaConfidenceFunction[E] = {
-    val randomForest = new weka.classifiers.trees.RandomForest()
-    randomForest.buildClassifier(converter.trainingInstances)
-    new WekaConfidenceFunction(features, randomForest, converter)
-  }
+class WekaRandomForestTrainer[E](features: FeatureSet[E, Double], val options: Seq[String] = Nil)
+  extends WekaConfidenceTrainer[E](features, options) {
+
+  override def newClassifier() = new weka.classifiers.trees.RandomForest()
 }
