@@ -7,7 +7,7 @@ import weka.classifiers.AbstractClassifier
 
 /**
  * Subclasses implement newClassifier() to supply a new instance of the appropriate classifier.
- *  
+ *
  * "options" are passed directly to weka's AbstractClassifier.setOptions
  * See weka docs for more info.
  * See also weka.core.Utils.splitOptions

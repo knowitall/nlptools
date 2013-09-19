@@ -7,19 +7,19 @@ import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
 object WekaConfidenceFunctionTest extends Specification {
-  
+
   case class TestObject(x: Double, y: Double, z: Double)
-  
+
   val unlabeledExamples = Seq.fill(500) {
     TestObject(Random.nextDouble, Random.nextDouble, Random.nextDouble)
   }
-  
+
   // Label according to a simple boolean function
   val labeledExamples = unlabeledExamples.map { ex =>
     val label = (ex.x + ex.y > 0.5 && ex.z < 0.25)
     Labelled(label, ex)
   }
-  
+
   val testPositive1 = TestObject(1.0, 1.0, 0.0)
   val testPositive2 = TestObject(0.75, 0.25, 0.1)
   val testNegative1 = TestObject(0.0, 0.0, 1.0)
@@ -50,12 +50,12 @@ object WekaConfidenceFunctionTest extends Specification {
       }
     }
   }
-  
+
   testWekaTrainer("logistic", new WekaLogisticTrainer(featureSet))
-  
+
   testWekaTrainer("J48", new WekaJ48Trainer(featureSet))
-  
+
   testWekaTrainer("REPTree", new WekaREPTreeTrainer(featureSet))
-  
+
   testWekaTrainer("RandomForest", new WekaRandomForestTrainer(featureSet))
 }
