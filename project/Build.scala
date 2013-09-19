@@ -297,7 +297,7 @@ object NlpToolsBuild extends Build {
     base = file("conf/weka"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl3),
-      libraryDependencies ++= Seq(weka))
+      libraryDependencies ++= Seq(weka, specs2, junit))
   ) dependsOn(core)
 
   // Stemmers
