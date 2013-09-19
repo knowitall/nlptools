@@ -9,44 +9,49 @@ import weka.core.Attribute
 import scala.collection.JavaConversions._
 import java.util.ArrayList
 
-class WekaInstanceConverter[E](featureSet: FeatureSet[E, Double]) {
+class WekaInstanceConverter[E](val training: Iterable[Labelled[E]], val featureSet: FeatureSet[E, Double]) {
   
   private val classValues = List("positive", "negative")
   
   private val classAttr = new Attribute("class", classValues)
   
-  private val attrs = {
+  val attributes = {
     val featureAttrs = featureSet.featureNames.map(name => new Attribute(name))
     featureAttrs :+ classAttr
   }
   
+  /*
+   * Weka requires that Attributes be in an ArrayList
+   */
   private val attrsList = {
-    val list = new ArrayList[Attribute](attrs.size)
-    attrs foreach list.add
+    val list = new ArrayList[Attribute](attributes.size)
+    list.addAll(attributes)
     list
   }
   
-  def toUnlabeledInstance(instances: Instances)(e: E): Instance = {
-    val attrValues = featureSet.vectorize(e)
-    val inst = new DenseInstance(attrValues.size)
-    inst.setDataset(instances)
-    attrs.zip(attrValues).foreach { case (attr, value) => inst.setValue(attr, value) }
-    inst
-  }
-  
-  def toLabeledInstance(instances: Instances)(datum: Labelled[E]): Instance = {
-    val label = if (datum.label) 1.0 else 0.0
-    val attrValues = featureSet.vectorize(datum.item) :+ label
-    val inst = new DenseInstance(attrs.size)
-    inst.setDataset(instances)
-    attrs.zip(attrValues).foreach { case (attr, value) => inst.setValue(attr, value) }
-    inst
-  }
-  
-  def toInstances(training: Iterable[Labelled[E]])  = {
+  val trainingInstances = {
     val insts = new Instances("Default training instances", attrsList, 0)
     insts.setClass(classAttr)
-    training map toLabeledInstance(insts) foreach insts.add
+    training map toLabeledInstance foreach insts.add
     insts
   }
+  
+  def toUnlabeledInstance(item: E): Instance = {
+    val attrValues = featureSet.vectorize(item)
+    val inst = new DenseInstance(attrValues.size)
+    inst.setDataset(trainingInstances)
+    attributes.zip(attrValues).foreach { case (attr, value) => inst.setValue(attr, value) }
+    inst
+  }
+  
+  def toLabeledInstance(datum: Labelled[E]): Instance = {
+    val label = if (datum.label) 1.0 else 0.0
+    val attrValues = featureSet.vectorize(datum.item) :+ label
+    val inst = new DenseInstance(attributes.size)
+    inst.setDataset(trainingInstances)
+    attributes.zip(attrValues).foreach { case (attr, value) => inst.setValue(attr, value) }
+    inst
+  }
+  
+
 }
