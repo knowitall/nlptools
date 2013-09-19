@@ -20,9 +20,7 @@ class WekaInstanceConverter[E](val training: Iterable[Labelled[E]], val featureS
     featureAttrs :+ classAttr
   }
   
-  /*
-   * Weka requires that Attributes be in an ArrayList
-   */
+  // Weka requires that Attributes be in an ArrayList
   private val attrsList = {
     val list = new ArrayList[Attribute](attributes.size)
     list.addAll(attributes)
