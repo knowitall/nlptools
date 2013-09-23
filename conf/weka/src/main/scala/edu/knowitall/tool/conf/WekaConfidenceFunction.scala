@@ -10,7 +10,7 @@ import weka.core.SerializationHelper
 class WekaConfidenceFunction[E](
   featureSet: FeatureSet[E, Double],
   classifier: AbstractClassifier,
-  converter: WekaInstanceConverter[E]) extends ConfidenceFunction[E](featureSet) {
+  converter: WekaInstanceCollection[E]) extends ConfidenceFunction[E](featureSet) {
 
   def apply(e: E) = {
     val inst = converter.toUnlabeledInstance(e)

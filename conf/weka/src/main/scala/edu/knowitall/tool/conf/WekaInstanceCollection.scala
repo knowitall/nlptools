@@ -9,7 +9,10 @@ import weka.core.Attribute
 import scala.collection.JavaConversions._
 import java.util.ArrayList
 
-class WekaInstanceConverter[E](val training: Iterable[Labelled[E]], val featureSet: FeatureSet[E, Double]) {
+/**
+ * Wraps the Weka Instances container and provides translation from features of E to Weka Instance objects.
+ */
+class WekaInstanceCollection[E](val training: Iterable[Labelled[E]], val featureSet: FeatureSet[E, Double]) {
 
   private val classValues = List("positive", "negative")
 

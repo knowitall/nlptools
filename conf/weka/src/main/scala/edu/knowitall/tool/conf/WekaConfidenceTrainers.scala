@@ -21,7 +21,7 @@ abstract class WekaConfidenceTrainer[E](features: FeatureSet[E, Double], options
   protected def newClassifier(): AbstractClassifier
 
   def train(training: Iterable[Labelled[E]]): WekaConfidenceFunction[E] = {
-    val converter = new WekaInstanceConverter(training, features)
+    val converter = new WekaInstanceCollection(training, features)
     val classifier = newClassifier()
     classifier.setOptions(options.toArray)
     classifier.buildClassifier(converter.trainingInstances)
