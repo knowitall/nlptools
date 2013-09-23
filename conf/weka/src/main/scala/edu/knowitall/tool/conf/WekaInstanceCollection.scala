@@ -18,6 +18,10 @@ class WekaInstanceCollection[E](val training: Iterable[Labelled[E]], val feature
 
   private val classAttr = new Attribute("class", classValues)
 
+  /**
+   * Wraps featureSet.featureNames with weka Attributes.
+   * Appended is a "class" attribute with values of "positive" and "negative". 
+   */
   val attributes = {
     val featureAttrs = featureSet.featureNames.map(name => new Attribute(name))
     featureAttrs :+ classAttr
@@ -30,6 +34,11 @@ class WekaInstanceCollection[E](val training: Iterable[Labelled[E]], val feature
     list
   }
 
+  /**
+   * A Weka Instances object containing all elements of this.training, 
+   * attributes for all features in this.featureSet, 
+   * and a "class" attribute with values of "positive" and "negative".
+   */
   val trainingInstances = {
     val insts = new Instances("Default training instances", attrsList, 0)
     insts.setClass(classAttr)
@@ -53,6 +62,4 @@ class WekaInstanceCollection[E](val training: Iterable[Labelled[E]], val feature
     attributes.zip(attrValues).foreach { case (attr, value) => inst.setValue(attr, value) }
     inst
   }
-
-
 }
