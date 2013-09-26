@@ -48,7 +48,7 @@ object StanfordNer {
     }
   }
 
-  def withDefaultModel = {
+  def withDefaultModel() = {
     fromModelUrl(defaultModelUrl)
   }
 }
