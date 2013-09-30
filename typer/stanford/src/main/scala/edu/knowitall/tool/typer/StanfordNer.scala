@@ -29,7 +29,7 @@ class StanfordNer(private val classifier: AbstractSequenceClassifier[_]) extends
       val end = seq.iterator.zipWithIndex.find(_._1.offsets.end == nerInterval.end).map(_._2)
 
       for (s <- start; e <- end) {
-        val typ = new Type(this.name + nerType, "Stanford", Interval.closed(s, e), text.substring(nerInterval.start, nerInterval.end))
+        val typ = Type.create(this.name + nerType, "Stanford", Interval.closed(s, e), text.substring(nerInterval.start, nerInterval.end))
         tags ::= typ
       }
     }
