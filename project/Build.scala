@@ -8,7 +8,7 @@ object NlpToolsBuild extends Build {
   // settings
   val buildOrganization = "edu.washington.cs.knowitall.nlptools"
   val buildVersion = "2.4.3-SNAPSHOT"
-  val buildScalaVersions = Seq("2.10.1", "2.9.3")
+  val buildScalaVersions = Seq("2.10.2", "2.9.3")
 
   lazy val root = Project(id = "nlptools", base = file(".")) settings (
     crossScalaVersions := buildScalaVersions,
@@ -48,32 +48,28 @@ object NlpToolsBuild extends Build {
   val breezeVersion = "0.2"
   val breezeLearn = "org.scalanlp" %% "breeze-learn" % breezeVersion exclude("com.codecommit", "anti-xml_2.9.1") cross CrossVersion.binaryMapped {
           case "2.9.3" => "2.9.2"
-          case "2.10.1" => "2.10"
+          case "2.10.2" => "2.10"
           case x => x
         }
   val breezeProcess = "org.scalanlp" %% "breeze-process" % breezeVersion exclude("com.codecommit", "anti-xml_2.9.1") cross CrossVersion.binaryMapped {
           case "2.9.3" => "2.9.2"
-          case "2.10.1" => "2.10"
+          case "2.10.2" => "2.10"
           case x => x
         }
 
 
   // dependencies
   val junit = "junit" % "junit" % "4.11"
-  val commonScala = "edu.washington.cs.knowitall.common-scala" % "common-scala" % "1.1.1" cross CrossVersion.binaryMapped {
-    case "2.9.3" => "2.9.2"
-    case "2.10.1" => "2.10"
-    case x => x
-  }
+  val commonScala = "edu.washington.cs.knowitall.common-scala" %% "common-scala" % "1.1.2"
   val specs2 = "org.specs2" % "specs2" % "1.12.3" cross CrossVersion.binaryMapped {
     case "2.9.3" => "2.9.2"
-    case "2.10.1" => "2.10"
+    case "2.10.2" => "2.10"
     case x => x
   }
 
   val scopt = "com.github.scopt" % "scopt" % "2.1.0" cross CrossVersion.binaryMapped {
     case "2.9.3" => "2.9.2"
-    case "2.10.1" => "2.10"
+    case "2.10.2" => "2.10"
     case x => x
   }
 
