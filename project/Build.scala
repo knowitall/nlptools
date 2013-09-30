@@ -7,7 +7,7 @@ import AssemblyKeys._
 object NlpToolsBuild extends Build {
   // settings
   val buildOrganization = "edu.washington.cs.knowitall.nlptools"
-  val buildVersion = "2.4.3-SNAPSHOT"
+  val buildVersion = "2.4.3"
   val buildScalaVersions = Seq("2.10.2", "2.9.3")
 
   lazy val root = Project(id = "nlptools", base = file(".")) settings (

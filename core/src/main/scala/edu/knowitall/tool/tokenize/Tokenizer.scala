@@ -52,9 +52,9 @@ object Tokenizer {
     // check that first token doesn't come before startOffset
     tokens.headOption.foreach { t =>
       require(t.offset >= startOffset,
-        s"Token must have offset >= startOffset. Given offset=${t.offset}, startOffset=$startOffset")
+        "Token must have offset >= startOffset. Given offset=" + t.offset + ", startOffset=" + startOffset)
     }
-    
+
     val builder = new StringBuilder()
 
     for (token <- tokens) {
