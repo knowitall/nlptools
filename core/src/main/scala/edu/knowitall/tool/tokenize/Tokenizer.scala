@@ -16,7 +16,7 @@ object Tokenizer {
   /** This method takes tokenized strings and the source sentence.
     * It adds offset information to the strings by tracing through
     * the source sentence and skipping whitespace. */
-  def computeOffsets(strings: Iterable[String], sentence: String) = {
+  def computeOffsets(strings: TraversableOnce[String], sentence: String) = {
     var sent: Array[Char] = sentence.toCharArray()
     var offset: Int = 0
     var tokens: Seq[Token] = Seq.empty
@@ -47,7 +47,7 @@ object Tokenizer {
     * startOffset specifies offset at which the original text
     * began, which is useful for controlling whitespace
     * at beginning of the rebuilt original text string. */
-  def originalText(tokens: Iterable[Token], startOffset: Int = 0) = {
+  def originalText(tokens: TraversableOnce[Token], startOffset: Int = 0) = {
 
     // check that first token doesn't come before startOffset
     tokens.headOption.foreach { t =>
