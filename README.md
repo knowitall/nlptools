@@ -26,13 +26,14 @@ The interfaces are defined in the `core` component.
 ## Usage
 
 Each component is usable through a java interface as well as on the command
-line.  For example:
+line.  Here are some examples:
 
-  `echo 'You are a fool to believe that!' | sbt 'project nlptools-parse-stanford' 'run-main edu.knowitall.tool.parse.StanfordParser`
+  `echo 'The quick brown fox jumps over the lazy dog.' | sbt 'project nlptools-parse-stanford' 'run-main edu.knowitall.tool.parse.StanfordParserMain'`
+  `echo 'The quick brown fox jumps over the lazy dog.' | sbt 'project nlptools-chunk-opennlp' 'run-main edu.knowitall.tool.chunk.OpenNlpChunkerMain'`
 
-You can also spin each tool up as a server.
+You can also spin each tool up as a server, but you will need to provide the `provided` dependencies.
 
-  `sbt 'project nlptools-parse-stanford' 'run-main edu.knowitall.tool.parse.StanfordParser --server'`
+  `sbt 'project nlptools-parse-stanford' 'run-main edu.knowitall.tool.parse.StanfordParserMain --server'`
 
 ## Components
 
