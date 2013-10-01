@@ -2,8 +2,8 @@
 
 This is a collection of natural language processing tools wrapped behind common
 interfaces.  The client can easily use the wrapped libraries through elegant
-scala interfaces.  It's also a breeze to switch implementations of a particular
-tool since all implementations of a particular tool extend a common trait.
+scala interfaces.  It's also simple to switch implementations of a particular
+tool since all implementations of a particular tool extend a common interface.
 
 This toolkit also aims to minimize the size of transitive dependencies.  Each
 tool is broken into its own component so you can choose what you want to use
@@ -23,6 +23,17 @@ CoreNLP (GPL 2.0).
 
 The interfaces are defined in the `core` component.
 
+## Usage
+
+Each component is usable through a java interface as well as on the command
+line.  For example:
+
+  `echo 'You are a fool to believe that!' | sbt 'project nlptools-parse-stanford' 'run-main edu.knowitall.tool.parse.StanfordParser`
+
+You can also spin each tool up as a server.
+
+  `sbt 'project nlptools-parse-stanford' 'run-main edu.knowitall.tool.parse.StanfordParser --server'`
+
 ## Components
 
 ### Stemmers
@@ -36,10 +47,12 @@ The interfaces are defined in the `core` component.
 ### Tokenizers
 
 * OpenNLP
+* Penn Treebank
 * Stanford
 
 ### Part-of-Speech (POS) Taggers
 
+* Clear
 * OpenNLP
 * Stanford
 
@@ -56,6 +69,7 @@ The interfaces are defined in the `core` component.
 
 * MaltParser
 * Stanford
+* ClearParser
 
 ### Coreference
 
@@ -65,13 +79,6 @@ The interfaces are defined in the `core` component.
 
 * OpenNLP
 * Piao
-
-## Usage
-
-Each component is usable through a java interface as well as on the command
-line.  For example:
-
-  `echo 'You are a fool to believe that!' | mvn exec:java -Dexec.mainClass=edu.washington.cs.knowitall.tool.parse.StanfordParse`
 
 ## Contributors
 
