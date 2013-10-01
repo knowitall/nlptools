@@ -48,16 +48,12 @@ object Tokenizer {
     * began, which is useful for controlling whitespace
     * at beginning of the rebuilt original text string. */
   def originalText(tokens: TraversableOnce[Token], startOffset: Int = 0) = {
-
-    // check that first token doesn't come before startOffset
-    tokens.headOption.foreach { t =>
-      require(t.offset >= startOffset,
-        "Token must have offset >= startOffset. Given offset=" + t.offset + ", startOffset=" + startOffset)
-    }
-
     val builder = new StringBuilder()
 
     for (token <- tokens) {
+      require(token.offset >= startOffset,
+          "Token must have offset >= startOffset. " +
+          "Given offset=" + token.offset + ", startOffset=" + startOffset)
       builder.append(" " * (token.offset - builder.length - startOffset))
       builder.append(token.string)
     }
