@@ -9,7 +9,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-object ClearParserTest extends Specification {
+object ClearTokenizerTest extends Specification {
   "tokenize example sentence" in {
     val text = "This is a test of Clear's tokenizer."
     val tokenizer = new ClearTokenizer()
