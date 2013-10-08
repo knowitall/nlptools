@@ -15,7 +15,7 @@ extends Postagger(tokenizer) {
 
   def this() = this(StanfordPostagger.loadDefaultModel())
 
-  override def postagTokens(tokens: Seq[Token]): Seq[PostaggedToken] = {
+  override def postagTokenized(tokens: Seq[Token]): Seq[PostaggedToken] = {
     val postags = tagger.tagSentence(
       tokens.map { token =>
         val corelabel = new CoreLabel();
@@ -25,7 +25,7 @@ extends Postagger(tokenizer) {
     ).map(_.tag())
 
     (tokens zip postags) map { case (token, postag) =>
-      new PostaggedToken(token, postag)
+      PostaggedToken(token, postag)
     }
   }
 }

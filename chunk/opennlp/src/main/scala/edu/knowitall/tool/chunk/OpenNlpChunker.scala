@@ -19,7 +19,7 @@ extends Chunker(postagger) {
 
   def chunkPostagged(tokens: Seq[postag.PostaggedToken]): Seq[ChunkedToken] = {
     val chunks = chunker.chunk(tokens.map(_.string).toArray, tokens.map(_.postag).toArray)
-    (tokens zip chunks) map { case (token, chunk) => new ChunkedToken(token, chunk) }
+    (tokens zip chunks) map { case (token, chunk) => ChunkedToken(token, chunk) }
   }
 }
 

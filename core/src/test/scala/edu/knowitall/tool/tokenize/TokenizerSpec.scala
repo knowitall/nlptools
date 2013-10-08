@@ -33,7 +33,7 @@ object TokenizerSpecTest extends Specification {
     // make sure we can go back to the original sentence
     Tokenizer.originalText(tokens) must_== sentence
   }
-  
+
   "Original text is trimmed correctly by specifying a start offset" in {
     val sentence = "  John walks down the hall."
     val trimmedSentence = "John walks down the hall."

@@ -13,9 +13,9 @@ import edu.knowitall.tool.postag.PostaggedToken
   * @param  postag  the PENN-style part-of-speech tag of the token
   * @param  chunk   the chunk tag of the token in BIO format
   */
-class ChunkedToken(val chunk: String, override val postag: String, override val string: String, override val offset: Int)
-extends PostaggedToken(postag, string, offset) {
-  def this(token: PostaggedToken, chunk: String) = this(chunk, token.postag, token.string, token.offset)
+class ChunkedToken(val chunkSymbol: Symbol, override val postagSymbol: Symbol, override val string: String, override val offset: Int)
+extends PostaggedToken(postagSymbol, string, offset) {
+  def chunk = chunkSymbol.name
 
   override def toString = string+"/"+postag+"/"+chunk+"@"+offset
 
@@ -30,5 +30,11 @@ extends PostaggedToken(postag, string, offset) {
 }
 
 object ChunkedToken {
+  def apply(chunk: String, postag: String, string: String, offset: Int): ChunkedToken =
+    new ChunkedToken(Symbol(chunk), Symbol(postag), string, offset)
+
+  def apply(token: PostaggedToken, chunk: String): ChunkedToken =
+    new ChunkedToken(Symbol(chunk), token.postagSymbol, token.string, token.offset)
+
   def unapply(token: ChunkedToken): Option[(String, String, String, Int)] = Some((token.chunk, token.postag, token.string, token.offset))
 }
