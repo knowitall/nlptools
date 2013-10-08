@@ -19,7 +19,7 @@ abstract class Chunker(val postagger: postag.Postagger) {
 
   /** chunk tokenized text */
   def chunkTokenized(tokens: Seq[tokenize.Token]): Seq[ChunkedToken] = {
-    val postags = postagger.postagTokens(tokens)
+    val postags = postagger.postagTokenized(tokens)
     chunkPostagged(postags)
   }
 
@@ -40,8 +40,8 @@ object Chunker {
           (index > 0 && (chunks(index - 1).chunk endsWith "NP")) &&
           (index < chunks.length && (chunks(index + 1).chunk endsWith "-NP"))) {
         val nextChunk = chunks(index + 1)
-        mutableChunks = mutableChunks.updated(index, new ChunkedToken("I-NP", chunk.postag, chunk.string, chunk.offset))
-        mutableChunks = mutableChunks.updated(index + 1, new ChunkedToken("I-NP", nextChunk.postag, nextChunk.string, nextChunk.offset))
+        mutableChunks = mutableChunks.updated(index, ChunkedToken("I-NP", chunk.postag, chunk.string, chunk.offset))
+        mutableChunks = mutableChunks.updated(index + 1, ChunkedToken("I-NP", nextChunk.postag, nextChunk.string, nextChunk.offset))
       }
     }
 
@@ -81,7 +81,7 @@ object Chunker {
 
   def tokensFrom(chunks: Seq[String], postags: Seq[String], tokens: Seq[Token]) = {
     val postaggedTokens = Postagger.tokensFrom(postags, tokens)
-    (chunks zip postaggedTokens).map { case (chunk, postaggedToken) => new ChunkedToken(postaggedToken, chunk) }
+    (chunks zip postaggedTokens).map { case (chunk, postaggedToken) => ChunkedToken(postaggedToken, chunk) }
   }
 }
 

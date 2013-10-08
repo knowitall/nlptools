@@ -35,7 +35,7 @@ object Tokenizer {
       sent = sent.drop(skip)
 
       offset += string.length + skip
-      tokens = tokens :+ new Token(string, leftOffset)
+      tokens = tokens :+ Token(string, leftOffset)
     }
 
     tokens
@@ -65,7 +65,7 @@ object Tokenizer {
   def deserialize(pickled: String): Seq[Token] = {
     val split = pickled.split("\\s+")
     split.map {
-      case tokenRegex(string, offset) => new Token(string, offset.toInt)
+      case tokenRegex(string, offset) => Token(string, offset.toInt)
       case s => throw new MatchError("Could not deserialize: " + s)
     }(scala.collection.breakOut)
   }

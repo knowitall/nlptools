@@ -12,9 +12,9 @@ import edu.knowitall.tool.tokenize.Token
   * @param  postag  the PENN-style part-of-speech tag of the token
   * @param  chunk   the chunk tag of the token in BIO format
   */
-class PostaggedToken(val postag: String, override val string: String, override val offset: Int)
+class PostaggedToken(val postagSymbol: Symbol, override val string: String, override val offset: Int)
 extends Token(string, offset) {
-  def this(token: Token, postag: String) = this(postag, token.string, token.offset)
+  def postag = postagSymbol.name
 
   override def toString = string+"/"+postag+"@"+offset
 
@@ -27,43 +27,48 @@ extends Token(string, offset) {
     case _ => false
   }
 
-  def isProperNoun = postag == "NNP" || postag == "NNPS"
-  def isCommonNoun = postag == "NN" || postag == "NNS"
+  def isProperNoun = postagSymbol == Symbol("NNP") || postagSymbol == Symbol("NNPS")
+  def isCommonNoun = postagSymbol ==Symbol("NN") || postagSymbol ==Symbol("NNS")
   def isNoun = isProperNoun || isCommonNoun
-  def isPluralNoun = postag == "NNS" || postag == "NNPS"
+  def isPluralNoun = postagSymbol ==Symbol("NNS") || postagSymbol ==Symbol("NNPS")
 
-  def isVerbBase = postag == "VB"
-  def isVerbPast = postag == "VBD"
-  def isVerbGerund = postag == "VBG"
-  def isVerbPastParticiple = postag == "VBN"
-  def isVerbNon3pPresent = postag == "VBP"
-  def isVerb3pPresent = postag == "VBZ"
+  def isVerbBase = postagSymbol == Symbol("VB")
+  def isVerbPast = postagSymbol == Symbol("VBD")
+  def isVerbGerund = postagSymbol == Symbol("VBG")
+  def isVerbPastParticiple = postagSymbol == Symbol("VBN")
+  def isVerbNon3pPresent = postagSymbol == Symbol("VBP")
+  def isVerb3pPresent = postagSymbol == Symbol("VBZ")
   def isVerbPresent = isVerbNon3pPresent || isVerb3pPresent
   def isVerb = postag.startsWith("VB")
 
-  def isPlainAdjective = postag == "JJ"
-  def isComparativeAdjective = postag == "JJR"
-  def isSuperlativeAdjective = postag == "JJS"
+  def isPlainAdjective = postagSymbol == Symbol("JJ")
+  def isComparativeAdjective = postagSymbol == Symbol("JJR")
+  def isSuperlativeAdjective = postagSymbol == Symbol("JJS")
   def isAdjective = isPlainAdjective || isComparativeAdjective || isSuperlativeAdjective
 
-  def isPersonalPronoun = postag == "PRP"
-  def isPossessivePronoun = postag == "PRP$"
+  def isPersonalPronoun = postagSymbol == Symbol("PRP")
+  def isPossessivePronoun = postagSymbol == Symbol("PRP$")
   def isPronoun = isPersonalPronoun || isPossessivePronoun
 
-  def isPossessive = isPossessivePronoun || postag == "POS"
+  def isPossessive = isPossessivePronoun || postagSymbol == Symbol("POS")
 
-  def isDeterminer = postag == "DT"
-  def isCardinalNumber = postag == "CD"
-  def isSuperlativeAdverb = postag == "RBS"
+  def isDeterminer = postagSymbol == Symbol("DT")
+  def isCardinalNumber = postagSymbol == Symbol("CD")
+  def isSuperlativeAdverb = postagSymbol == Symbol("RBS")
   def isPunctuation = punctuation.contains(postag)
-  def isSubordinatingConjunction = postag == "IN"
-  def isCoordinatingConjunction = postag == "CC"
+  def isSubordinatingConjunction = postag == Symbol("IN")
+  def isCoordinatingConjunction = postag == Symbol("CC")
   def isConjunction = isSubordinatingConjunction || isCoordinatingConjunction
-  def isPreposition = postag == "IN"
+  def isPreposition = postag == Symbol("IN")
 
   val punctuation = Set("#", "$", "''", "(", ")", ",", ".", ":", "``")
 }
 
 object PostaggedToken {
+  def apply(postag: String, string: String, offset: Int): PostaggedToken =
+    new PostaggedToken(Symbol(postag), string, offset)
+
+  def apply(token: Token, postag: String): PostaggedToken = PostaggedToken(postag, token.string, token.offset)
+
   def unapply(token: PostaggedToken): Option[(String, String, Int)] = Some((token.postag, token.string, token.offset))
 }

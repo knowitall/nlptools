@@ -12,12 +12,12 @@ abstract class Postagger(val tokenizer: tokenize.Tokenizer) {
   def apply(sentence: String) = postag(sentence)
 
   /* POS tag pre-tokenized text */
-  def postagTokens(tokens: Seq[tokenize.Token]): Seq[PostaggedToken]
+  def postagTokenized(tokens: Seq[tokenize.Token]): Seq[PostaggedToken]
 
   /* Tokenize and then POS tag text*/
   def postag(sentence: String): Seq[PostaggedToken] = {
     val tokens = tokenizer.tokenize(sentence)
-    postagTokens(tokens)
+    postagTokenized(tokens)
   }
 }
 
@@ -60,7 +60,7 @@ object Postagger {
   val prepositions = simplePrepositions ++ complexPrepositions
 
   def tokensFrom(postags: Seq[String], tokens: Seq[Token]): Seq[PostaggedToken] = {
-    (postags zip tokens).map { case (postag, token) => new PostaggedToken(token, postag) }
+    (postags zip tokens).map { case (postag, token) => PostaggedToken(token, postag) }
   }
 }
 

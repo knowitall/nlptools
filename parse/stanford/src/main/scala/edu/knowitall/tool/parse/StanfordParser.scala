@@ -23,7 +23,7 @@ import edu.knowitall.tool.parse.BaseStanfordParser.CollapseType
  * Subclasses of BaseStanfordParser must perform an optional post-processing step that applies
  * Stanford's CC-compressed algorithm on the graph. */
 abstract class BaseStanfordParser extends DependencyParser {
-  
+
   @deprecated("Use dependencyGraph(string, collapse).dependencies", "2.4.3")
   def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] = dependencyGraph(string, collapse).dependencies
 
@@ -33,16 +33,16 @@ abstract class BaseStanfordParser extends DependencyParser {
   override def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     dependencyGraphPostagged(tokens, BaseStanfordParser.None)
   }
-  
+
   def dependencyGraphPostagged(tokens: Seq[PostaggedToken], collapse: CollapseType): DependencyGraph
-  
+
   def dependencyGraph(string: String, collapse: CollapseType) = {
     val postaggedTokens = postagger.postag(string)
     dependencyGraphPostagged(postaggedTokens, collapse)
   }
-  
+
   def dependencyGraphTokenized(tokens: Seq[Token], collapse: CollapseType) = {
-    val postaggedTokens = postagger.postagTokens(tokens)
+    val postaggedTokens = postagger.postagTokenized(tokens)
     dependencyGraphPostagged(postaggedTokens, collapse)
   }
 }

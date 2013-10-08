@@ -31,5 +31,11 @@ class Token(val string: String, val offset: Int) {
 }
 
 object Token {
+  def apply(string: String, offset: Int) = new Token(string, offset)
   def unapply(token: Token): Option[(String, Int)] = Some((token.string, token.offset))
+
+  def deserialize(string: String) = {
+    val splitIndex = string.lastIndexOf('@')
+    Token(string.take(splitIndex), 0)
+  }
 }
