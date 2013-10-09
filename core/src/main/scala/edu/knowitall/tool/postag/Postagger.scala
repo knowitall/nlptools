@@ -31,6 +31,8 @@ object Postagger {
   val articles = immutable.Set("a", "an", "the")
   val possessives = immutable.Set("my", "your", "his", "her", "its", "one's", "our", "your", "their")
 
+  val whWords = immutable.Set("what", "which", "who", "whose", "that", "where", "when")
+
   val simplePrepositions = immutable.Set(
     "a", "abaft", "aboard", "about", "above", "absent", "across", "afore",
     "after", "against", "along", "alongside", "amid", "amidst", "among",

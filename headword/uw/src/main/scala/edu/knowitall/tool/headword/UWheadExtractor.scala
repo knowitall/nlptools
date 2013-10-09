@@ -3,6 +3,7 @@ package edu.knowitall.tool.headword
 import collection.mutable.ArrayBuffer
 import collection.immutable.HashSet
 import edu.knowitall.tool.postag.PostaggedToken
+import edu.knowitall.tool.postag.Postagger
 import edu.knowitall.tool.wordnet.JwiTools
 
 import edu.mit.jwi.item.{POS, ISynset}
@@ -23,7 +24,7 @@ import java.io.File
  *
  * Requires wordnet to exist somewhere on the local filesystem.
  */
-class HeadExtractor(wordnetHome:String) {
+class UWHeadExtractor(wordnetHome:String) extends HeadExtractor {
 
   val relationStopWords = HashSet("has", "have", "had", "did", "do")
   val relationStopTags = HashSet("MD", "JJ", "JJR", "JJS", "RB", "RBR", "RBS", "CC",
@@ -33,20 +34,18 @@ class HeadExtractor(wordnetHome:String) {
    * Given a Seq[PostaggedTokens] will attempt to extract the tokens representing the 
    * headword tokens of the relation.
    */
-  def relationHead(tokens:Seq[PostaggedToken]) : Option[Seq[PostaggedToken]] = {
+  def relationHead(tokens:Seq[PostaggedToken]) : Seq[PostaggedToken] = {
     val outTokens = tokens.filter(token => !(relationStopTags.contains(token.postag) ||
                                              relationStopWords.contains(token.string)))
-    if(outTokens.isEmpty) None else Some(outTokens)
+    outTokens
   }
 
-  val whwords = HashSet("what", "which", "who", "whose", "that", "where", "when")
   def isConjunction(token:PostaggedToken) = {
-    token.postag.startsWith("CC") || token.postag.startsWith("W") || whwords.contains(token.string)
+    token.isCoordinatingConjunction || token.isWhWord || Postagger.whWords.contains(token.string)
   }
-  def isPreposition(token:PostaggedToken) = token.postag.startsWith("IN")
 
   def removeTokensAfterConjunctionsOrPrepositions(tokens: Seq[PostaggedToken]): Seq[PostaggedToken] = {
-    var firstConjPrepIndex = tokens.indexWhere(token => isConjunction(token) || isPreposition(token))
+    var firstConjPrepIndex = tokens.indexWhere(token => isConjunction(token) || token.isPreposition)
     var firstNounIndex = tokens.indexWhere(token => token.isNoun)
     if(firstConjPrepIndex > 0 && firstNounIndex < firstConjPrepIndex) {
       tokens.take(firstConjPrepIndex)
@@ -56,8 +55,7 @@ class HeadExtractor(wordnetHome:String) {
   }
 
   def truncateBeforeRelativeClause(intokens:Seq[PostaggedToken]) = {
-    val index = intokens.indexWhere(p => p.postag.startsWith("W"))
-    if(index > 0) intokens.take(intokens.indexWhere(p => p.postag.startsWith("W"))) else intokens
+    intokens.takeWhile(tok => !tok.isWhWord)
   }
 
   def removeTokensBeforeAppositive (tokens: Seq[PostaggedToken]): Seq[PostaggedToken] = {
@@ -115,7 +113,7 @@ class HeadExtractor(wordnetHome:String) {
    * Given a Seq[PostaggedTokens] will attempt to extract the tokens representing the 
    * headword tokens.
    */
-  def argumentHead(tokens:Seq[PostaggedToken]) : Option[Seq[PostaggedToken]] = {
+  def argumentHead(tokens:Seq[PostaggedToken]) : Seq[PostaggedToken] = {
 
     var subTokens = truncateBeforeRelativeClause(tokens)
 
@@ -139,17 +137,17 @@ class HeadExtractor(wordnetHome:String) {
       subTokens = returnTokens
     }
 
-    def allowedToken(p: PostaggedToken) = !p.postag.startsWith("W") &&
-      (p.isNoun || p.isAdjective || p.isVerbGerund || p.postag.equals("CD") ||
-        p.postag.equals("DT") || p.string.equals("the") || p.string.equals("a") || p.string.equals("an"))
+    def allowedToken(p: PostaggedToken) = !p.isWhWord &&
+      (p.isNoun || p.isAdjective || p.isVerbGerund || p.isCardinalNumber ||
+        p.isDeterminer || Postagger.articles.contains(p.string))
 
-    def contentToken(p:PostaggedToken): Boolean = p.isNoun || p.isPronoun || p.postag.equals("CD")
+    def contentToken(p:PostaggedToken): Boolean = p.isNoun || p.isPronoun || p.isCardinalNumber
 
     val truncateIndex = subTokens.indexWhere(p => !allowedToken(p))
     if(truncateIndex > 0 && subTokens.take(truncateIndex).find(p => (p.isPronoun || p.isNoun)) != None) {
       subTokens = subTokens.take(truncateIndex)
     } else if(subTokens.find(p => contentToken(p)) == None) {
-      return None
+      return Nil 
     }
 
     /**
@@ -158,7 +156,7 @@ class HeadExtractor(wordnetHome:String) {
      * If NN NN -> return last NN (air plane --> air plane)
      *
      */
-    return findLastNounAndNormalized(subTokens)
+    return findLastNounAndNormalized(subTokens).getOrElse(Nil)
   }
 
   def findLastNounAndNormalized(subTokens: Seq[PostaggedToken]): Option[Seq[PostaggedToken]] = {
@@ -258,10 +256,10 @@ class HeadExtractor(wordnetHome:String) {
   }
 }
 
-object HeadExtractor {
+object UWHeadExtractor {
 
   def main(args:Array[String]){
-    val headExtractor = new HeadExtractor(args(0))
+    val headExtractor = new UWHeadExtractor(args(0))
     val testCasesFile = args(1)
     io.Source.fromFile(testCasesFile).getLines.foreach(line => {
       val tokensText = line.split(" ")
@@ -271,10 +269,10 @@ object HeadExtractor {
         argText.append(parts(0)).append(" ")
         new PostaggedToken(parts(1), parts(0), 0 /* position is unused*/ )
       })
-      headExtractor.argumentHead(tokens) match {
-        case Some(head) => println("Head(%s)=%s".format(argText.toString.trim, "" + head.map(_.string).mkString(" ")))
-        case None => println("Head(%s)=%s".format(argText.toString.trim, ""))
-      }
+      val arg = argText.toString.trim
+      val head = headExtractor.argumentHead(tokens) 
+      val headString = head.map(_.string).mkString(" ")
+      println(s"head($arg) = $headString")
     })
   }
 }
