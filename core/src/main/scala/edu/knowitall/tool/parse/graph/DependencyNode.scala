@@ -13,7 +13,7 @@ import tool.postag.PostaggedToken
 /** A representation for a node in the graph of dependencies.  A node
   * represents one or more adjacent tokens in the source sentence.
   */
-class DependencyNode(string: String, postag: String, val tokenInterval: Interval, offset: Int) extends PostaggedToken(postag, string, offset) with Ordered[DependencyNode] {
+class DependencyNode(string: String, postag: String, val tokenInterval: Interval, offset: Int) extends PostaggedToken(Symbol(postag), string, offset) with Ordered[DependencyNode] {
   require(string != null)
   require(postag != null)
 

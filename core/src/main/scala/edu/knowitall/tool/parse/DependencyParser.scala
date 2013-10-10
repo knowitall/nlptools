@@ -13,14 +13,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /** A trait for a tool that produces dependencies, such as the
   * Stanford dependency parser. */
 trait DependencyParser {
-  
+
   def postagger: Postagger
-  
+
   /**
    * Create a graph of the dependencies from POS-tagged tokens.
    */
   def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph
-  
+
   def apply(string: String) = dependencyGraph(string)
 
   /**
@@ -29,15 +29,15 @@ trait DependencyParser {
    * will have the source text.
    */
   def dependencyGraph(string: String): DependencyGraph = {
-    val postaggedTokens = postagger.postag(string) 
+    val postaggedTokens = postagger.postag(string)
     dependencyGraphPostagged(postaggedTokens)
   }
-  
+
   /**
    * Create a graph of the dependencies from Tokens.
    */
   def dependencyGraphTokenized(tokens: Seq[Token]) = {
-    val postaggedTokens = postagger.postagTokens(tokens)
+    val postaggedTokens = postagger.postagTokenized(tokens)
     dependencyGraphPostagged(postaggedTokens)
   }
 
@@ -66,19 +66,19 @@ class RemoteDependencyParser(urlString: String) extends DependencyParser {
   val svc = url(urlString)
 
   override def postagger = throw new UnsupportedOperationException()
-  
+
   override def dependencyGraph(sentence: String) = {
     val response = Http(svc << sentence OK as.String).apply()
     DependencyGraph.deserialize(response)
   }
-  
+
   /**
    * Throws UnsupportedOperationException
    */
   override def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     throw new UnsupportedOperationException()
   }
-  
+
   /**
    * Throws UnsupportedOperationException
    */

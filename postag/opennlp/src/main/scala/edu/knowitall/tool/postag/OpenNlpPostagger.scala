@@ -20,10 +20,10 @@ extends Postagger(tokenizer) {
 
   val tagger = new POSTaggerME(model)
 
-  override def postagTokens(tokens: Seq[Token]): Seq[PostaggedToken] = {
+  override def postagTokenized(tokens: Seq[Token]): Seq[PostaggedToken] = {
     val postags = tagger.tag(tokens.iterator.map(_.string).toArray)
     (tokens zip postags).map { case (token, postag) =>
-      new PostaggedToken(token, postag)
+      PostaggedToken(token, postag)
     }
   }
 }

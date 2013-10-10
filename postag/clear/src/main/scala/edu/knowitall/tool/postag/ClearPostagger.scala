@@ -19,7 +19,7 @@ class ClearPostagger(override val tokenizer: Tokenizer = new ClearTokenizer) ext
     new CPOSTagger(new ZipInputStream(input));
   }
 
-  override def postagTokens(tokens: Seq[Token]) = {
+  override def postagTokenized(tokens: Seq[Token]) = {
     val tree = new DEPTree()
     tokens.zipWithIndex.foreach { case (token, i) =>
       tree.add(new DEPNode(i + 1, token.string))
@@ -28,7 +28,7 @@ class ClearPostagger(override val tokenizer: Tokenizer = new ClearTokenizer) ext
     clearPosTagger.process(tree)
 
     val postaggedTokens = for ((treeNode, token) <- (tree.iterator.asScala.drop(1).toSeq zip tokens)) yield {
-      new PostaggedToken(token, treeNode.pos)
+      PostaggedToken(token, treeNode.pos)
     }
 
     postaggedTokens
