@@ -20,7 +20,8 @@ object NlpToolsBuild extends Build {
       maltParse,
       clearTokenize, clearPostag, clearParse, clearSrl,
       breezeTokenize, breezeSentence, breezeConf,
-      morphaStemmer, snowballStemmer)
+      morphaStemmer, snowballStemmer,
+      uwHeadword, uwWordnet)
 
   override lazy val settings = super.settings ++ Seq(
     crossScalaVersions := buildScalaVersions
