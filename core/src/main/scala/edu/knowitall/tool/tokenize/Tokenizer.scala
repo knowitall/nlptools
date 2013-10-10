@@ -22,16 +22,16 @@ object Tokenizer {
     var tokens: Seq[Token] = Seq.empty
 
     // remove leading spaces
-    val (spaces, rest) = sent.span(_.isWhitespace)
+    val (spaces, rest) = sent.span(c => c.isWhitespace || c.isControl)
     offset += spaces.size
     sent = rest
 
     for (string <- strings) {
       val leftOffset = offset
-      assume(sent startsWith string, "Wrong sentence prefix: '" + string + "' of " + "'" + sent + "'")
+      assume(sent startsWith string, "Wrong sentence prefix: '" + string + "' of " + "'" + sentence + "'")
 
       sent = sent.drop(string.length)
-      val skip = sent.takeWhile(_.isWhitespace).length
+      val skip = sent.takeWhile(c => c.isWhitespace || c.isControl).length
       sent = sent.drop(skip)
 
       offset += string.length + skip
