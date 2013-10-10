@@ -51,6 +51,10 @@ object Chunker {
   def joinOf(chunks: Seq[ChunkedToken]) = join("of".r, "IN")(chunks)
   def joinPos(chunks: Seq[ChunkedToken]) = join("'|'s".r, "POS")(chunks)
 
+  /**
+   * Return the intervals represented by these ChunkedTokens.
+   * The first part of a pair is the chunk type, the second part is the interval.
+   */
   def intervals(chunks: Seq[ChunkedToken]): Seq[(String, Interval)] = {
     def helper(chunks: Iterator[String]) = {
       var intervals = Vector.empty[(String, Interval)]

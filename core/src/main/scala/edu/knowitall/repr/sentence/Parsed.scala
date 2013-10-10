@@ -15,5 +15,9 @@ trait Parser extends Parsed {
   this: Sentence with Postagged =>
 
   def parser: DependencyParser
-  override lazy val dgraph = parser.dependencyGraphPostagged(this.tokens)
+
+  def postParse(dgraph: DependencyGraph): DependencyGraph = dgraph
+
+  override lazy val dgraph = 
+    postParse(parser.dependencyGraphPostagged(this.postaggedTokens))
 }
