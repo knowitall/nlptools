@@ -26,8 +26,8 @@ import java.io.File
  */
 class UWHeadExtractor(wordnetHome:String) extends HeadExtractor {
 
-  val relationStopWords = HashSet("has", "have", "had", "did", "do")
-  val relationStopTags = HashSet("MD", "JJ", "JJR", "JJS", "RB", "RBR", "RBS", "CC",
+  private val relationStopWords = HashSet("has", "have", "had", "did", "do")
+  private val relationStopTags = HashSet("MD", "JJ", "JJR", "JJS", "RB", "RBR", "RBS", "CC",
                                  "UH", "PRP", "PRP$", "DT", "WP", "WP$", "WRB", "CD")
 
   /**
@@ -38,75 +38,6 @@ class UWHeadExtractor(wordnetHome:String) extends HeadExtractor {
     val outTokens = tokens.filter(token => !(relationStopTags.contains(token.postag) ||
                                              relationStopWords.contains(token.string)))
     outTokens
-  }
-
-  def isConjunction(token:PostaggedToken) = {
-    token.isCoordinatingConjunction || token.isWhWord || Postagger.whWords.contains(token.string)
-  }
-
-  def removeTokensAfterConjunctionsOrPrepositions(tokens: Seq[PostaggedToken]): Seq[PostaggedToken] = {
-    var firstConjPrepIndex = tokens.indexWhere(token => isConjunction(token) || token.isPreposition)
-    var firstNounIndex = tokens.indexWhere(token => token.isNoun)
-    if(firstConjPrepIndex > 0 && firstNounIndex < firstConjPrepIndex) {
-      tokens.take(firstConjPrepIndex)
-    }else{
-      tokens
-    }
-  }
-
-  def truncateBeforeRelativeClause(intokens:Seq[PostaggedToken]) = {
-    intokens.takeWhile(tok => !tok.isWhWord)
-  }
-
-  def removeTokensBeforeAppositive (tokens: Seq[PostaggedToken]): Seq[PostaggedToken] = {
-    val apostropheIndex = tokens.indexWhere(token => token.string.equals("POS") || token.postag.equals("POS"))
-    if(apostropheIndex > 0 && (apostropheIndex+1) < tokens.size) {
-      tokens.drop(apostropheIndex+1)
-    } else {
-      tokens
-    }
-  }
-  val alphaNumDotDollarRe = """[^a-zA-Z0-9.$]""".r
-  def removeTokensAfterPunctuation(tokens: Seq[PostaggedToken]): Seq[PostaggedToken] = {
-    val puncIndex = tokens.indexWhere(token => alphaNumDotDollarRe.findFirstIn(token.string) == None)
-    if (puncIndex > 0) {
-      tokens.take(puncIndex)
-    }else{
-      tokens
-    }
-  }
-
-  val leadingModPatterns = """^(DT|CD|(DT*) JJ|JJ|RBS) of""".r
-
-  def findNPofNP(tokens: Seq[PostaggedToken]) : Seq[PostaggedToken] = {
-
-    val leadingOfIndex = tokens.indexWhere(token => token.string.equals("of") || token.string.equals("in"))
-    if(leadingOfIndex > 0){
-      /**
-       * First step is to find the head noun of an argument phrase, as follows:
-       *  If the phrase begins with "NP of NP", check the WN type and hypernyms of the first NP.
-       *  If the first NP has type { number[n2], group[n1], quantity[n1], part[n1], amount[n1] }, then remove "NP of".
-       *  If the phrase begins with "Adj of NP", then remove "Adj of NP".  (example:"some of NP", "any of NP").
-       *  Find first token of remaining phrase that is not in { Noun, Adj, Determiner}. Truncate phrase at that word.
-       */
-      val posTokenString = tokens.take(leadingOfIndex+1).map(token => {
-        if(token.string.equals("of") || token.string.equals("in")) "of" else token.postag
-      }).mkString(" ")
-
-      if(leadingModPatterns.findFirstIn(posTokenString) != None){
-        return tokens.drop(leadingOfIndex+1)
-      }
-
-      var leadingNPs = tokens.take(leadingOfIndex).filter(x => x.isNoun)
-      var trailingNPs = tokens.drop(leadingOfIndex+1).filter(x => x.isNoun)
-      if (leadingNPs.find(x => !x.isProperNoun) == None){
-        return tokens
-      }
-      leadingNPs.filter(x => !x.isProperNoun).foreach(x => 
-        if (WordNetUtil.isGroupQuantityAmountNumberOrPart(x)) return trailingNPs)
-      return leadingNPs
-    }
-    return tokens
   }
 
   /**
@@ -159,7 +90,81 @@ class UWHeadExtractor(wordnetHome:String) extends HeadExtractor {
     return findLastNounAndNormalized(subTokens).getOrElse(Nil)
   }
 
-  def findLastNounAndNormalized(subTokens: Seq[PostaggedToken]): Option[Seq[PostaggedToken]] = {
+  //
+  // private helper functions
+  //
+
+  private def isConjunction(token:PostaggedToken) = {
+    token.isCoordinatingConjunction || token.isWhWord || Postagger.whWords.contains(token.string)
+  }
+
+  private def removeTokensAfterConjunctionsOrPrepositions(tokens: Seq[PostaggedToken]): Seq[PostaggedToken] = {
+    var firstConjPrepIndex = tokens.indexWhere(token => isConjunction(token) || token.isPreposition)
+    var firstNounIndex = tokens.indexWhere(token => token.isNoun)
+    if(firstConjPrepIndex > 0 && firstNounIndex < firstConjPrepIndex) {
+      tokens.take(firstConjPrepIndex)
+    }else{
+      tokens
+    }
+  }
+
+  private def truncateBeforeRelativeClause(intokens:Seq[PostaggedToken]) = {
+    intokens.takeWhile(tok => !tok.isWhWord)
+  }
+
+  private def removeTokensBeforeAppositive (tokens: Seq[PostaggedToken]): Seq[PostaggedToken] = {
+    val apostropheIndex = tokens.indexWhere(token => token.string.equals("POS") || token.postag.equals("POS"))
+    if(apostropheIndex > 0 && (apostropheIndex+1) < tokens.size) {
+      tokens.drop(apostropheIndex+1)
+    } else {
+      tokens
+    }
+  }
+
+  private val alphaNumDotDollarRe = """[^a-zA-Z0-9.$]""".r
+  private def removeTokensAfterPunctuation(tokens: Seq[PostaggedToken]): Seq[PostaggedToken] = {
+    val puncIndex = tokens.indexWhere(token => alphaNumDotDollarRe.findFirstIn(token.string) == None)
+    if (puncIndex > 0) {
+      tokens.take(puncIndex)
+    }else{
+      tokens
+    }
+  }
+
+  private val leadingModPatterns = """^(DT|CD|(DT*) JJ|JJ|RBS) of""".r
+
+  private def findNPofNP(tokens: Seq[PostaggedToken]) : Seq[PostaggedToken] = {
+
+    val leadingOfIndex = tokens.indexWhere(token => token.string.equals("of") || token.string.equals("in"))
+    if(leadingOfIndex > 0){
+      /**
+       * First step is to find the head noun of an argument phrase, as follows:
+       *  If the phrase begins with "NP of NP", check the WN type and hypernyms of the first NP.
+       *  If the first NP has type { number[n2], group[n1], quantity[n1], part[n1], amount[n1] }, then remove "NP of".
+       *  If the phrase begins with "Adj of NP", then remove "Adj of NP".  (example:"some of NP", "any of NP").
+       *  Find first token of remaining phrase that is not in { Noun, Adj, Determiner}. Truncate phrase at that word.
+       */
+      val posTokenString = tokens.take(leadingOfIndex+1).map(token => {
+        if(token.string.equals("of") || token.string.equals("in")) "of" else token.postag
+      }).mkString(" ")
+
+      if(leadingModPatterns.findFirstIn(posTokenString) != None){
+        return tokens.drop(leadingOfIndex+1)
+      }
+
+      var leadingNPs = tokens.take(leadingOfIndex).filter(x => x.isNoun)
+      var trailingNPs = tokens.drop(leadingOfIndex+1).filter(x => x.isNoun)
+      if (leadingNPs.find(x => !x.isProperNoun) == None){
+        return tokens
+      }
+      leadingNPs.filter(x => !x.isProperNoun).foreach(x => 
+        if (WordNetUtil.isGroupQuantityAmountNumberOrPart(x)) return trailingNPs)
+      return leadingNPs
+    }
+    return tokens
+  }
+
+  private def findLastNounAndNormalized(subTokens: Seq[PostaggedToken]): Option[Seq[PostaggedToken]] = {
 
     assert(subTokens.size > 0, "Sub tokens cannot be zero.")
     //If only one token left return the stemmed version.
@@ -208,7 +213,7 @@ class UWHeadExtractor(wordnetHome:String) extends HeadExtractor {
   /**
    * Uses JwiTools to determine if a PostaggedToken isGroupQuantityAmountNumberOrPart
    */
-  object WordNetUtil {
+  private object WordNetUtil {
  
     val dict = new Dictionary(new File(wordnetHome, "dict"))
     if(!dict.open()) {
@@ -228,9 +233,7 @@ class UWHeadExtractor(wordnetHome:String) extends HeadExtractor {
                      ("percentage", 0),
                      ("proportion", 3))
 
-    Xclasses.foreach(xc => {
-      val word = xc._1
-      val sense = xc._2
+    Xclasses.foreach { case (word, sense) => {
       val stemmedWord = jwiTools.stem(word, 0)
       val indexedWord = dict.getIndexWord(stemmedWord, POS.NOUN)
       val wordIDs = indexedWord.getWordIDs
@@ -238,7 +241,7 @@ class UWHeadExtractor(wordnetHome:String) extends HeadExtractor {
       val synset = dict.getWord(dictWord).getSynset
       types += synset
       typeSynsetIds += synset.getID.toString
-    })
+    }}
 
     val XclassNames = HashSet(Xclasses.map(xc => xc._1) : _*)
 
@@ -256,7 +259,7 @@ class UWHeadExtractor(wordnetHome:String) extends HeadExtractor {
   }
 }
 
-object UWHeadExtractor {
+object UWHeadExtractorMain {
 
   def main(args:Array[String]){
     val headExtractor = new UWHeadExtractor(args(0))
