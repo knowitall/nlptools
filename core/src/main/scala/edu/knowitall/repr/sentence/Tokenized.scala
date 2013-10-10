@@ -10,7 +10,6 @@ trait TokenizedSupertrait {
   type token <: Token
 
   def tokens: Seq[token]
-  def tokenizedTokens: Seq[Token]
 
   def strings: Seq[String] = tokens.map(_.string)
 }
@@ -18,8 +17,6 @@ trait TokenizedSupertrait {
 trait Tokenized extends TokenizedSupertrait {
   this: Sentence =>
   type token = Token
-
-  override def tokens: Seq[token] = tokenizedTokens
 }
 
 trait Tokenizer extends Tokenized {
@@ -28,6 +25,6 @@ trait Tokenizer extends Tokenized {
   def tokenizer: edu.knowitall.tool.tokenize.Tokenizer
 
   def postTokenize(tokens: Seq[Token]): Seq[Token] = tokens
-  override lazy val tokenizedTokens: Seq[Token] = 
+  override lazy val tokens: Seq[Token] =
     postTokenize(tokenizer.tokenize(text))
 }
