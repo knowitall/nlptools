@@ -17,7 +17,7 @@ object Frame {
     pickled match {
       case pickledRegex(relation, arguments) =>
         val rel = Relation.deserialize(dgraph)(relation)
-        val args = arguments.split(",\\s+") map Argument.deserialize(dgraph)
+        val args = arguments.split(",\\s+") filter (!_.trim.isEmpty) map Argument.deserialize(dgraph)
         Frame(rel, args)
       case _ => throw new IllegalArgumentException("Could not deserialize: " + pickled)
     }
