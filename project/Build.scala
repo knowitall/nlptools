@@ -20,6 +20,7 @@ object NlpToolsBuild extends Build {
       maltParse,
       clearTokenize, clearPostag, clearParse, clearSrl,
       breezeTokenize, breezeSentence, breezeConf,
+      wekaConf,
       morphaStemmer, snowballStemmer,
       uwHeadword, uwWordnet)
 
