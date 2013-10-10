@@ -270,7 +270,7 @@ object UWHeadExtractorMain {
       val tokens = tokensText.map(text => {
         val parts = text.split("/")
         argText.append(parts(0)).append(" ")
-        new PostaggedToken(parts(1), parts(0), 0 /* position is unused*/ )
+        PostaggedToken(parts(1), parts(0), 0 /* position is unused*/ )
       })
       val arg = argText.toString.trim
       val head = headExtractor.argumentHead(tokens) 
