@@ -5,8 +5,10 @@ import edu.knowitall.tool.postag._
 trait PostaggedSupertrait extends TokenizedSupertrait {
   this: Sentence =>
 
-  type token <: PostaggedToken
   def postaggedTokens: Seq[PostaggedToken]
+  type token <: PostaggedToken
+
+  override def tokenizedTokens = postaggedTokens
 }
 
 trait Postagged extends PostaggedSupertrait {
@@ -19,6 +21,6 @@ trait Postagged extends PostaggedSupertrait {
 trait Postagger extends Postagged {
   this: Sentence =>
   def postagger: edu.knowitall.tool.postag.Postagger
-  override lazy val postaggedTokens: Seq[PostaggedToken] = postagger.postagTokenized(tokenizedTokens)
+  override lazy val postaggedTokens: Seq[PostaggedToken] = postagger.postag(this.text)
 }
 

@@ -11,30 +11,9 @@ trait Parsed {
   def dgraph: DependencyGraph
 }
 
-trait Parser {
-  def dgraph: DependencyGraph
-  def parser: DependencyParser
-}
-
-trait ParserFromString extends Parser with Postagged {
-  this: Sentence =>
-
-  def parser: DependencyParser
-  override def dgraph = parser.dependencyGraph(this.text)
-  override def tokens = this.dgraph.nodes.toSeq
-}
-
-trait ParserFromTokens extends Parser with Postagged {
-  this: Sentence with Tokenized =>
-
-  def parser: DependencyParser
-  override def dgraph = parser.dependencyGraphTokenized(this.tokens)
-  override def tokens: Seq[PostaggedToken] = this.dgraph.nodes.toSeq
-}
-
-trait ParserFromPostagged extends Parser {
+trait Parser extends Parsed {
   this: Sentence with Postagged =>
 
   def parser: DependencyParser
-  override def dgraph = parser.dependencyGraphPostagged(this.tokens)
+  override lazy val dgraph = parser.dependencyGraphPostagged(this.tokens)
 }

@@ -7,6 +7,8 @@ trait ChunkedSupertrait extends PostaggedSupertrait {
 
   type token <: ChunkedToken
   def chunkedTokens: Seq[ChunkedToken]
+  
+  override def postaggedTokens = chunkedTokens
 }
 
 trait Chunked extends ChunkedSupertrait {
@@ -20,5 +22,5 @@ trait Chunker extends Chunked {
   this: Sentence =>
 
   def chunker: edu.knowitall.tool.chunk.Chunker
-  override def chunkedTokens: Seq[ChunkedToken] = chunker.chunkPostagged(postaggedTokens)
+  override def chunkedTokens: Seq[ChunkedToken] = chunker.chunk(this.text)
 }
