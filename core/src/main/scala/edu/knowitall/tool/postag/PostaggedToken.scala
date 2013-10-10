@@ -61,10 +61,10 @@ extends Token(string, offset) {
   def isConjunction = isSubordinatingConjunction || isCoordinatingConjunction
   def isPreposition = postag == Symbol("IN")
 
-  def isWhDeterminer = postag == "WDT"
-  def isWhPronoun = postag == "WP"
-  def isWhPossessivePronoun = postag == "WP$"
-  def isWhAdverb = postag == "WRB"
+  def isWhDeterminer = postag == Symbol("WDT")
+  def isWhPronoun = postag == Symbol("WP")
+  def isWhPossessivePronoun = postag == Symbol("WP$")
+  def isWhAdverb = postag == Symbol("WRB")
   def isWhWord = isWhDeterminer || isWhPronoun || isWhPossessivePronoun || isWhAdverb
 
   val punctuation = Set("#", "$", "''", "(", ")", ",", ".", ":", "``")
