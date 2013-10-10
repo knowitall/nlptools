@@ -24,7 +24,6 @@ trait Tokenizer extends Tokenized {
 
   def tokenizer: edu.knowitall.tool.tokenize.Tokenizer
 
-  def postTokenize(tokens: Seq[Token]): Seq[Token] = tokens
   override lazy val tokens: Seq[Token] =
-    postTokenize(tokenizer.tokenize(text))
+    tokenizer.tokenize(text)
 }

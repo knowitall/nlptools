@@ -21,11 +21,7 @@ trait Chunked extends ChunkedSupertrait {
 trait Chunker extends Chunked {
   this: Sentence =>
 
-  def postChunk(tokens: Seq[ChunkedToken]): Seq[ChunkedToken] = {
-    Chunker.joinPos(Chunker.joinOf(tokens))
-  }
-
   def chunker: edu.knowitall.tool.chunk.Chunker
   override lazy val tokens: Seq[ChunkedToken] =
-    postChunk(chunker.chunk(this.text))
+    chunker.chunk(this.text)
 }
