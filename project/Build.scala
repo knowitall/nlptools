@@ -123,6 +123,23 @@ object NlpToolsBuild extends Build {
     libraryDependencies ++= Seq(commonScala, scopt, slf4j)
   ))
 
+  // Headwords 
+
+  lazy val uwHeadword = Project(
+    id = "nlptools-headword-uw",
+    base = file("headword/uw"),
+    settings = buildSettings
+  ) dependsOn(uwWordnet)
+
+  // Wordnet
+
+  lazy val uwWordnet = Project(
+    id = "nlptools-wordnet-uw",
+    base = file("wordnet/uw"),
+    settings = buildSettings ++ Seq(
+      libraryDependencies ++= Seq("edu.mit" % "jwi" % "2.2.3"))
+  ) dependsOn(core)
+
   // OpenNLP
 
   lazy val opennlpSentence = Project(
