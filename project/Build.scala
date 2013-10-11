@@ -131,7 +131,8 @@ object NlpToolsBuild extends Build {
   lazy val uwHeadword = Project(
     id = "nlptools-headword-uw",
     base = file("headword/uw"),
-    settings = buildSettings
+    settings = buildSettings ++ Seq(
+      licenses := Seq(apache2))
   ) dependsOn(uwWordnet)
 
   // Wordnet
@@ -140,6 +141,7 @@ object NlpToolsBuild extends Build {
     id = "nlptools-wordnet-uw",
     base = file("wordnet/uw"),
     settings = buildSettings ++ Seq(
+      licenses := Seq("MIT Java Wordnet Interface License" -> url("http://projects.csail.mit.edu/jwi/license.html")),
       libraryDependencies ++= Seq("edu.mit" % "jwi" % "2.2.3"))
   ) dependsOn(core)
 
