@@ -16,6 +16,7 @@ import edu.knowitall.tool.postag.PostaggedToken
 class ChunkedToken(val chunkSymbol: Symbol, override val postagSymbol: Symbol, override val string: String, override val offset: Int)
 extends PostaggedToken(postagSymbol, string, offset) {
   def chunk = chunkSymbol.name
+  require(chunk.forall(!_.isWhitespace), "chunk contains whitespace: " + chunk)
 
   override def toString = string+"/"+postag+"/"+chunk+"@"+offset
 

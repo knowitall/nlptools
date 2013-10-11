@@ -15,6 +15,7 @@ import edu.knowitall.tool.tokenize.Token
 class PostaggedToken(val postagSymbol: Symbol, override val string: String, override val offset: Int)
 extends Token(string, offset) {
   def postag = postagSymbol.name
+  require(postag.forall(!_.isWhitespace), "postag contains whitespace: " + postag)
 
   override def toString = string+"/"+postag+"@"+offset
 
