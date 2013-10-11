@@ -4,17 +4,19 @@ import Keys._
 import sbtassembly.Plugin._
 import AssemblyKeys._
 
+import sbtrelease.ReleasePlugin._
+
 object NlpToolsBuild extends Build {
   // settings
   val buildOrganization = "edu.washington.cs.knowitall.nlptools"
-  val buildVersion = "2.4.4-SNAPSHOT"
   val buildScalaVersions = Seq("2.10.2", "2.9.3")
 
-  lazy val root = Project(id = "nlptools", base = file(".")) settings (
+  lazy val root = Project(id = "nlptools", base = file(".")).settings (
     crossScalaVersions := buildScalaVersions,
     publish := { },
+    publishTo := Some("bogus" at "http://nowhere.com"),
     publishLocal := { }
-  ) aggregate(core,
+  ).settings(releaseSettings: _*).aggregate(core,
       opennlpSentence, opennlpTokenize, opennlpPostag, opennlpChunk, opennlpParse,
       stanfordTokenize, stanfordPostag, stanfordParse, stanfordCoref, stanfordTyper,
       maltParse,
@@ -84,7 +86,6 @@ object NlpToolsBuild extends Build {
   // parent build definition
   val buildSettings = Defaults.defaultSettings ++ Seq (
     organization := buildOrganization,
-    version      := buildVersion,
     crossScalaVersions := buildScalaVersions,
     scalaVersion <<= (crossScalaVersions) { versions => versions.head },
     libraryDependencies ++= Seq(junit % "test", specs2 % "test",
@@ -125,7 +126,7 @@ object NlpToolsBuild extends Build {
     libraryDependencies ++= Seq(commonScala, scopt, slf4j)
   ))
 
-  // Headwords 
+  // Headwords
 
   lazy val uwHeadword = Project(
     id = "nlptools-headword-uw",
