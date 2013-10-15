@@ -145,8 +145,12 @@ class JwiTools(dict: Dictionary) {
     *          stream returns one deeper level in the hypernym hierarchy. 
     */
   def hypernymStream(synsets: Set[ISynset]): Stream[Set[ISynset]] = {
-    val hypernyms = synsets flatMap synsetToHypernyms
-    synsets #:: hypernymStream(hypernyms)
+    if(synsets.size == 0) {
+      Stream.Empty
+    } else {
+      val hypernyms = synsets flatMap synsetToHypernyms
+      synsets #:: hypernymStream(hypernyms)
+    }
   }
 
   /** Goes from a synset to a Set of its hypernyms (which are
