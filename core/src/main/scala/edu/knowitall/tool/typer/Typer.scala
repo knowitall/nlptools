@@ -3,7 +3,10 @@ package edu.knowitall.tool.typer
 import edu.knowitall.collection.immutable.Interval
 import edu.knowitall.tool.tokenize.Token
 
-abstract class Typer[E <: Token](val name: String, val source: String) {
+abstract class Typer[E <: Token] {
+  def name: String
+  def source: String
+
   def apply(seq: Seq[E]): Seq[Type]
 }
 
