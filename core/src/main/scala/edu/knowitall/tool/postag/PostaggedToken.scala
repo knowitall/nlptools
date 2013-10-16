@@ -1,5 +1,5 @@
-package edu.knowitall
-package tool.postag
+package edu.knowitall.tool
+package postag
 
 import edu.knowitall.common.HashCodeHelper
 import edu.knowitall.tool.tokenize.Token
@@ -78,4 +78,21 @@ object PostaggedToken {
   def apply(token: Token, postag: String): PostaggedToken = PostaggedToken(postag, token.string, token.offset)
 
   def unapply(token: PostaggedToken): Option[(String, String, Int)] = Some((token.postag, token.string, token.offset))
+
+  object bratFormat extends Format[PostaggedToken, String] {
+    def write(token: PostaggedToken): String = {
+      Iterator(token.postag + " " + token.offset + " " + token.offsets.end, token.string).mkString("\t")
+    }
+
+    def read(string: String): PostaggedToken = {
+      string.split("\t") match {
+        case Array(meat, token) =>
+          meat.split("\\s+") match {
+            case Array(postag, token, offset) => PostaggedToken(postag, token, offset.toInt)
+            case _ => throw new MatchError("Could not match BRAT PostaggedToken: " + string)
+          }
+        case _ => throw new MatchError("Could not match BRAT PostaggedToken: " + string)
+      }
+    }
+  }
 }
