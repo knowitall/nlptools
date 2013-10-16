@@ -64,6 +64,19 @@ object Postagger {
   def tokensFrom(postags: Seq[String], tokens: Seq[Token]): Seq[PostaggedToken] = {
     (postags zip tokens).map { case (postag, token) => PostaggedToken(token, postag) }
   }
+
+  object bratFormat extends Format[PostaggedToken, String] {
+    def write(token: PostaggedToken): String = {
+      Iterator(token.postag, token.offset, token.offsets.end, token.string).mkString("\t")
+    }
+
+    def read(string: String): PostaggedToken = {
+      string.split("\t") match {
+        case Array(postag, offset, _, token) => PostaggedToken(postag, token, offset.toInt)
+        case _ => throw new MatchError("Could not match BRAT PostaggedToken: " + string)
+      }
+    }
+  }
 }
 
 abstract class PostaggerMain extends LineProcessor("postagger") {
