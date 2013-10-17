@@ -13,7 +13,11 @@ import java.io.BufferedInputStream
 import java.io.FileInputStream
 import java.util.zip.GZIPInputStream
 
-class StanfordNer(private val classifier: AbstractSequenceClassifier[_]) extends Typer[Token]("Stanford", "Stanford") {
+class StanfordNer(private val classifier: AbstractSequenceClassifier[_]) extends Typer[Token] {
+
+  override def name = "Stanford"
+  override def source = "Stanford"
+
   def apply(seq: Seq[Token]) = {
     val text = Tokenizer.originalText(seq)
     import scala.collection.JavaConverters._
