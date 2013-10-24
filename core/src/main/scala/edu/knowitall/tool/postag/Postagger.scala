@@ -64,6 +64,20 @@ object Postagger {
   def tokensFrom(postags: Seq[String], tokens: Seq[Token]): Seq[PostaggedToken] = {
     (postags zip tokens).map { case (postag, token) => PostaggedToken(token, postag) }
   }
+  
+  object serialization extends Format[Seq[PostaggedToken],String]{
+   
+    def write(tokens: Seq[PostaggedToken]): String = {
+      val serializedTokens = for(tok <- tokens) yield {
+        PostaggedToken.serialization.write(tok)
+      }
+      serializedTokens.mkString("\t")
+    }
+    
+    def read(string: String): Seq[PostaggedToken] ={
+      for (str <- string.split("\t")) yield PostaggedToken.serialization.read(str)
+    }
+  }
 }
 
 abstract class PostaggerMain extends LineProcessor("postagger") {
