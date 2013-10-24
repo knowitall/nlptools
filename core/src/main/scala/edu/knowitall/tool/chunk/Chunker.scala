@@ -87,6 +87,18 @@ object Chunker {
     val postaggedTokens = Postagger.tokensFrom(postags, tokens)
     (chunks zip postaggedTokens).map { case (chunk, postaggedToken) => ChunkedToken(postaggedToken, chunk) }
   }
+  
+  object stringFormat extends Format[Seq[ChunkedToken], String]{
+    def write(chunkedTokens: Seq[ChunkedToken]): String = {
+      val serializedChunkedTokens = for(chunkedTok <- chunkedTokens) yield {
+        ChunkedToken.stringFormat.write(chunkedTok)
+      }
+      serializedChunkedTokens.mkString("\t")
+    }
+    def read(str: String): Seq[ChunkedToken] = {
+      for (s <- str.split("\t")) yield ChunkedToken.stringFormat.read(s)
+    }
+  }
 }
 
 abstract class ChunkerMain

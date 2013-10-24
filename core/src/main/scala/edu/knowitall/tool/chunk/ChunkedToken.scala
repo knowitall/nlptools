@@ -3,6 +3,7 @@ package tool.chunk
 
 import edu.knowitall.common.HashCodeHelper
 import edu.knowitall.tool.postag.PostaggedToken
+import edu.knowitall.tool.Format
 
 /** A representation of a chunked token.  A chunked token has all the
   * aspects of a postagged token along with a chunk tag.
@@ -38,4 +39,24 @@ object ChunkedToken {
     new ChunkedToken(Symbol(chunk), token.postagSymbol, token.string, token.offset)
 
   def unapply(token: ChunkedToken): Option[(String, String, String, Int)] = Some((token.chunk, token.postag, token.string, token.offset))
+  
+  object stringFormat extends Format[ChunkedToken, String] {
+    def write(chunkedToken: ChunkedToken): String = {
+      Iterator(PostaggedToken.stringFormat.write(chunkedToken),chunkedToken.chunk).mkString(" ").replaceAll("\\s+", " ")
+    }
+    def read(str: String): ChunkedToken = {
+      try{
+        val postaggedToken = PostaggedToken.stringFormat.read(str)
+        val info = str.split(" ")
+        val chunkName = info(2)
+        ChunkedToken(chunkName,postaggedToken.postag,postaggedToken.string,postaggedToken.offset)
+      }
+      catch{
+        case e: Exception => {
+          throw new MatchError("Error parsing ChunkedToken format token@offset postag chunkName for " +
+	        "the serialized string " + str)
+        }
+      }
+    }
+  }
 }

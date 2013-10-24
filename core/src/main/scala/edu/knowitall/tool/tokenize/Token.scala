@@ -38,4 +38,18 @@ object Token {
     val splitIndex = string.lastIndexOf('@')
     Token(string.take(splitIndex), 0)
   }
+  
+  object stringFormat extends Format[Token, String]{
+    def write(token: Token): String = token.string+"@"+token.offset
+    def read(str: String): Token = {
+	  val info = str.split(" ")
+	  val tokenRegex = "(.+)@(\\d+)".r
+      val(tokenString, tokenOffset) = info(0) match{
+	    case tokenRegex(string,offset) => (string, offset)
+	    case _ => throw new MatchError("Error parsing token format token@offset for token " + info(0) +
+	        " in this serialized string " + str)
+	  }
+      Token(tokenString,tokenOffset.toInt)
+    }
+  }
 }

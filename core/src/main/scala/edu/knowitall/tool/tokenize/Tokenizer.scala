@@ -69,6 +69,16 @@ object Tokenizer {
       case s => throw new MatchError("Could not deserialize: " + s)
     }(scala.collection.breakOut)
   }
+  
+  object stringFormat extends Format[Seq[Token],String]{
+    def write(tokens: Seq[Token]): String = {
+      val serializedTokens = for(tok <- tokens) yield Token.stringFormat.write(tok)
+      serializedTokens.mkString("\t")
+    }
+    def read(str: String): Seq[Token] = {
+      for (s <- str.split("\t")) yield Token.stringFormat.read(s)
+    }
+  }
 }
 
 abstract class TokenizerMain extends LineProcessor("tokenizer") {
