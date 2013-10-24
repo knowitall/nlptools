@@ -106,6 +106,9 @@ object NlpToolsBuild extends Build {
         Some("releases"  at nexus + "service/local/staging/deploy/maven2")
     },
     homepage := Some(url("https://github.com/knowitall/nlptools")),
+    mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) => {
+      case _ => MergeStrategy.first
+    }},
     pomExtra := (
       <scm>
         <url>https://github.com/knowitall/nlptools</url>

@@ -76,7 +76,6 @@ abstract class ConstituencyParserMain
 extends LineProcessor("parser") {
   def constituencyParser: ConstituencyParser
   override def process(line: String) = {
-    println(constituencyParser.parse(line).toString);
-    constituencyParser.parse(line).printDOT(System.out); ""
+    constituencyParser.parse(line).toString
   }
 }
