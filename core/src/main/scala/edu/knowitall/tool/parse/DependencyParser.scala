@@ -61,14 +61,11 @@ abstract class DependencyParserMain extends LineProcessor("parser") {
   }
 }
 
-class RemoteDependencyParser(urlString: String) extends DependencyParser {
-  import dispatch._
-  val svc = url(urlString)
-
+class RemoteDependencyParser(val urlString: String) extends DependencyParser with Remote {
   override def postagger = throw new UnsupportedOperationException()
 
   override def dependencyGraph(sentence: String) = {
-    val response = Http(svc << sentence OK as.String).apply()
+    val response = post(sentence)
     DependencyGraph.deserialize(response)
   }
 
