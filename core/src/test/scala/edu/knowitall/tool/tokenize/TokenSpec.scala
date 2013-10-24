@@ -73,4 +73,9 @@ object TokenSpecTest extends Specification {
       case e: MatchError => { }
     }
   }
+  
+  "Token should be able to contain @" in {
+   val t = Token("@",0)
+   Token.stringFormat.read(Token.stringFormat.write(t)) == t
+  }
 }

@@ -43,8 +43,9 @@ object Token {
     def write(token: Token): String = token.string+"@"+token.offset
     def read(str: String): Token = {
 	  val info = str.split(" ")
-      val(tokenString, tokenOffset) = info(0).split("@") match{
-	    case Array(string, offset) if offset.matches("\\d+")=> (string, offset)
+	  val tokenRegex = "(.+)@(\\d+)".r
+      val(tokenString, tokenOffset) = info(0) match{
+	    case tokenRegex(string,offset) => (string, offset)
 	    case _ => throw new MatchError("Error parsing token format token@offset for token " + info(0) +
 	        " in this serialized string " + str)
 	  }
