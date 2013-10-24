@@ -39,21 +39,16 @@ object Token {
     Token(string.take(splitIndex), 0)
   }
   
-  object serialization extends Format[Token, String]{
+  object stringFormat extends Format[Token, String]{
     def write(token: Token): String = token.string+"@"+token.offset
     def read(str: String): Token = {
-      try{
-	      val info = str.split(" ")
-	      val tokenSplit = info(0).split("@")
-	      val tokenOffset = tokenSplit(1).toInt
-	      val tokenString = tokenSplit(0)
-	      Token(tokenString,tokenOffset)
-      }
-      catch{
-        case e: Exception =>{
-          throw new MatchError("Could not match Token in serialized form")
-        }
-      }
+	  val info = str.split(" ")
+      val(tokenString, tokenOffset) = info(0).split("@") match{
+	    case Array(string, offset) if offset.matches("\\d+")=> (string, offset)
+	    case _ => throw new MatchError("Error parsing token format token@offset for token " + info(0) +
+	        " in this serialized string " + str)
+	  }
+      Token(tokenString,tokenOffset.toInt)
     }
   }
 }

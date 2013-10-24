@@ -70,13 +70,13 @@ object Tokenizer {
     }(scala.collection.breakOut)
   }
   
-  object serialization extends Format[Seq[Token],String]{
-    def write(tokens: Seq[Token]):String = {
-      val serializedTokens = for(tok <- tokens) yield Token.serialization.write(tok)
+  object stringFormat extends Format[Seq[Token],String]{
+    def write(tokens: Seq[Token]): String = {
+      val serializedTokens = for(tok <- tokens) yield Token.stringFormat.write(tok)
       serializedTokens.mkString("\t")
     }
     def read(str: String): Seq[Token] = {
-      for (s <- str.split("\t")) yield Token.serialization.read(s)
+      for (s <- str.split("\t")) yield Token.stringFormat.read(s)
     }
   }
 }

@@ -96,20 +96,21 @@ object PostaggedToken {
     }
   }
   
-  object serialization extends Format[PostaggedToken, String]{
+  object stringFormat extends Format[PostaggedToken, String] {
     def write(postaggedToken: PostaggedToken): String = {
-      Iterator(Token.serialization.write(postaggedToken),postaggedToken.postag).mkString(" ").replaceAll("\\s+", " ")
+      Iterator(Token.stringFormat.write(postaggedToken),postaggedToken.postag).mkString(" ").replaceAll("\\s+", " ")
     }
     def read(str: String): PostaggedToken = {
       try{
-        val token = Token.serialization.read(str)
+        val token = Token.stringFormat.read(str)
         val info = str.split(" ")
         val posTag = info(1)
-        PostaggedToken.apply(posTag,token.string,token.offset)
+        PostaggedToken(posTag,token.string,token.offset)
       }
       catch{
         case e: Exception => {
-          throw new MatchError("Could not match PostaggedToken in serialized form")
+          throw new MatchError("Error parsing PostaggedToken format token@offset postag for " +
+	        "the serialized string " + str)
         }
       }
     }
