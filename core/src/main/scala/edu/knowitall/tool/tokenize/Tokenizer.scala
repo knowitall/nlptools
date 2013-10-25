@@ -62,14 +62,7 @@ object Tokenizer {
   }
 
   private[this] val tokenRegex = """(.+)@(\d+)""".r
-  def deserialize(pickled: String): Seq[Token] = {
-    val split = pickled.split("\\s+")
-    split.map {
-      case tokenRegex(string, offset) => Token(string, offset.toInt)
-      case s => throw new MatchError("Could not deserialize: " + s)
-    }(scala.collection.breakOut)
-  }
-  
+
   object stringFormat extends Format[Seq[Token],String]{
     def write(tokens: Seq[Token]): String = {
       val serializedTokens = for(tok <- tokens) yield Token.stringFormat.write(tok)
@@ -84,7 +77,7 @@ object Tokenizer {
 abstract class TokenizerMain extends LineProcessor("tokenizer") {
   def tokenizer: Tokenizer
   override def process(sentence: String) =
-    tokenizer.tokenize(sentence).mkString(" ")
+    Tokenizer.stringFormat.write(tokenizer.tokenize(sentence))
 }
 
 class RemoteTokenizer(urlString: String) extends Tokenizer {
@@ -93,6 +86,6 @@ class RemoteTokenizer(urlString: String) extends Tokenizer {
 
   def tokenize(sentence: String) = {
     val response = Http(svc << sentence OK as.String).apply()
-    Tokenizer.deserialize(response)
+    Tokenizer.stringFormat.read(response)
   }
 }

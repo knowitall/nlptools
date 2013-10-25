@@ -34,20 +34,15 @@ object Token {
   def apply(string: String, offset: Int) = new Token(string, offset)
   def unapply(token: Token): Option[(String, Int)] = Some((token.string, token.offset))
 
-  def deserialize(string: String) = {
-    val splitIndex = string.lastIndexOf('@')
-    Token(string.take(splitIndex), 0)
-  }
-  
   object stringFormat extends Format[Token, String] {
-    val tokenRegex = "(.+)@(\\d+)".r
-    def write(token: Token): String = token.string + "@" + token.offset
-    def read(str: String): Token = {
-      val (tokenString, tokenOffset) = str match {
-        case tokenRegex(string, offset) => (string, offset)
-        case _ => throw new MatchError("Error deserializing token: " + str)
+    val tokenRegex = "(.*?) +([^ ]*)".r
+    def write(token: Token): String = token.string + " " + token.offset
+    def read(pickled: String): Token = {
+      val (string, offset) = pickled match {
+        case tokenRegex(string, offset) => (string, offset.toInt)
+        case _ => throw new MatchError("Error parsing token: " + pickled)
       }
-      Token(tokenString, tokenOffset.toInt)
+      Token(string, offset)
     }
   }
 }

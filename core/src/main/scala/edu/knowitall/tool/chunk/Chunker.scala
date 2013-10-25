@@ -87,7 +87,7 @@ object Chunker {
     val postaggedTokens = Postagger.tokensFrom(postags, tokens)
     (chunks zip postaggedTokens).map { case (chunk, postaggedToken) => ChunkedToken(postaggedToken, chunk) }
   }
-  
+
   object stringFormat extends Format[Seq[ChunkedToken], String]{
     def write(chunkedTokens: Seq[ChunkedToken]): String = {
       val serializedChunkedTokens = for(chunkedTok <- chunkedTokens) yield {
@@ -104,9 +104,8 @@ object Chunker {
 abstract class ChunkerMain
 extends LineProcessor("chunker") {
   def chunker: Chunker
-  override def process(line: String) = chunker.chunk(line).map { case ChunkedToken(chunk, postag, string, offset) =>
-    string + "/" + postag + "/" + chunk
-  }.mkString(" ")
+  override def process(line: String) =
+    Chunker.stringFormat.write(chunker.chunk(line))
 
   override def init(config: Config) {
     // for timing purposes
