@@ -8,8 +8,8 @@ import edu.knowitall.common.Resource
 
 class OpenNlpChunker(
   val model: ChunkerModel,
-  postagger: postag.Postagger)
-extends Chunker(postagger) {
+  override val postagger: postag.Postagger)
+extends Chunker {
   def this(postagger: postag.Postagger) =
     this(OpenNlpChunker.loadDefaultModel(), postagger)
 

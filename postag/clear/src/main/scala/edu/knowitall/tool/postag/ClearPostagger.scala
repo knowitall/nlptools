@@ -12,7 +12,7 @@ import edu.knowitall.tool.tokenize.Tokenizer
 import edu.knowitall.tool.tokenize.ClearTokenizer
 import edu.knowitall.tool.tokenize.Token
 
-class ClearPostagger(override val tokenizer: Tokenizer = new ClearTokenizer) extends Postagger(tokenizer) {
+class ClearPostagger(override val tokenizer: Tokenizer = new ClearTokenizer) extends Postagger {
   val clearPosUrl = this.getClass.getResource("/knowitall/models/clear/ontonotes-en-pos-1.3.0.jar")
   require(clearPosUrl != null, "clear pos model not found")
   val clearPosTagger = using (clearPosUrl.openStream()) { input =>

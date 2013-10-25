@@ -9,8 +9,8 @@ import edu.knowitall.common.Resource
 
 class OpenNlpPostagger(
   val model: POSModel,
-  tokenizer: tokenize.Tokenizer)
-extends Postagger(tokenizer) {
+  override val tokenizer: tokenize.Tokenizer)
+extends Postagger {
 
   def this(tokenizer: tokenize.Tokenizer) =
     this(OpenNlpPostagger.loadDefaultModel(), tokenizer)

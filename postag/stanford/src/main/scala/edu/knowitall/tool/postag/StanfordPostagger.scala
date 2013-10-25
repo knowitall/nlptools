@@ -10,8 +10,8 @@ import tool.tokenize.Token
 
 class StanfordPostagger(
   val tagger: MaxentTagger,
-  tokenizer: tokenize.Tokenizer = new tokenize.StanfordTokenizer())
-extends Postagger(tokenizer) {
+  override val tokenizer: tokenize.Tokenizer = new tokenize.StanfordTokenizer())
+extends Postagger {
 
   def this() = this(StanfordPostagger.loadDefaultModel())
 

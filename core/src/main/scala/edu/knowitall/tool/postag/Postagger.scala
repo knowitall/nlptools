@@ -8,7 +8,9 @@ import scala.collection.immutable
 /** A POS tagger takes tokenized input and associates a part of speech
   * tag with each token.
   */
-abstract class Postagger(val tokenizer: tokenize.Tokenizer) {
+abstract class Postagger {
+  def tokenizer: tokenize.Tokenizer
+
   def apply(sentence: String) = postag(sentence)
 
   /* POS tag pre-tokenized text */

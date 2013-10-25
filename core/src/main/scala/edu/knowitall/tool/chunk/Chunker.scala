@@ -11,7 +11,9 @@ import edu.knowitall.tool.tokenize._
 /** A Chunker takes postagged text and adds a chunk tag, specifying
   * whether a noun or verb phrase is starting or continuing.
   */
-abstract class Chunker(val postagger: postag.Postagger) {
+abstract class Chunker {
+  def postagger: postag.Postagger
+
   def apply(sentence: String) = chunk(sentence)
 
   /** chunk postagged text */
