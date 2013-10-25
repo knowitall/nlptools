@@ -84,12 +84,12 @@ object NlpToolsBuild extends Build {
 
 
   // parent build definition
-  val buildSettings = Defaults.defaultSettings ++ Seq (
+  val buildSettings = Defaults.defaultSettings ++ assemblySettings ++ Seq (
     organization := buildOrganization,
     crossScalaVersions := buildScalaVersions,
     scalaVersion <<= (crossScalaVersions) { versions => versions.head },
     libraryDependencies ++= Seq(junit % "test", specs2 % "test",
-      dispatch % "provided", unfilteredFilter % "provided", unfilteredJetty % "provided"),
+      dispatch, unfilteredFilter, unfilteredJetty),
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     parallelExecution in ThisBuild := false,
     javaOptions += "-Xms512M",
@@ -107,6 +107,7 @@ object NlpToolsBuild extends Build {
     },
     homepage := Some(url("https://github.com/knowitall/nlptools")),
     mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) => {
+      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
       case _ => MergeStrategy.first
     }},
     pomExtra := (
@@ -120,7 +121,7 @@ object NlpToolsBuild extends Build {
        <developer>
           <name>Michael Schmitz</name>
         </developer>
-      </developers>)) ++ assemblySettings
+      </developers>))
 
   // Core
 
