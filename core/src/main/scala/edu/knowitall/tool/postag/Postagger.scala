@@ -88,3 +88,12 @@ abstract class PostaggerMain extends LineProcessor("postagger") {
   override def process(line: String) =
     Postagger.multilineStringFormat.write(tagger(line))
 }
+
+class RemotePostagger(val urlString: String) extends Postagger with Remote {
+  override def tokenizer = throw new UnsupportedOperationException()
+  override def postagTokenized(tokens: Seq[Token]) = throw new UnsupportedOperationException()
+  override def postag(sentence: String) = {
+    val response = post(sentence)
+    Postagger.multilineStringFormat.read(response)
+  }
+}
