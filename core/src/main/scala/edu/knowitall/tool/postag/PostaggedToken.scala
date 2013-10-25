@@ -98,7 +98,7 @@ object PostaggedToken {
   
   object stringFormat extends Format[PostaggedToken, String] {
     def write(postaggedToken: PostaggedToken): String = {
-      Iterator(Token.stringFormat.write(postaggedToken),postaggedToken.postag).mkString(" ").replaceAll("\\s+", " ")
+      Iterator(Token.stringFormat.write(postaggedToken),postaggedToken.postag).mkString(" ")
     }
     def read(str: String): PostaggedToken = {
       val postaggedTokenRegex = """(.*?) +([^ ]*)""".r
