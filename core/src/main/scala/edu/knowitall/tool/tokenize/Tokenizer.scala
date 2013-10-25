@@ -80,12 +80,9 @@ abstract class TokenizerMain extends LineProcessor("tokenizer") {
     Tokenizer.stringFormat.write(tokenizer.tokenize(sentence))
 }
 
-class RemoteTokenizer(urlString: String) extends Tokenizer {
-  import dispatch._
-  val svc = url(urlString)
-
+class RemoteTokenizer(val urlString: String) extends Tokenizer with Remote {
   def tokenize(sentence: String) = {
-    val response = Http(svc << sentence OK as.String).apply()
+    val response = post(sentence)
     Tokenizer.stringFormat.read(response)
   }
 }
