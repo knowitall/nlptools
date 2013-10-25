@@ -45,17 +45,6 @@ object TokenSpecTest extends Specification {
     Postagger.stringFormat.read(posTokensSerialization) === posTokens
   }
   
-  "deserializing Tokens from posTagger serialization works" in {
-    val posToken1 = PostaggedToken("DT","The",0)
-    val token1 = Token("The",0)
-    val posToken2 = PostaggedToken("JJ","big",4)
-    val token2 = Token("big",4)
-    val posTokens = Seq(posToken1,posToken2)
-    val tokens = Seq(token1,token2)
-    val posTokensSerialization = Postagger.stringFormat.write(posTokens)
-    Tokenizer.stringFormat.read(posTokensSerialization) === tokens
-  }
-  
   "chunker/chunkedToken serialization and deserialization work correctly" in {
     val chunkedToken1 = ChunkedToken("NP-DT","DT","The",0)
     val chunkedToken2 = ChunkedToken("NP-JJ","JJ","big",4)

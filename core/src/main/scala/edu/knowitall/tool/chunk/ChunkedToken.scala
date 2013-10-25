@@ -42,20 +42,18 @@ object ChunkedToken {
   
   object stringFormat extends Format[ChunkedToken, String] {
     def write(chunkedToken: ChunkedToken): String = {
-      Iterator(PostaggedToken.stringFormat.write(chunkedToken),chunkedToken.chunk).mkString(" ").replaceAll("\\s+", " ")
+      Iterator(PostaggedToken.stringFormat.write(chunkedToken),chunkedToken.chunk).mkString(" ")
     }
     def read(str: String): ChunkedToken = {
-      try{
-        val postaggedToken = PostaggedToken.stringFormat.read(str)
-        val info = str.split(" ")
-        val chunkName = info(2)
-        ChunkedToken(chunkName,postaggedToken.postag,postaggedToken.string,postaggedToken.offset)
+      val chunkedTokenRegex = """(.*?) +([^ ]*)""".r
+      try {
+        val chunkedTokenRegex(pickledPostaggedToken, chunk) = str
+        val postaggedToken = PostaggedToken.stringFormat.read(pickledPostaggedToken)
+        ChunkedToken(postaggedToken, chunk)
       }
-      catch{
-        case e: Exception => {
-          throw new MatchError("Error parsing ChunkedToken format token@offset postag chunkName for " +
-	        "the serialized string " + str)
-        }
+      catch {
+        case e: Exception => 
+          throw new MatchError("Error deserializing ChunkedToken: " + str)
       }
     }
   }

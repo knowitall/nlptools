@@ -101,16 +101,15 @@ object PostaggedToken {
       Iterator(Token.stringFormat.write(postaggedToken),postaggedToken.postag).mkString(" ").replaceAll("\\s+", " ")
     }
     def read(str: String): PostaggedToken = {
-      try{
-        val token = Token.stringFormat.read(str)
-        val info = str.split(" ")
-        val posTag = info(1)
-        PostaggedToken(posTag,token.string,token.offset)
+      val postaggedTokenRegex = """(.*?) +([^ ]*)""".r
+      try {
+        val postaggedTokenRegex(pickledToken, postag) = str
+        val token = Token.stringFormat.read(pickledToken)
+        PostaggedToken(token, postag)
       }
-      catch{
+      catch {
         case e: Exception => {
-          throw new MatchError("Error parsing PostaggedToken format token@offset postag for " +
-	        "the serialized string " + str)
+          throw new MatchError("Error deserializing PostaggedToken: " + str)
         }
       }
     }
