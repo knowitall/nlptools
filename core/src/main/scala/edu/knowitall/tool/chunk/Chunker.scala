@@ -88,24 +88,26 @@ object Chunker {
     (chunks zip postaggedTokens).map { case (chunk, postaggedToken) => ChunkedToken(postaggedToken, chunk) }
   }
 
-  object stringFormat extends Format[Seq[ChunkedToken], String]{
+  class stringFormat(val delim: String) extends Format[Seq[ChunkedToken], String]{
     def write(chunkedTokens: Seq[ChunkedToken]): String = {
       val serializedChunkedTokens = for(chunkedTok <- chunkedTokens) yield {
         ChunkedToken.stringFormat.write(chunkedTok)
       }
-      serializedChunkedTokens.mkString("\t")
+      serializedChunkedTokens.mkString(delim)
     }
     def read(str: String): Seq[ChunkedToken] = {
-      for (s <- str.split("\t")) yield ChunkedToken.stringFormat.read(s)
+      for (s <- str.split(delim)) yield ChunkedToken.stringFormat.read(s)
     }
   }
+  object stringFormat extends stringFormat("\t")
+  object multilineStringFormat extends stringFormat("\n")
 }
 
 abstract class ChunkerMain
 extends LineProcessor("chunker") {
   def chunker: Chunker
   override def process(line: String) =
-    Chunker.stringFormat.write(chunker.chunk(line))
+    Chunker.multilineStringFormat.write(chunker.chunk(line))
 
   override def init(config: Config) {
     // for timing purposes

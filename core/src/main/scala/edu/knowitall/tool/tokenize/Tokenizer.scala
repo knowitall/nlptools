@@ -63,26 +63,29 @@ object Tokenizer {
 
   private[this] val tokenRegex = """(.+)@(\d+)""".r
 
-  object stringFormat extends Format[Seq[Token],String]{
+  class stringFormat(val delim: String) extends Format[Seq[Token],String]{
     def write(tokens: Seq[Token]): String = {
       val serializedTokens = for(tok <- tokens) yield Token.stringFormat.write(tok)
-      serializedTokens.mkString("\t")
+      serializedTokens.mkString(delim)
     }
     def read(str: String): Seq[Token] = {
-      for (s <- str.split("\t")) yield Token.stringFormat.read(s)
+      for (s <- str.split(delim)) yield Token.stringFormat.read(s)
     }
   }
+
+  object stringFormat extends stringFormat("\t")
+  object multilineStringFormat extends stringFormat("\n")
 }
 
 abstract class TokenizerMain extends LineProcessor("tokenizer") {
   def tokenizer: Tokenizer
   override def process(sentence: String) =
-    Tokenizer.stringFormat.write(tokenizer.tokenize(sentence))
+    Tokenizer.multilineStringFormat.write(tokenizer.tokenize(sentence))
 }
 
 class RemoteTokenizer(val urlString: String) extends Tokenizer with Remote {
   def tokenize(sentence: String) = {
     val response = post(sentence)
-    Tokenizer.stringFormat.read(response)
+    Tokenizer.multilineStringFormat.read(response)
   }
 }
