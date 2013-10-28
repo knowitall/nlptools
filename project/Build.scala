@@ -4,7 +4,13 @@ import Keys._
 import sbtassembly.Plugin._
 import AssemblyKeys._
 
-import sbtrelease.ReleasePlugin._
+import sbtrelease._
+import ReleasePlugin._
+import ReleaseKeys._
+import ReleaseStateTransformations._
+import Utilities._
+
+import com.typesafe.sbt.SbtPgp.PgpKeys._
 
 object NlpToolsBuild extends Build {
   // settings
@@ -15,8 +21,7 @@ object NlpToolsBuild extends Build {
     crossScalaVersions := buildScalaVersions,
     publish := { },
     publishTo := Some("bogus" at "http://nowhere.com"),
-    publishLocal := { }
-  ).settings(releaseSettings: _*).aggregate(core,
+    publishLocal := { }).settings(ReleaseSettings.defaults: _*).aggregate(core,
       opennlpSentence, opennlpTokenize, opennlpPostag, opennlpChunk, opennlpParse,
       stanfordTokenize, stanfordPostag, stanfordParse, stanfordCoref, stanfordTyper,
       maltParse,
@@ -82,6 +87,11 @@ object NlpToolsBuild extends Build {
   val unfilteredJetty = "net.databinder" %% "unfiltered-jetty" % "0.7.0"
   val dispatch = "net.databinder.dispatch" %% "dispatch-core" % "0.11.0"
 
+  lazy val publishSignedAction = { st: State =>
+    val extracted = st.extract
+    val ref = extracted.get(thisProjectRef)
+    extracted.runAggregated(publishSigned in Global in ref, st)
+  }
 
   // parent build definition
   val buildSettings = Defaults.defaultSettings ++ assemblySettings ++ Seq (
@@ -110,6 +120,17 @@ object NlpToolsBuild extends Build {
       case PathList("META-INF", xs @ _*) => MergeStrategy.discard
       case _ => MergeStrategy.first
     }},
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      publishArtifacts.copy(action = publishSignedAction),
+      setNextVersion,
+      commitNextVersion
+    ),
     pomExtra := (
       <scm>
         <url>https://github.com/knowitall/nlptools</url>
