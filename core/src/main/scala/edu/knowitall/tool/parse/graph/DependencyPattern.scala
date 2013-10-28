@@ -99,6 +99,25 @@ object DependencyPattern {
     }
   }
 
+  class StringFormat(implicit lemmatizer: Stemmer) extends Format[DependencyPattern, String] {
+    private val parser = new Parser
+
+    def read(pickled: String): DependencyPattern = {
+      try {
+        parser.synchronized {
+          parser(pickled)(lemmatizer)
+        }
+      }
+      catch {
+        case e: Throwable => e.printStackTrace(); throw new DependencyPatternSerializationException(e.getMessage(), e)
+      }
+    }
+
+    def write(pattern: DependencyPattern): String = {
+      pattern.serialize
+    }
+  }
+
   /**
    * A more intuitive constructor that builds the pattern from a
    * bidirectional path though the tree.
@@ -107,19 +126,12 @@ object DependencyPattern {
     bipath.path.map(dedge => DependencyEdgeMatcher(dedge)),
     new DependencyNodeMatcher(bipath.path.head.start) :: bipath.path.map(dedge => new DependencyNodeMatcher(dedge.end)))
 
-  private val parser = new Parser
-  def deserialize(string: String)(implicit lemmatizer: Stemmer): DependencyPattern = {
-    try {
-      parser.synchronized {
-        parser(string)(lemmatizer)
-      }
-    }
-    catch {
-      case e: Throwable => e.printStackTrace(); throw new DependencyPatternSerializationException(e.getMessage(), e)
-    }
-  }
+  @deprecated("Use stringFormat instead.", "2.4.5")
+  def deserialize(string: String)(implicit lemmatizer: Stemmer): DependencyPattern = 
+    new StringFormat().read(string)
 
   def main(args: Array[String]) {
+    val patternFormat = new DependencyPattern.StringFormat()(IdentityStemmer.instance)
     def print(tab: Int, m: Matcher[_]): Unit = {
       println(" " * (tab * 2) + m)
       println(" " * (tab * 2) + m.getClass.getSimpleName)
@@ -131,7 +143,7 @@ object DependencyPattern {
       }
     }
 
-    val pattern = DependencyPattern.deserialize(args(0))(IdentityStemmer.instance)
+    val pattern = patternFormat.read(args(0))
     println(pattern)
     for (m <- pattern.matchers) {
       print(0, m)

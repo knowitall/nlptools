@@ -61,8 +61,8 @@ object Dependency {
     def read(pickled: String): Dependency = try {
       val Serialized(label, source, dest) = pickled
       new Dependency(
-        DependencyNode.deserialize(source),
-        DependencyNode.deserialize(dest),
+        DependencyNode.stringFormat.read(source),
+        DependencyNode.stringFormat.read(dest),
         label)
     } catch {
       case e: Throwable => throw new Dependency.SerializationException("could not deserialize dependency: " + pickled, e)
@@ -78,7 +78,7 @@ object Dependency {
 
 
 object Dependencies {
-  def serialize(deps: Iterable[Dependency]) = (deps.iterator).map(_.serialize).mkString("; ")
+  def serialize(deps: Iterable[Dependency]) = (deps.iterator).map(Dependency.stringFormat.write(_)).mkString("; ")
   def deserialize(string: String): SortedSet[Dependency] = string.split("""\s*(?:;|\n)\s*""").
       map(Dependency.stringFormat.read(_))(scala.collection.breakOut);
 

@@ -9,7 +9,7 @@ import edu.knowitall.tool.parse.graph.DependencyGraph
 @RunWith(classOf[JUnitRunner])
 object FrameSpecTest extends Specification {
   case class SerializationTest(val dgraphString: String, val frameString: String) {
-    def dgraph = DependencyGraph.deserialize(dgraphString)
+    def dgraph = DependencyGraph.stringFormat.read(dgraphString)
     def frame(dgraph: DependencyGraph) = Frame.deserialize(dgraph)(frameString)
   }
 

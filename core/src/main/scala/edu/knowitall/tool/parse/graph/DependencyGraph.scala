@@ -461,31 +461,6 @@ class DependencyGraph (
     mapPostags(simplifyPostag)
   }
 
-  def toCONLL(implicit stemmer: Stemmer) = {
-    this.nodes.toSeq.zipWithIndex.map { case (node, index) =>
-      val deps = this.dependencies.filter(_.dest == node)
-      require(deps.size <= 1, "multiple dependencies from node: " + node)
-      val (destIndex, label) = deps.headOption match {
-        case Some(dep) =>
-          require(dep.source.indices.size == 1, "destination is multiple indices: " + dep)
-          (dep.source.indices.head + 1, dep.label)
-        case None => (0, "root")
-      }
-
-      val cols = Iterable(
-          index + 1,
-          node.text,
-          node.lemma,
-          node.postag,
-          "_",
-          destIndex,
-          label
-      )
-
-      cols mkString "\t"
-    }.mkString("\n")
-  }
-
   def dot(title: String=this.text): String = {
     val buffer = new StringBuffer(4092)
     printDot(buffer, title)
@@ -632,36 +607,63 @@ object DependencyGraph {
   def deserialize(string: String) = {
     stringFormat.read(string)
   }
+  
+  class conllFormat(implicit lemmatizer: Stemmer) extends Format[DependencyGraph, String] {
+    def write(graph: DependencyGraph) = {
+      graph.nodes.toSeq.zipWithIndex.map { case (node, index) =>
+        val deps = graph.dependencies.filter(_.dest == node)
+        require(deps.size <= 1, "multiple dependencies from node: " + node)
+        val (destIndex, label) = deps.headOption match {
+          case Some(dep) =>
+            require(dep.source.indices.size == 1, "destination is multiple indices: " + dep)
+            (dep.source.indices.head + 1, dep.label)
+          case None => (0, "root")
+        }
 
-  // WARNING: this won't restore the actual sentence text because
-  // there is no offset information stored in CONLL format.
-  def fromCONLL(iterator: Iterator[String]): DependencyGraph = {
-    val section = iterator.takeWhile(!_.trim.isEmpty).toIndexedSeq
+        val cols = Iterable(
+            index + 1,
+            node.text,
+            node.lemma,
+            node.postag,
+            "_",
+            destIndex,
+            label
+        )
 
-    var offset = 0
-    val nodes = section.map { line =>
-      val Array(index, string, lemma, postag, _, _, _) = line.split("\t")
-      val node = new DependencyNode(string, postag, index.toInt - 1, offset)
-      offset += string.length + 1
-
-      node
+        cols mkString "\t"
+      }.mkString("\n")
     }
 
-    val deps = section.flatMap { line =>
-      val Array(index, string, lemma, postag, _, sourceIndex, edge) = line.split("\t")
-      if (sourceIndex.toInt > 0) {
-        Some(new Dependency(nodes(sourceIndex.toInt - 1), nodes(index.toInt - 1), edge))
+    // WARNING: this won't restore the actual sentence text because
+    // there is no offset information stored in CONLL format.
+    def read(iterator: Iterator[String]): DependencyGraph = {
+      val section = iterator.takeWhile(!_.trim.isEmpty).toIndexedSeq
+
+      var offset = 0
+      val nodes = section.map { line =>
+        val Array(index, string, lemma, postag, _, _, _) = line.split("\t")
+        val node = new DependencyNode(string, postag, index.toInt - 1, offset)
+        offset += string.length + 1
+
+        node
       }
-      else {
-        None
+
+      val deps = section.flatMap { line =>
+        val Array(index, string, lemma, postag, _, sourceIndex, edge) = line.split("\t")
+        if (sourceIndex.toInt > 0) {
+          Some(new Dependency(nodes(sourceIndex.toInt - 1), nodes(index.toInt - 1), edge))
+        }
+        else {
+          None
+        }
       }
+
+      new DependencyGraph(nodes, deps)
     }
 
-    new DependencyGraph(nodes, deps)
-  }
-
-  def fromCONLL(string: String): DependencyGraph = {
-    fromCONLL(string.split("\n").iterator)
+    def read(string: String): DependencyGraph = {
+      this.read(string.split("\n").iterator)
+    }
   }
 
   class SerializationException(message: String, cause: Throwable)

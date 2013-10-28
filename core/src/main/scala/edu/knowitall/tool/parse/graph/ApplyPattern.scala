@@ -17,9 +17,11 @@ object ApplyPattern {
       opt("s", "sentences", "<file>", "sentence file", { v: String => sentenceFilePath = v })
     }
 
+    val patternFormat = new DependencyPattern.StringFormat()(IdentityStemmer.instance)
+
     if (parser.parse(args)) {
       val patternSource = Source.fromFile(parser.patternFilePath)
-      val patterns = patternSource.getLines.map(DependencyPattern.deserialize(_)(IdentityStemmer.instance)).toList
+      val patterns = patternSource.getLines.map(patternFormat.read(_)).toList
       patternSource.close
 
       val sentenceSource = Source.fromFile(parser.sentenceFilePath)
@@ -28,7 +30,7 @@ object ApplyPattern {
           println("pattern: " + p)
           for (line <- sentenceSource.getLines) {
             val Array(text, deps) = line.split("\t")
-            val graph = DependencyGraph.deserialize(deps)
+            val graph = DependencyGraph.stringFormat.read(deps)
             for (m <- p(graph.graph)) {
               println(m)
             }
