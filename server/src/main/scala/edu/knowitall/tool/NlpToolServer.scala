@@ -37,22 +37,30 @@ object NlpToolServer extends App {
 
 case class Tool(path: String, port: Int) {
   val svc = host("localhost", port)
+
+  def withoutTrailingSlash = {
+    if (path endsWith "/") this.copy(path = path.dropRight(1))
+    else this
+  }
 }
 class NlpToolServer(port: Int, tools: Seq[Tool]) {
-  val toolMap = tools.groupBy(_.path).map { case (k, v) => (k, v.head) }
+  val toolMap = tools.map(_.withoutTrailingSlash).groupBy(_.path).map { case (k, v) => 
+    (k, v.head)
+  }
 
   import unfiltered.request._
   import unfiltered.response._
   import unfiltered.filter.Planify
 
   def run() {
+    def dropSlash(s: String) = if (s endsWith "/") s.dropRight(1) else s
     val plan = Planify {
       case GET(Path("/")) => ResponseString(tools.map(_.path).mkString("\n"))
-      case GET(Path(path)) if toolMap.contains(path) =>
-        val tool = toolMap(path)
+      case GET(Path(path)) if toolMap.contains(dropSlash(path)) =>
+        val tool = toolMap(dropSlash(path))
         ResponseString(Http(tool.svc OK as.String).apply())
-      case req @ POST(Path(path)) if toolMap.contains(path) =>
-        val tool = toolMap(path)
+      case req @ POST(Path(path)) if toolMap.contains(dropSlash(path)) =>
+        val tool = toolMap(dropSlash(path))
         val payload = Body.string(req)
         ResponseString(Http(tool.svc << payload OK as.String).apply())
       case req @ GET(Path(path)) => ResponseString("Tool not found in GET: " + path)
