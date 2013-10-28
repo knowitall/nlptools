@@ -76,21 +76,24 @@ class DependencyGraph (
         this.graph == that.graph
     case _ => false
   }
-  override def toString = serialize
+  override def toString = DependencyGraph.stringFormat.write(this)
 
   def interval = Interval.open(0, nodes.size)
 
   def length = nodes.size
 
+  @deprecated("Use StringFormat instead.", "2.4.5")
   def serialize = {
+    DependencyGraph.stringFormat.write(this)
+  }
+
+  def serializeSeq = {
     val extra = this.nodes filterNot (this.dependencies.flatMap(dep => Set(dep.source, dep.dest)).contains(_))
 
-    val pickledNodes = (extra.iterator).map("("+_.serialize+")").mkString("; ")
-    val pickledDeps = Dependencies.serialize(this.dependencies)
+    val pickledNodes = (extra.iterator).map(node => "("+DependencyNode.stringFormat.write(node)+")")
+    val pickledDeps = (this.dependencies.iterator).map(Dependency.stringFormat.write)
 
-    if (pickledNodes.isEmpty) pickledDeps
-    else if (pickledDeps.isEmpty) pickledNodes
-    else pickledNodes + "; " + pickledDeps
+    pickledNodes ++ pickledDeps
   }
 
   def map(f: DependencyNode=>DependencyNode) = {
@@ -581,31 +584,48 @@ class DependencyGraph (
 object DependencyGraph {
   val logger = LoggerFactory.getLogger(classOf[DependencyGraph])
 
-  def deserialize(string: String) = {
-    def rec(string: String, nodes: immutable.SortedSet[DependencyNode]): (immutable.SortedSet[DependencyNode], immutable.SortedSet[Dependency]) = {
-      // we're done, return the extra nodes and dependencies
-      if (string.isEmpty) (nodes, immutable.SortedSet.empty[Dependency])
-      // we found an extra node that needs to be deserialized
-      else if (string.charAt(0) == '(') {
-        val pickled = string.drop(1).takeWhile(_ != ')')
-        val node = DependencyNode.deserialize(pickled)
-        rec(string.drop(pickled.length + 2 /* 2 for the () */).dropWhile(c => c != ',' && c != ';').drop(1).dropWhile(_ == ' '), nodes + node)
-      }
-      // deserialize all the depencencies
-      else {
-        (nodes, Dependencies.deserialize(string))
-      }
+  class StringFormat(seperator: String) extends Format[DependencyGraph, String] {
+    def write(graph: DependencyGraph) = {
+      graph.serializeSeq.mkString(seperator)
     }
 
-    try {
-      val (nodes, deps) = rec(string.trim, immutable.SortedSet[DependencyNode]())
-      val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
-      new DependencyGraph(nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
+    def read(pickled: String) = {
+      val skipSeperator = ("\\s*" + seperator + "\\s*(.*)").r
+      def rec(string: String, nodes: immutable.SortedSet[DependencyNode]): (immutable.SortedSet[DependencyNode], immutable.SortedSet[Dependency]) = {
+        // we're done, return the extra nodes and dependencies
+        if (string.isEmpty) (nodes, immutable.SortedSet.empty[Dependency])
+        // we found an extra node that needs to be deserialized
+        else if (string.charAt(0) == '(') {
+          val pickled = string.drop(1).takeWhile(_ != ')')
+          val node = DependencyNode.stringFormat.read(pickled)
+
+          val nextPickled = string.drop(pickled.length + 2 /* 2 for the () */ ) match {
+            case skipSeperator(rest) => rest
+            case _ => "" // no seperator if we're at the end
+          }
+          rec(nextPickled, nodes + node)
+        } // deserialize all the depencencies
+        else {
+          (nodes, Dependencies.deserialize(string))
+        }
+      }
+
+      try {
+        val (nodes, deps) = rec(pickled.trim, immutable.SortedSet[DependencyNode]())
+        val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
+        new DependencyGraph(nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
+      } catch {
+        case e: Throwable => throw new DependencyGraph.SerializationException(
+          "Could not deserialize graph: " + pickled, e)
+      }
     }
-    catch {
-      case e: Throwable => throw new DependencyGraph.SerializationException(
-                    "Could not deserialize graph: " + string, e)
-    }
+  }
+  object stringFormat extends StringFormat("; ")
+  object multilineStringFormat extends StringFormat("\n")
+
+  @deprecated("Use StringFormat instead.", "2.4.5")
+  def deserialize(string: String) = {
+    stringFormat.read(string)
   }
 
   // WARNING: this won't restore the actual sentence text because

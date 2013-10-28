@@ -15,7 +15,7 @@ abstract class SrlMain extends LineProcessor("srl") {
   def srl: Srl
 
   override def process(line : String) = {
-    val dgraph = DependencyGraph.deserialize(line)
+    val dgraph = DependencyGraph.stringFormat.read(line)
     (srl(dgraph) map (_.serialize)).mkString("\n")
   }
 }

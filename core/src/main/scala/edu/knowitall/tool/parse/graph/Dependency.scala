@@ -1,5 +1,4 @@
-package edu.knowitall
-package tool
+package edu.knowitall.tool
 package parse
 package graph
 
@@ -46,22 +45,32 @@ with Ordered[Dependency] {
   }
 
   def lemmatize(stemmer: Stemmer) = new Dependency(source.lemmatize(stemmer), dest.lemmatize(stemmer), label)
-  def serialize = label + "(" + source.serialize + ", " + dest.serialize + ")"
+
+  @deprecated("Use stringFormat instead.", "2.4.5")
+  def serialize = Dependency.stringFormat.write(this)
 }
 
 object Dependency {
   val Serialized = new Regex("""(\p{Graph}+)\(\s*(\p{Graph}*?_\p{Graph}*?_\p{Graph}*?_\p{Graph}*?),\s*(\p{Graph}*?_\p{Graph}*?_\p{Graph}*?_\p{Graph}*?)\s*\)""")
-  def deserialize(string: String) = try {
-    val Serialized(label, source, dest) = string
-    new Dependency(
+
+  object stringFormat extends Format[Dependency, String] {
+    def write(dep: Dependency): String = {
+      dep.label + "(" + DependencyNode.stringFormat.write(dep.source) + ", " + DependencyNode.stringFormat.write(dep.dest) + ")"
+    }
+
+    def read(pickled: String): Dependency = try {
+      val Serialized(label, source, dest) = pickled
+      new Dependency(
         DependencyNode.deserialize(source),
         DependencyNode.deserialize(dest),
         label)
-  }
-  catch {
-    case e: Throwable => throw new Dependency.SerializationException("could not deserialize dependency: " + string, e)
+    } catch {
+      case e: Throwable => throw new Dependency.SerializationException("could not deserialize dependency: " + pickled, e)
+    }
   }
 
+  @deprecated("Use stringFormat instead.", "2.4.5")
+  def deserialize(string: String) = stringFormat.read(string)
 
   class SerializationException(message: String, cause: Throwable)
   extends RuntimeException(message, cause)
@@ -71,5 +80,6 @@ object Dependency {
 object Dependencies {
   def serialize(deps: Iterable[Dependency]) = (deps.iterator).map(_.serialize).mkString("; ")
   def deserialize(string: String): SortedSet[Dependency] = string.split("""\s*(?:;|\n)\s*""").
-      map(Dependency.deserialize(_))(scala.collection.breakOut);
+      map(Dependency.stringFormat.read(_))(scala.collection.breakOut);
+
 }

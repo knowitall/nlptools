@@ -65,14 +65,31 @@ class DependencyNode(string: String, postag: String, val tokenInterval: Interval
   def toFullString = this.text + "_" + this.postag + "_" + this.tokenInterval.mkString("_")
 
   def lemmatize(stemmer: Stemmer) = new DependencyNode(stemmer.lemmatize(text), postag, tokenInterval, offset)
-  override def serialize = {
-    if (tokenInterval.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple tokenInterval")
-    def clean(string: String): String = string.replaceAll(";", ":")
-    clean(text).replaceAll("[[_()][^\\p{Graph}]]", "") + "_" + clean(postag) + "_" + tokenInterval.start + "_" + offset;
+
+  @deprecated("Use StringFormat instead.", "2.4.5")
+  def serialize = {
+    DependencyNode.stringFormat.write(this)
   }
 }
 
 object DependencyNode {
+  object stringFormat extends Format[DependencyNode, String] {
+    def write(node: DependencyNode): String = {
+      if (node.tokenInterval.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple tokenInterval")
+      def clean(string: String): String = string.replaceAll(";", ":")
+      clean(node.text).replaceAll("[[_()][^\\p{Graph}]]", "") + "_" + clean(node.postag) + "_" + node.tokenInterval.start + "_" + node.offset;
+    }
+
+    def read(pickled: String): DependencyNode = {
+      val Array(text, postag, index, offset) = try (pickled.split("_"))
+      catch {
+        case e: Throwable => throw new SerializationException("could not deserialize dependency node: " + pickled, e);
+      }
+
+      new DependencyNode(text, postag, index.toInt, offset.toInt)
+    }
+  }
+
   implicit def merge(nodes: Traversable[DependencyNode]) = {
     if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
     val sorted = nodes.toList.sorted
@@ -123,13 +140,9 @@ object DependencyNode {
     new DependencyNode(text, postag, tokenInterval, sorted.iterator.map(_.offset).min)
   }
 
+  @deprecated("Use StringFormat instead.", "2.4.5")
   def deserialize(string: String) = {
-    val Array(text, postag, index, offset) = try (string.split("_"))
-    catch {
-      case e: Throwable => throw new SerializationException("could not deserialize dependency node: " + string, e);
-    }
-
-    new DependencyNode(text, postag, index.toInt, offset.toInt)
+    stringFormat.read(string)
   }
 
   class SerializationException(message: String, cause: Throwable)

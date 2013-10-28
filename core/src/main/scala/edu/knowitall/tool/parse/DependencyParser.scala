@@ -57,7 +57,8 @@ abstract class DependencyParserMain extends LineProcessor("parser") {
   }
 
   override def process(line : String) = {
-    dependencyParser.dependencyGraph(line).serialize
+    val parse = dependencyParser.dependencyGraph(line)
+    DependencyGraph.multilineStringFormat.write(parse)
   }
 }
 
@@ -66,7 +67,7 @@ class RemoteDependencyParser(val urlString: String) extends DependencyParser wit
 
   override def dependencyGraph(sentence: String) = {
     val response = post(sentence)
-    DependencyGraph.deserialize(response)
+    DependencyGraph.stringFormat.read(response)
   }
 
   /**
