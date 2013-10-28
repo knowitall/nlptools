@@ -76,16 +76,3 @@ object Tokenizer {
   object stringFormat extends stringFormat("\t")
   object multilineStringFormat extends stringFormat("\n")
 }
-
-abstract class TokenizerMain extends LineProcessor("tokenizer") {
-  def tokenizer: Tokenizer
-  override def process(sentence: String) =
-    Tokenizer.multilineStringFormat.write(tokenizer.tokenize(sentence))
-}
-
-class RemoteTokenizer(val urlString: String) extends Tokenizer with Remote {
-  def tokenize(sentence: String) = {
-    val response = post(sentence)
-    Tokenizer.multilineStringFormat.read(response)
-  }
-}

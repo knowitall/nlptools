@@ -10,22 +10,3 @@ import scala.concurrent.duration._
 abstract class Srl {
   def apply(graph: DependencyGraph): Seq[Frame]
 }
-
-abstract class SrlMain extends LineProcessor("srl") {
-  def srl: Srl
-
-  override def process(line : String) = {
-    val dgraph = DependencyGraph.stringFormat.read(line)
-    (srl(dgraph) map (_.serialize)).mkString("\n")
-  }
-}
-
-class RemoteSrl(val urlString: String) extends Srl with Remote {
-  def apply(dgraph: DependencyGraph) = {
-    val response = this.post(urlString)
-    if (response.isEmpty) Seq.empty
-    else {
-      response.split("\\n").map(Frame.deserialize(dgraph))(scala.collection.breakOut)
-    }
-  }
-}

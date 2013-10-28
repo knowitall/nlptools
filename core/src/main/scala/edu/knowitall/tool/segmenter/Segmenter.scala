@@ -1,5 +1,4 @@
-package edu.knowitall
-package tool
+package edu.knowitall.tool
 package segment
 
 import _root_.edu.knowitall.collection.immutable.Interval
@@ -36,22 +35,5 @@ object Segment {
       case segmentRegex(string, offset) => new Segment(string, offset.toInt)
       case s => throw new MatchError("Could not deserialize: " + s)
     }
-  }
-}
-
-abstract class SegmenterMain
-extends LineProcessor("segmenter") {
-  def sentencer: Segmenter
-  override def process(line: String) =
-    sentencer(line).mkString("\n")
-}
-
-class RemoteSegmenter(urlString: String) extends Segmenter {
-  import dispatch._
-  val svc = url(urlString)
-
-  def segment(sentence: String) = {
-    val response = Http(svc << sentence OK as.String).apply()
-    response.split("\\n").map(Segment.deserialize)(scala.collection.breakOut)
   }
 }

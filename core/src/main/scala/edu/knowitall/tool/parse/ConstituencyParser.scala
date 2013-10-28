@@ -71,11 +71,3 @@ abstract class ParseTree(val token: String, var index: Int, val children: Array[
 class ParseTreePhrase(token: String, index: Int, children: Array[ParseTree]) extends ParseTree(token, index, children) {}
 class ParseTreePostag(token: String, index: Int, children: Array[ParseTree]) extends ParseTree(token, index, children) {}
 class ParseTreeToken(token: String, index: Int, children: Array[ParseTree]) extends ParseTree(token, index, children) {}
-
-abstract class ConstituencyParserMain
-extends LineProcessor("parser") {
-  def constituencyParser: ConstituencyParser
-  override def process(line: String) = {
-    constituencyParser.parse(line).toString
-  }
-}

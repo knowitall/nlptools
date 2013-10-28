@@ -44,9 +44,3 @@ object Stemmer {
   def normalize(word: String) = Stemmer.remove.replaceAllIn(
     word.trim.toLowerCase, "")
 }
-
-abstract class StemmerMain
-extends LineProcessor("stemmer") {
-  def stemmer: Stemmer
-  override def process(line: String) = line.split("\\s+").map(stemmer.lemmatize(_)).mkString(" ")
-}

@@ -3,15 +3,20 @@ package tool
 package parse
 package graph
 
+import scala.Option.option2Iterable
 import scala.collection.immutable
+
 import org.slf4j.LoggerFactory
+
 import edu.knowitall.collection.immutable.Interval
-import edu.knowitall.collection.immutable.graph.Graph
-import edu.knowitall.collection.immutable.graph.Graph._
-import tool.postag.Postagger
-import edu.knowitall.collection.immutable.graph.{DownEdge, UpEdge}
 import edu.knowitall.collection.immutable.graph.Direction
+import edu.knowitall.collection.immutable.graph.DownEdge
+import edu.knowitall.collection.immutable.graph.Graph
+import edu.knowitall.collection.immutable.graph.Graph.Edge
+import edu.knowitall.collection.immutable.graph.UpEdge
+import edu.knowitall.tool.Format
 import edu.knowitall.tool.stem.Stemmer
+import edu.knowitall.tool.postag.Postagger
 
 /** A representation of a graph over dependencies.
   * This richer representation may include the text of the original sentence,

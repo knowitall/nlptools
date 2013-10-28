@@ -104,25 +104,3 @@ object Chunker {
   object stringFormat extends stringFormat("\t")
   object multilineStringFormat extends stringFormat("\n")
 }
-
-abstract class ChunkerMain
-extends LineProcessor("chunker") {
-  def chunker: Chunker
-  override def process(line: String) =
-    Chunker.multilineStringFormat.write(chunker.chunk(line))
-
-  override def init(config: Config) {
-    // for timing purposes
-    chunker.chunk("I want to initialize the chunker.")
-  }
-}
-
-class RemoteChunker(val urlString: String) extends Chunker with Remote {
-  override def postagger = throw new UnsupportedOperationException()
-  override def chunkPostagged(tokens: Seq[PostaggedToken]) = throw new UnsupportedOperationException()
-  override def chunkTokenized(tokens: Seq[Token]) = throw new UnsupportedOperationException()
-  override def chunk(sentence: String) = {
-    val response = post(sentence)
-    Chunker.multilineStringFormat.read(response)
-  }
-}
