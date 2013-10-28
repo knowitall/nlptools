@@ -608,8 +608,8 @@ object DependencyGraph {
     stringFormat.read(string)
   }
   
-  class conllFormat(implicit lemmatizer: Stemmer) extends Format[DependencyGraph, String] {
-    def write(graph: DependencyGraph) = {
+  class ConllFormat(implicit lemmatizer: Stemmer) extends Format[DependencyGraph, String] {
+    def write(graph: DependencyGraph): String = {
       graph.nodes.toSeq.zipWithIndex.map { case (node, index) =>
         val deps = graph.dependencies.filter(_.dest == node)
         require(deps.size <= 1, "multiple dependencies from node: " + node)

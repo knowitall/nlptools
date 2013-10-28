@@ -148,7 +148,7 @@ object DependencyGraphSpecTest extends Specification {
     }
     val pickled = "nsubj(wanted_VBD_1_2, I_PRP_0_0); xcomp(wanted_VBD_1_2, go_VB_3_12); aux(go_VB_3_12, to_TO_2_9); prep(go_VB_3_12, to_TO_4_15); pobj(to_TO_4_15, store_NN_6_22); det(store_NN_6_22, the_DT_5_18); prep(store_NN_6_22, for_IN_7_28); pobj(for_IN_7_28, cream_NN_10_41); det(cream_NN_10_41, some_DT_8_32); nn(cream_NN_10_41, ice_NN_9_37)"
     val graph = DependencyGraph.stringFormat.read(pickled)
-    graph.toCONLL must_==("""1	I	i	PRP	_	2	nsubj
+    new DependencyGraph.ConllFormat()(stemmer).write(graph) must_==("""1	I	i	PRP	_	2	nsubj
 2	wanted	wanted	VBD	_	0	root
 3	to	to	TO	_	4	aux
 4	go	go	VB	_	2	xcomp
@@ -167,8 +167,9 @@ object DependencyGraphSpecTest extends Specification {
     }
     val pickled = "nsubj(wanted_VBD_1_2, I_PRP_0_0); xcomp(wanted_VBD_1_2, go_VB_3_12); aux(go_VB_3_12, to_TO_2_9); prep(go_VB_3_12, to_TO_4_15); pobj(to_TO_4_15, store_NN_6_22); det(store_NN_6_22, the_DT_5_18); prep(store_NN_6_22, for_IN_7_28); pobj(for_IN_7_28, cream_NN_10_41); det(cream_NN_10_41, some_DT_8_32); nn(cream_NN_10_41, ice_NN_9_37)"
     val graph = DependencyGraph.stringFormat.read(pickled)
-    val newg = DependencyGraph.fromCONLL(graph.toCONLL)
-    DependencyGraph.fromCONLL(graph.toCONLL) must_== graph
+
+    val conllFormat = new DependencyGraph.ConllFormat()(stemmer)
+    conllFormat.read(conllFormat.write(graph)) must_== graph
   }
 
   testNNPOfCollapse
