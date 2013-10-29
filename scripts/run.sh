@@ -20,9 +20,8 @@ fi
 /bin/rm -f $STDOUT_FILE
 /bin/rm -f $STDERR_FILE
 
-CMD="/usr/bin/java $OPTS -jar '.$PATH/target/scala-2.10/nlptools-$NAME-assembly-2.4.4-SNAPSHOT.jar' --server --port $PORT > $STDOUT_FILE 2> $STDERR_FILE &"
+CMD="/usr/bin/java $OPTS -jar '.$PATH/target/scala-2.10/nlptools-$NAME-assembly-2.4.4-SNAPSHOT.jar' --server --port $PORT >> $STDOUT_FILE 2> $STDERR_FILE &"
 
-echo "$CMD"
 echo "$CMD" > $STDOUT_FILE
 eval "$CMD"
 
