@@ -12,7 +12,7 @@ class RemoteDependencyParser(val urlString: String) extends DependencyParser wit
 
   override def dependencyGraph(sentence: String) = {
     val response = post(sentence)
-    DependencyGraph.stringFormat.read(response)
+    DependencyGraph.multilineStringFormat.read(response)
   }
 
   /**
