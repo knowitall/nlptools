@@ -55,7 +55,19 @@ class NlpToolServer(port: Int, tools: Seq[Tool]) {
   def run() {
     def dropSlash(s: String) = if (s endsWith "/") s.dropRight(1) else s
     val plan = Planify {
-      case GET(Path("/")) => ResponseString(tools.map(_.path).mkString("\n"))
+      case GET(Path("/")) => 
+        ResponseString(
+          """<html><head><title>Http NlpTools Status</title></head><body>""" +
+          tools.map { tool =>
+            val path = dropSlash(tool.path)
+            val color = Http(tool.svc OK as.String).either() match {
+              case Left(_) => "darkred"
+              case Right(_) => "darkgreen"
+            }
+            s"<font color='$color'>$path</font> at :${tool.port}"
+          }.mkString("<br/>\n") +
+          """</html>"""
+        )
       case GET(Path(path)) if toolMap.contains(dropSlash(path)) =>
         val tool = toolMap(dropSlash(path))
         ResponseString(Http(tool.svc OK as.String).apply())
