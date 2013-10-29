@@ -44,7 +44,7 @@ case class Tool(path: String, port: Int) {
   }
 }
 class NlpToolServer(port: Int, tools: Seq[Tool]) {
-  val toolMap = tools.map(_.withoutTrailingSlash).groupBy(_.path).map { case (k, v) => 
+  val toolMap = tools.map(_.withoutTrailingSlash).groupBy(_.path).map { case (k, v) =>
     (k, v.head)
   }
 
@@ -55,7 +55,7 @@ class NlpToolServer(port: Int, tools: Seq[Tool]) {
   def run() {
     def dropSlash(s: String) = if (s endsWith "/") s.dropRight(1) else s
     val plan = Planify {
-      case GET(Path("/")) => 
+      case GET(Path("/")) =>
         ResponseString(
           """<html><head><title>Http NlpTools Status</title></head><body>""" +
           tools.map { tool =>
@@ -68,6 +68,8 @@ class NlpToolServer(port: Int, tools: Seq[Tool]) {
           }.mkString("<br/>\n") +
           """</html>"""
         )
+      case GET(Path("/plaintext")) =>
+        ResponseString(tools.map(_.path).mkString("\n"))
       case GET(Path(path)) if toolMap.contains(dropSlash(path)) =>
         val tool = toolMap(dropSlash(path))
         ResponseString(Http(tool.svc OK as.String).apply())
