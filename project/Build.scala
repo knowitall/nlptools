@@ -177,7 +177,7 @@ object NlpToolsBuild extends Build {
     base = file("sentence/opennlp"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
-      (libraryDependencies ++= Seq(opennlp, "edu.washington.cs.knowitall" % "opennlp-sent-models" % "1.5" )))
+      libraryDependencies ++= Seq(opennlp, "edu.washington.cs.knowitall" % "opennlp-sent-models" % "1.5" ))
   ) dependsOn(core)
 
   lazy val opennlpTokenize = Project(
