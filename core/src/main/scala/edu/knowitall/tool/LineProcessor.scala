@@ -18,7 +18,9 @@ abstract class LineProcessor(name: String) {
   val parser = new scopt.immutable.OptionParser[Config](name) {
     def options = Seq(
       flag("server", "run as a server") { (c: Config) => c.copy(server = true) },
-      intOpt("port", "which port to run the server on") { (port: Int, c: Config) => c.copy(port = port) },
+      intOpt("port", "which port to run the server on") { (port: Int, c: Config) =>
+        require(c.server, "--server must be set with --port"); c.copy(port = port)
+      },
       argOpt("input", "file to input from") { (path: String, c: Config) => c.copy(inputFile=Some(new File(path))) },
       argOpt("output", "file to output to") { (path: String, c: Config) => c.copy(outputFile=Some(new File(path))) },
       flag("parallel", "parallel execution") { (c: Config) => c.copy(parallel=true) }
