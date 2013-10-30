@@ -99,7 +99,7 @@ object NlpToolsBuild extends Build {
     crossScalaVersions := buildScalaVersions,
     scalaVersion <<= (crossScalaVersions) { versions => versions.head },
     libraryDependencies ++= Seq(junit % "test", specs2 % "test",
-      dispatch, unfilteredFilter, unfilteredJetty),
+      dispatch % "provided", unfilteredFilter % "provided", unfilteredJetty % "provided"),
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     parallelExecution in ThisBuild := false,
     javaOptions += "-Xms512M",
