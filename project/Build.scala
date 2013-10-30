@@ -15,7 +15,7 @@ import com.typesafe.sbt.SbtPgp.PgpKeys._
 object NlpToolsBuild extends Build {
   // settings
   val buildOrganization = "edu.washington.cs.knowitall.nlptools"
-  val buildScalaVersions = Seq("2.10.2", "2.9.3")
+  val buildScalaVersions = Seq("2.10.3")
 
   lazy val root = Project(id = "nlptools", base = file(".")).settings (
     crossScalaVersions := buildScalaVersions,
