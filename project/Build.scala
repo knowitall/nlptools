@@ -314,7 +314,7 @@ object NlpToolsBuild extends Build {
     base = file("tokenize/breeze"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
-      libraryDependencies ++= Seq(clear, breezeProcess))
+      libraryDependencies ++= Seq(clear, breezeProcess),
       mainClass in assembly := Some("edu.knowitall.tool.tokenize.SimpleEnglishTokenizer"))
   ) dependsOn(core)
 
