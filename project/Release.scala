@@ -1,9 +1,6 @@
 import sbt._
 import Keys._
 
-import sbtassembly.Plugin._
-import AssemblyKeys._
-
 import sbtrelease._
 import ReleasePlugin._
 import ReleaseKeys._
