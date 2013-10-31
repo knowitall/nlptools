@@ -57,15 +57,15 @@ extends Token(string, offset) {
   def isCardinalNumber = postagSymbol == Symbol("CD")
   def isSuperlativeAdverb = postagSymbol == Symbol("RBS")
   def isPunctuation = punctuation.contains(postag)
-  def isSubordinatingConjunction = postag == Symbol("IN")
-  def isCoordinatingConjunction = postag == Symbol("CC")
+  def isSubordinatingConjunction = postagSymbol == Symbol("IN")
+  def isCoordinatingConjunction = postagSymbol == Symbol("CC")
   def isConjunction = isSubordinatingConjunction || isCoordinatingConjunction
-  def isPreposition = postag == Symbol("IN")
+  def isPreposition = postagSymbol == Symbol("IN")
 
-  def isWhDeterminer = postag == Symbol("WDT")
-  def isWhPronoun = postag == Symbol("WP")
-  def isWhPossessivePronoun = postag == Symbol("WP$")
-  def isWhAdverb = postag == Symbol("WRB")
+  def isWhDeterminer = postagSymbol == Symbol("WDT")
+  def isWhPronoun = postagSymbol == Symbol("WP")
+  def isWhPossessivePronoun = postagSymbol == Symbol("WP$")
+  def isWhAdverb = postagSymbol == Symbol("WRB")
   def isWhWord = isWhDeterminer || isWhPronoun || isWhPossessivePronoun || isWhAdverb
 
   val punctuation = Set("#", "$", "''", "(", ")", ",", ".", ":", "``")
