@@ -315,7 +315,7 @@ object NlpToolsBuild extends Build {
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear, breezeProcess),
-      mainClass in assembly := Some("edu.knowitall.tool.tokenize.SimpleEnglishTokenizer"))
+      mainClass in assembly := Some("edu.knowitall.tool.tokenize.SimpleEnglishTokenizerMain"))
   ) dependsOn(core)
 
   lazy val breezeSentence = Project(
