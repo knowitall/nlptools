@@ -16,6 +16,7 @@ import edu.knowitall.collection.immutable.graph.Graph
 import edu.knowitall.collection.immutable.graph.Graph.Edge
 import edu.knowitall.collection.immutable.graph.UpEdge
 import edu.knowitall.tool.Format
+import edu.knowitall.tool.tokenize.Tokenizer
 import edu.knowitall.tool.stem.Stemmer
 import edu.knowitall.tool.postag.Postagger
 
@@ -58,20 +59,7 @@ class DependencyGraph (
       immutable.SortedSet[Dependency]() ++ dependencies)
 
   /** the text of the source sentence */
-  val text = {
-    def buildString(nodes: Iterable[DependencyNode]) = {
-      val builder = new StringBuilder()
-
-      for (node <- nodes) {
-        builder.append(" " * (node.offset - builder.length))
-        builder.append(node.text)
-      }
-
-      builder.toString()
-    }
-
-    buildString(nodes)
-  }
+  val text = Tokenizer.originalText(this.nodes)
 
   def canEqual(that: Any) = that.isInstanceOf[DependencyGraph]
   override def equals(that: Any) = that match {
