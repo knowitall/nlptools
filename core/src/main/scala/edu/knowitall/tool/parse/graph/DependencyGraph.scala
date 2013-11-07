@@ -5,6 +5,7 @@ package graph
 
 import scala.Option.option2Iterable
 import scala.collection.immutable
+import scala.util.{Try, Success, Failure}
 
 import org.slf4j.LoggerFactory
 
@@ -569,35 +570,29 @@ object DependencyGraph {
       graph.serializeSeq.mkString(seperator)
     }
 
+    val nodeRegex = "\\s*\\((.*)\\)\\s*".r
     def read(pickled: String) = {
-      val skipSeperator = ("\\s*" + seperator + "\\s*(.*)").r
-      def rec(string: String, nodes: immutable.SortedSet[DependencyNode]): (immutable.SortedSet[DependencyNode], immutable.SortedSet[Dependency]) = {
-        // we're done, return the extra nodes and dependencies
-        if (string.isEmpty) (nodes, immutable.SortedSet.empty[Dependency])
-        // we found an extra node that needs to be deserialized
-        else if (string.charAt(0) == '(') {
-          val pickled = string.drop(1).takeWhile(_ != ')')
-          val node = DependencyNode.stringFormat.read(pickled)
+      val skipSeperator = ("(?m)\\s*" + seperator + "\\s*")
+      val parts = pickled.split(skipSeperator)
 
-          val nextPickled = string.drop(pickled.length + 2 /* 2 for the () */ ) match {
-            case skipSeperator(rest) => rest
-            case _ => "" // no seperator if we're at the end
+      var nodes: Seq[DependencyNode] = Vector.empty[DependencyNode]
+      var deps: Seq[Dependency] = Vector.empty[Dependency]
+      for (part <- parts) {
+        try {
+          part match {
+            // it's a loose dependency node
+            case nodeRegex(node) => nodes :+= DependencyNode.stringFormat.read(node)
+            // it's a regular dependency
+            case _ => deps :+= Dependency.stringFormat.read(part)
           }
-          rec(nextPickled, nodes + node)
-        } // deserialize all the depencencies
-        else {
-          (nodes, Dependencies.deserialize(string))
+        }
+        catch {
+          case e: Exception => throw new SerializationException(s"Could not deserialize `$part` from graph: $pickled", e)
         }
       }
 
-      try {
-        val (nodes, deps) = rec(pickled.trim, immutable.SortedSet[DependencyNode]())
-        val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
-        new DependencyGraph(nodes ++ depNodes, deps, new Graph[DependencyNode](depNodes, deps))
-      } catch {
-        case e: Throwable => throw new DependencyGraph.SerializationException(
-          "Could not deserialize graph: " + pickled, e)
-      }
+      val depNodes = deps.flatMap(dep => List(dep.source, dep.dest)).toSet
+      new DependencyGraph(nodes ++ depNodes, deps)
     }
   }
   object stringFormat extends StringFormat("; ")
