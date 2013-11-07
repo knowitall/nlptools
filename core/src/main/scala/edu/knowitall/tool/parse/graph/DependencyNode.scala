@@ -77,7 +77,8 @@ object DependencyNode {
     def write(node: DependencyNode): String = {
       if (node.tokenInterval.length > 1) throw new IllegalStateException("cannot serialize node spanning multiple tokenInterval")
       def clean(string: String): String = string.replaceAll(";", ":")
-      clean(node.text).replaceAll("[[_()][^\\p{Graph}]]", "") + "_" + clean(node.postag) + "_" + node.tokenInterval.start + "_" + node.offset;
+      val cleanText = clean(node.text).replaceAll("[[_()][^\\p{Graph}]]", "") 
+      Iterator(cleanText, clean(node.postag), node.tokenInterval.start, node.offset).mkString("_")
     }
 
     def read(pickled: String): DependencyNode = {
