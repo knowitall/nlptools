@@ -86,12 +86,12 @@ object DependencyGraphSpecTest extends Specification {
   
   "serializes ok without dependencies" in {
     val pickled = "(over_IN_2_0)"
-    DependencyGraph.stringFormat.read(pickled).serialize must_== pickled
+    DependencyGraph.stringFormat.reverseRoundtrip(pickled) must_== pickled
   }
   
   "serializes ok without dependencies" in {
     val pickled = "(over_IN_2_0); (through_IN_3_0)"
-    DependencyGraph.stringFormat.read(pickled).serialize must_== pickled
+    DependencyGraph.stringFormat.reverseRoundtrip(pickled) must_== pickled
   }
   
   "deserializes fails on garbage" in {
@@ -140,7 +140,7 @@ object DependencyGraphSpecTest extends Specification {
     val graph = DependencyGraph.stringFormat.read(pickled)
     val graphOld = DependencyGraph.stringFormat.read(pickledOld)
     
-    graph.serialize must_== pickled
+    DependencyGraph.stringFormat.write(graph) must_== pickled
     graph.graph must_== graphOld.graph
   }
   

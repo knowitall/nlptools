@@ -11,5 +11,8 @@ trait Reader[F, T] {
   def readTry(from: F): Try[T] = Try(this.read(from))
 }
 
-trait Format[F, T]
-extends Writer[F, T] with Reader[T, F]
+trait Format[F, T] 
+extends Writer[F, T] with Reader[T, F] {
+  def roundtrip(f: F) = read(write(f))
+  def reverseRoundtrip(t: T) = write(read(t))
+}
