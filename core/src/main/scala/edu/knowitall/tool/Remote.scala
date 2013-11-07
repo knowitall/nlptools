@@ -10,7 +10,7 @@ import dispatch.url
 
 trait Remote {
   def urlString: String
-  def timeout = 5 minutes
+  def timeout = 5.minutes
 
   val svc = url(urlString)
 
