@@ -45,9 +45,10 @@ object Relation {
     Relation(node, cleanName, sense)
   }
 
+  private val splitLabelRegex = "(.*)\\.(.*)".r
   def deserialize(dgraph: DependencyGraph)(pickled: String) = {
-    val (label, sense) = pickled.split("\\.") match {
-      case Array(label, sense) => (label, sense)
+    val (label, sense) = pickled match {
+      case splitLabelRegex(label, sense) => (label, sense)
       case _ => throw new MatchError("Could not deserialize relation: " + pickled)
     }
     val (name, nodeIndex) = label.split("_") match {

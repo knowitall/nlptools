@@ -28,8 +28,8 @@ object NlpToolServer extends App {
     val source = io.Source.fromFile(configFile)
     try {
       source.getLines().map { line =>
-        val Array(path, port, jar) = line.split("\t")
-        Tool(path, port.toInt)
+        val Array(path, url, jar) = line.split("\t")
+        Tool(path, url)
       }.toList
     }
     finally {
@@ -38,8 +38,8 @@ object NlpToolServer extends App {
   }
 }
 
-case class Tool(path: String, port: Int) {
-  val svc = host("localhost", port)
+case class Tool(path: String, url: String) {
+  val svc = dispatch.url(url)
 
   def withoutTrailingSlash = {
     if (path endsWith "/") this.copy(path = path.dropRight(1))
@@ -68,7 +68,7 @@ class NlpToolServer(config: NlpToolServer.Config, tools: Seq[Tool]) {
               case Left(_) => "darkred"
               case Right(_) => "darkgreen"
             }
-            s"<font color='$color'>$path</font> at :${tool.port}"
+            s"<font color='$color'>$path</font> at <a href='${tool.url}'>${tool.url}</a>"
           }.mkString("<br/>\n") +
           """</html>"""
         )
