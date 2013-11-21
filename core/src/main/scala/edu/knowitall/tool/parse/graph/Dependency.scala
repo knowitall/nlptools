@@ -30,28 +30,18 @@ with Ordered[Dependency] {
   // extend Ordered
   def compare(that: Dependency) = {
     def tuplize(dep: Dependency) =
-      (dep.source.indices.start, dep.dest.indices.start, dep.label)
+      (dep.source.id, dep.dest.id, dep.label)
     implicitly[Ordering[(Int, Int, String)]].compare(tuplize(this), tuplize(that))
   }
 
   def nodes = Set(source, dest)
-  def otherNode(node: DependencyNode) =
-    if (source == dest) throw new IllegalStateException("source == dest")
-    else if (source == node) dest
-    else source
-
-  def mapNodes(f: DependencyNode=>DependencyNode) = {
-    new Dependency(f(source), f(dest), label)
-  }
-
-  def lemmatize(stemmer: Stemmer) = new Dependency(source.lemmatize(stemmer), dest.lemmatize(stemmer), label)
 
   @deprecated("Use stringFormat instead.", "2.4.5")
   def serialize = Dependency.stringFormat.write(this)
 }
 
 object Dependency {
-  val Serialized = new Regex("""(\p{Graph}+)\(\s*(\p{Graph}*?_\p{Graph}*?_\p{Graph}*?_\p{Graph}*?),\s*(\p{Graph}*?_\p{Graph}*?_\p{Graph}*?_\p{Graph}*?)\s*\)""")
+  val Serialized = new Regex("""(\p{Graph}+)\(\s*(\p{Graph}*?-\d\d*?,\s*(\p{Graph}*?_\d\d*)\s*\)""")
 
   object stringFormat extends Format[Dependency, String] {
     def write(dep: Dependency): String = {
@@ -81,5 +71,4 @@ object Dependencies {
   def serialize(deps: Iterable[Dependency]) = (deps.iterator).map(Dependency.stringFormat.write(_)).mkString("; ")
   def deserialize(string: String): SortedSet[Dependency] = string.split("""\s*(?:;|\n)\s*""").
       map(Dependency.stringFormat.read(_))(scala.collection.breakOut);
-
 }

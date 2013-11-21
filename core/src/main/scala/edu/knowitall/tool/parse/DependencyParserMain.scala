@@ -12,7 +12,7 @@ abstract class DependencyParserMain extends LineProcessor("parser") {
   }
 
   override def process(line : String) = {
-    val parse = dependencyParser.dependencyGraph(line)
-    DependencyGraph.multilineStringFormat.write(parse)
+    val graph = dependencyParser.dependencyGraph(line)
+    DependencyGraph.multilineStringFormat.write(graph)
   }
 }

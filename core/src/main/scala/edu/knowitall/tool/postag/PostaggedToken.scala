@@ -96,7 +96,7 @@ object PostaggedToken {
     }
   }
 
-  object stringFormat extends Format[PostaggedToken, String] {
+  implicit object stringFormat extends Format[PostaggedToken, String] {
     def write(postaggedToken: PostaggedToken): String = {
       Iterator(Token.stringFormat.write(postaggedToken),postaggedToken.postag).mkString(" ")
     }

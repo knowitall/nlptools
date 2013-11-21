@@ -28,7 +28,7 @@ trait DependencyParser {
    * creating a DependencyGraph from an `Iterable[Dependency]` because it
    * will have the source text.
    */
-  def dependencyGraph(string: String): DependencyGraph = {
+  def dependencyGraph(string: String): (Seq[PostaggedToken], DependencyGraph) = {
     val postaggedTokens = postagger.postag(string)
     dependencyGraphPostagged(postaggedTokens)
   }

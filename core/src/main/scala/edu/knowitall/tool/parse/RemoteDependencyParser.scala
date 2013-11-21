@@ -9,10 +9,12 @@ import edu.knowitall.tool.chunk._
 
 class RemoteDependencyParser(val urlString: String) extends DependencyParser with Remote {
   override def postagger = throw new UnsupportedOperationException()
+  
+  val dgraphFormat = DependencyGraph.multilineStringFormat
 
   override def dependencyGraph(sentence: String) = {
     val response = post(sentence)
-    DependencyGraph.multilineStringFormat.read(response)
+    dgraphFormat.read(response)
   }
 
   /**
