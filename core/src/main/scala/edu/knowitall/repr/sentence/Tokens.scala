@@ -5,7 +5,7 @@ import edu.knowitall.tool.postag._
 import edu.knowitall.tool.chunk._
 import edu.knowitall.tool.stem._
 
-trait TokenizedSupertrait {
+trait TokensSupertrait {
   this: Sentence =>
   type token <: Token
 
@@ -14,12 +14,12 @@ trait TokenizedSupertrait {
   def strings: Seq[String] = tokens.map(_.string)
 }
 
-trait Tokenized extends TokenizedSupertrait {
+trait Tokens extends TokensSupertrait {
   this: Sentence =>
   type token = Token
 }
 
-trait Tokenizer extends Tokenized {
+trait Tokenizer extends Tokens {
   this: Sentence =>
 
   def tokenizer: edu.knowitall.tool.tokenize.Tokenizer

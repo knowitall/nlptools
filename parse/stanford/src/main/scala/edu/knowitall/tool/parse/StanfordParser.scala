@@ -24,12 +24,6 @@ import edu.knowitall.tool.parse.BaseStanfordParser.CollapseType
  * Stanford's CC-compressed algorithm on the graph. */
 abstract class BaseStanfordParser extends DependencyParser {
 
-  @deprecated("Use dependencyGraph(string, collapse).dependencies", "2.4.3")
-  def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] = dependencyGraph(string, collapse).dependencies
-
-  @deprecated("Use dependencyGraph(string).dependencies", "2.4.3")
-  override def dependencies(string: String): Iterable[Dependency] = dependencies(string, BaseStanfordParser.None)
-
   override def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     dependencyGraphPostagged(tokens, BaseStanfordParser.None)
   }
@@ -72,11 +66,6 @@ object StanfordParserMain extends DependencyParserMain {
 class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends BaseStanfordParser with ConstituencyParser {
   def this(postagger: Postagger = new StanfordPostagger()) = this(LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"), postagger)
 
-  override def dependencies(string: String, collapse: CollapseType): Iterable[Dependency] = {
-    val tokens = postagger.postag(string)
-    StanfordParser.dependencyHelper(lp.parse(postagToStanfordRepr(tokens)), collapse)._2
-  }
-
   private def postagToStanfordRepr(tokens: Seq[PostaggedToken]): java.util.List[TaggedWord] = {
     val words = new java.util.ArrayList[TaggedWord](tokens.size)
 
@@ -92,7 +81,7 @@ class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends Ba
    
   override def dependencyGraphPostagged(tokens: Seq[PostaggedToken], collapse: CollapseType) = {
     val (nodes, deps) = StanfordParser.dependencyHelper(lp.parse(postagToStanfordRepr(tokens)), collapse)
-    new DependencyGraph(nodes.toList.sortBy(_.indices), deps)
+    DependencyGraph.create(deps)
   }
 
   override def parse(string: String) = {
@@ -124,7 +113,7 @@ object StanfordParser {
 
   def dependencyHelper(tree: Tree, collapser: CollapseType): (Iterable[DependencyNode], Iterable[Dependency]) = {
     val nodes = tree.taggedYield().view.zipWithIndex.map {
-      case (tw, i) => new DependencyNode(tw.word, tw.tag, i, tw.beginPosition)
+      case (tw, i) => new DependencyNode(i, tw.word)
     }
 
     (nodes, convertDependencies(nodes, collapser.collapse(gsf.newGrammaticalStructure(tree))))
@@ -136,7 +125,7 @@ object StanfordParser {
 
   def convertDependencies(nodes: Iterable[DependencyNode], dep: Iterable[edu.stanford.nlp.trees.TypedDependency]) = {
     // filter out the dependency from the root
-    dep.filter(_.gov.index > 0).map(d => convertDependency(nodes.map(node => node.indices.head -> node).toMap, d))
+    dep.filter(_.gov.index > 0).map(d => convertDependency(nodes.map(node => node.id -> node).toMap, d))
   }
 }
 

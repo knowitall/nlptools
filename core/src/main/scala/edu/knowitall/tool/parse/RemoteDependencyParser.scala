@@ -7,14 +7,13 @@ import edu.knowitall.tool.tokenize._
 import edu.knowitall.tool.postag._
 import edu.knowitall.tool.chunk._
 
+/* TODO
 class RemoteDependencyParser(val urlString: String) extends DependencyParser with Remote {
   override def postagger = throw new UnsupportedOperationException()
   
-  val dgraphFormat = DependencyGraph.multilineStringFormat
-
   override def dependencyGraph(sentence: String) = {
     val response = post(sentence)
-    dgraphFormat.read(response)
+    DependencyGraph.multilineStringFormat.read(response)
   }
 
   /**
@@ -31,3 +30,4 @@ class RemoteDependencyParser(val urlString: String) extends DependencyParser wit
     throw new UnsupportedOperationException()
   }
 }
+*/

@@ -5,14 +5,14 @@ import edu.knowitall.tool.postag.PostaggedToken
 import edu.knowitall.tool.parse._
 import edu.knowitall.tool.parse.graph._
 
-trait Parsed {
+trait Dependencies {
   this: Sentence =>
 
   def dgraph: DependencyGraph
 }
 
-trait Parser extends Parsed {
-  this: Sentence with Postagged =>
+trait Parser extends Dependencies {
+  this: Sentence with Postags =>
 
   def parser: DependencyParser
 

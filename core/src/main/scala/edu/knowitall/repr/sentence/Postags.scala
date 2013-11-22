@@ -2,7 +2,7 @@ package edu.knowitall.repr.sentence
 
 import edu.knowitall.tool.postag._
 
-trait PostaggedSupertrait extends TokenizedSupertrait {
+trait PostagsSupertrait extends TokensSupertrait {
   this: Sentence =>
 
   type token <: PostaggedToken
@@ -10,13 +10,13 @@ trait PostaggedSupertrait extends TokenizedSupertrait {
   def postags: Seq[String] = tokens.map(_.postag)
 }
 
-trait Postagged extends PostaggedSupertrait {
+trait Postags extends PostagsSupertrait {
   this: Sentence =>
 
   type token = PostaggedToken
 }
 
-trait Postagger extends Postagged {
+trait Postagger extends Postags {
   this: Sentence =>
   def postagger: edu.knowitall.tool.postag.Postagger
 

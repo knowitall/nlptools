@@ -30,20 +30,14 @@ trait DependencyParser {
    */
   def dependencyGraph(string: String): (Seq[PostaggedToken], DependencyGraph) = {
     val postaggedTokens = postagger.postag(string)
-    dependencyGraphPostagged(postaggedTokens)
+    (postaggedTokens, dependencyGraphPostagged(postaggedTokens))
   }
 
   /**
    * Create a graph of the dependencies from Tokens.
    */
-  def dependencyGraphTokenized(tokens: Seq[Token]) = {
+  def dependencyGraphTokenized(tokens: Seq[Token]): (Seq[PostaggedToken], DependencyGraph) = {
     val postaggedTokens = postagger.postagTokenized(tokens)
-    dependencyGraphPostagged(postaggedTokens)
+    (postaggedTokens, dependencyGraphPostagged(postaggedTokens))
   }
-
-  @deprecated("Use dependencyGraph(string).dependencies", "2.4.3")
-  def dependencies(string: String): Iterable[Dependency] = {
-    this.dependencyGraph(string).dependencies
-  }
-
 }
