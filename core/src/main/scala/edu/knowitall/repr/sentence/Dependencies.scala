@@ -57,7 +57,7 @@ object Dependencies {
 
       val nodeStyle = filledNodes
       val edgeStyle = (specialEdges zip Stream.continually("style=filled")) ++
-        ((sentence.dgraph.graph.edges -- specialEdges) zip Stream.continually("style=dotted,color=gray"))
+        ((sentence.dgraph.edges -- specialEdges) zip Stream.continually("style=dotted,color=gray"))
 
       printDot(sentence, writer, title, nodeStyle.toMap, edgeStyle.toMap)
     }
@@ -69,7 +69,7 @@ object Dependencies {
         val token = sentence.tokens(node.id)
         val text = escape(token.string)
         val postag = escape(token.postag)
-        if (sentence.dgraph.graph.vertices.filter(_.string.equals(text)).size > 1)
+        if (sentence.dgraph.vertices.filter(_.string.equals(text)).size > 1)
           text + "_" + postag + "_" + node.id
         else
           text + "_" + postag
@@ -86,7 +86,7 @@ object Dependencies {
       writer.append(indent * 2 + "label=\"" + cleanedTitle + "\"\n")
       writer.append(indent + "]\n\n")
 
-      for (node <- sentence.dgraph.graph.vertices.toSeq.sorted) {
+      for (node <- sentence.dgraph.vertices.toSeq.sorted) {
         var parts: List[String] = List()
         if (nodeStyle contains node) {
           parts ::= nodeStyle(node)
@@ -102,7 +102,7 @@ object Dependencies {
       }
 
       writer.append("\n")
-      for (dep <- sentence.dgraph.graph.edges.toSeq.sortBy(edge => (edge.source.id, edge.dest.id, edge.label))) {
+      for (dep <- sentence.dgraph.edges.toSeq.sortBy(edge => (edge.source.id, edge.dest.id, edge.label))) {
         val color = dep.label match {
           case "neg" => Some("red")
           case "amod" | "advmod" => Some("lightblue")

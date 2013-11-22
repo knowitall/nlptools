@@ -23,17 +23,14 @@ import edu.knowitall.tool.postag.PostaggedToken
 /** A representation of a graph over dependencies.
   * This richer representation may include the text of the original sentence,
   * the original nodes (before collapsing), and the original dependencies. */
-case class DependencyGraph (
-    /** the `Dependency`s from the parser */
-    val dependencies: Seq[Dependency],
-    /** a graph representation dependencies */
-    val graph: Graph[DependencyNode]
-  ) {
+class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]])
+  extends Graph[DependencyNode](vertices, edges) {
 
-  require(dependencies != null)
-  require(graph != null)
+  def this(edges: Iterable[Edge[DependencyNode]]) =
+    this(edges.flatMap(_.vertices).toSet, edges.toSet)
   
-  val nodes = dependencies.flatMap(_.nodes)
+  val nodes = vertices
+  val dependencies = edges
 
   override def toString = DependencyGraph.multilineStringFormat.write(this)
 
@@ -235,25 +232,24 @@ case class DependencyGraph (
         edgifyPrepositions(
             distributeConjunctions(
                 collapseJunctions(
-                    collapseMultiwordPrepositions(this.graph))))
+                    collapseMultiwordPrepositions(this))))
 
-    // TODO: sync dependencies with the graph
-    new DependencyGraph(this.dependencies, graph)
+    new DependencyGraph(graph.vertices, graph.edges)
   }
 
   /** Simplify xsubj and nsubj to just subj. */
   def collapseXNsubj = {
-    val edges = graph.edges.map { dep =>
+    val edges = this.edges.map { dep =>
       if ((dep.label equals "xsubj") || (dep.label equals "nsubj"))
         new Edge[DependencyNode](dep.source, dep.dest, "subj")
       else dep
     }
-    new DependencyGraph(this.dependencies, new Graph[DependencyNode](edges))
+    new DependencyGraph(edges)
   }
 
   def joined: DependencyGraph.JoinedDependencyGraph = {
-    val joinedNodes = this.graph.vertices map JoinedDependencyNode.from
-    val joinedEdges = this.graph.edges map { edge =>
+    val joinedNodes = this.vertices map JoinedDependencyNode.from
+    val joinedEdges = this.edges map { edge =>
       edge.copy(
           source=JoinedDependencyNode.from(edge.source), 
           dest=JoinedDependencyNode.from(edge.dest))
@@ -269,7 +265,7 @@ object DependencyGraph {
   type JoinedDependencyGraph = Graph[JoinedDependencyNode]
   
   def create[T <: Token](dependencies: Iterable[Dependency]): DependencyGraph = {
-    new DependencyGraph(dependencies.toSeq, new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
+    new DependencyGraph(dependencies)
   }
   
   object multilineStringFormat extends StringFormat("\n")
