@@ -4,11 +4,17 @@ import edu.knowitall.collection.immutable.graph.Graph
 import edu.knowitall.collection.immutable.graph.Graph.Edge
 import edu.knowitall.tool.postag.PostaggedToken
 
-object JoinedDependencyGraph {
-  // TODO: Create collapsed representation
+class JoinedDependencyGraph(vertices: Set[JoinedDependencyNode], edges: Set[Edge[JoinedDependencyNode]])
+  extends Graph[JoinedDependencyNode](vertices, edges) {
+
+  def this(edges: Iterable[Edge[JoinedDependencyNode]]) =
+    this(edges.flatMap(_.vertices).toSet, edges.toSet)
   
+  val nodes = vertices
+  val dependencies = edges
+
   /** Join NNPs connected by "of" into a single node. */
-  def collapseNNPOf(graph: JoinedDependencyGraph, tokens: Seq[PostaggedToken]) = {
+  def collapseNNPOf(tokens: Seq[PostaggedToken]) = {
     def nodeTokens(node: JoinedDependencyNode) = {
       node.ids map tokens.apply
     }
@@ -32,7 +38,7 @@ object JoinedDependencyGraph {
       new JoinedDependencyNode(ids, strings)
     }
 
-    graph.collapse(pred(_))(merge)
+    this.collapse(pred(_))(merge)
   }
 
   /**
@@ -41,7 +47,7 @@ object JoinedDependencyGraph {
     * all vertices correspond to adjacent words in the
     * source sentence.
     */
-  def adjacentComponents(graph: JoinedDependencyGraph)(pred: Edge[JoinedDependencyNode]=>Boolean): Set[Set[JoinedDependencyNode]] = {
+  def adjacentComponents(pred: Edge[JoinedDependencyNode]=>Boolean): Set[Set[JoinedDependencyNode]] = {
     def splitByAdjacency(nodes: List[JoinedDependencyNode]): List[List[JoinedDependencyNode]] = {
       def rec(nodes: List[JoinedDependencyNode], result: List[JoinedDependencyNode]): List[List[JoinedDependencyNode]] = nodes match {
         case x :: Nil => (x :: result) :: Nil
@@ -52,8 +58,8 @@ object JoinedDependencyGraph {
       rec(nodes, Nil)
     }
 
-    val groups: Set[Set[JoinedDependencyNode]] = (for (dep <- graph.edges; if pred(dep)) yield {
-      graph.connected(dep.source, dedge=>pred(dedge.edge)).toSet
+    val groups: Set[Set[JoinedDependencyNode]] = (for (dep <- this.edges; if pred(dep)) yield {
+      this.connected(dep.source, dedge=>pred(dedge.edge)).toSet
     })(scala.collection.breakOut)
 
 
@@ -109,15 +115,16 @@ object JoinedDependencyGraph {
 //    new DependencyGraph(this.tokens, this.dependencies, graph.collapseGroups(groupsToCollapse))
 //  }
 
-  def directedAdjacentCollapse(graph: JoinedDependencyGraph)(labels: Set[String]): JoinedDependencyGraph = {
+  def directedAdjacentCollapse(labels: Set[String]): JoinedDependencyGraph = {
     def pred(edge: Edge[JoinedDependencyNode]) = labels.contains(edge.label)
 
     // If we get a component that is not connected, remove it from consideration.
     // It is often a mistake due to a strange parse.  It may also be an unusual edge.
-    val components = adjacentComponents(graph)(pred) filter (graph.areConnected)
-    graph.collapseGroups(components)(JoinedDependencyNode.directedMerge(graph))
+    val components = adjacentComponents(pred) filter (this.areConnected)
+    val graph = this.collapseGroups(components)(JoinedDependencyNode.directedMerge(this))
+    new JoinedDependencyGraph(graph.vertices, graph.edges)
   }
 
-  def collapseWeakLeaves(graph: JoinedDependencyGraph) =
-    directedAdjacentCollapse(graph)(Set("neg", "det", "aux", "amod", "num", "quantmod", "advmod"))
+  def collapseWeakLeaves =
+    directedAdjacentCollapse(Set("neg", "det", "aux", "amod", "num", "quantmod", "advmod"))
 }
