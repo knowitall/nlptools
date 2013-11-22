@@ -241,126 +241,32 @@ case class DependencyGraph (
     new DependencyGraph(this.dependencies, graph)
   }
 
-  // TODO: Create collapsed representation
-//  def collapseXNsubj =
-//    new DependencyGraph(this.tokens, this.dependencies,
-//      new Graph[DependencyNode](graph.edges.map { dep =>
-//        if (dep.label.equals("xsubj") || dep.label.equals("nsubj"))
-//          new Dependency(dep.source, dep.dest, "subj")
-//        else dep
-//      }))
-//
-//  def collapseNNPOf = {
-//    def pred(edge: Edge[DependencyNode]) = (edge.source.indices distance edge.dest.indices) == 2 &&
-//      edge.label.equals("prep_of") && edge.source.postag == "NNP" && edge.dest.postag == "NNP"
-//    def merge(nodes: Traversable[DependencyNode]) = {
-//      if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
-//      val sorted = nodes.toList.sorted.view
-//      sorted.sliding(2).foreach(l => require((l.head.indices distance l.last.indices) == 2, "two nodes to merge don't have a distance of 2 (distance is "+(l.head.indices distance l.last.indices)+"): " + l.mkString(", ")))
-//      new DependencyNode(sorted.map(_.text).mkString(" of "),
-//        if (nodes.forall(_.postag.equals(nodes.head.postag)))
-//          nodes.head.postag
-//        else
-//          sorted.map(_.postag).mkString(" of "), Interval.span(sorted.map(_.indices)), sorted.iterator.map(_.offset).min)
-//    }
-//
-//    new DependencyGraph(this.tokens, this.dependencies, graph.collapse(pred(_))(merge))
-//  }
-//
-//  /**
-//    * Find components that are connected by the predicate.
-//    * Then, split components into subcomponents in which
-//    * all vertices correspond to adjacent words in the
-//    * source sentence.
-//    */
-//  def adjacentComponents(pred: Edge[DependencyNode]=>Boolean): Set[Set[DependencyNode]] = {
-//    def splitByAdjacency(nodes: List[DependencyNode]): List[List[DependencyNode]] = {
-//      def rec(nodes: List[DependencyNode], result: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
-//        case x :: Nil => (x :: result) :: Nil
-//        case x :: y :: xs => if (x.indices borders y.indices) rec(y :: xs, x :: result) else (x :: result) :: rec(y :: xs, Nil)
-//        case Nil => Nil
-//      }
-//
-//      rec(nodes, Nil)
-//    }
-//
-//    val groups: Set[Set[DependencyNode]] = (for (dep <- graph.edges; if pred(dep)) yield {
-//      graph.connected(dep.source, dedge=>pred(dedge.edge)).toSet
-//    })(scala.collection.breakOut)
-//
-//
-//    (for {
-//      // for each connect nn component
-//      group <- groups
-//      // split the component by POS tag
-//      nodes = group.toList.sorted
-//      part <- splitByAdjacency(nodes)
-//      if part.size > 1
-//    } yield(part.toSet))(scala.collection.breakOut)
-//  }
-//
-//  def collapseAdjacentGroups(pred: Edge[DependencyNode]=>Boolean)
-//      (implicit merge: Traversable[DependencyNode]=>DependencyNode) = {
-//    val components = adjacentComponents(edge => pred(edge))
-//    val graph = this.graph.collapseGroups(components)(merge)
-//    new DependencyGraph(this.tokens, this.dependencies, graph)
-//  }
-//
-//  def collapseNounGroups(dividors: List[String] = List.empty) = {
-//    val lowerCaseDividors = dividors.map(_.toLowerCase)
-//
-//    def pred(edge: Edge[DependencyNode]) = edge.label == "nn"
-//    val groups = adjacentComponents(pred)
-//
-//    def splitByDividor(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
-//      case x :: xs if lowerCaseDividors.contains(x.text.toLowerCase) => List(x) :: splitByDividor(xs)
-//      case x :: xs =>
-//        val (part, rest) = nodes.span(node => !lowerCaseDividors.contains(node.text.toLowerCase))
-//        part :: splitByDividor(rest)
-//      case Nil => Nil
-//    }
-//
-//    // segment ordered dependency nodes by POS tag
-//    def postagEqual(a: String, b: String) = a == b || a.startsWith("NNP") && b.startsWith("NNP")
-//    def splitByPos(nodes: List[DependencyNode]): List[List[DependencyNode]] = nodes match {
-//      case x :: xs => nodes.takeWhile(node => postagEqual(node.postag, x.postag)) ::
-//        splitByPos(nodes.dropWhile(node => postagEqual(node.postag, x.postag)))
-//      case Nil => Nil
-//    }
-//
-//    val groupsToCollapse: Set[Set[DependencyNode]] = (for {
-//      // for each connect nn component
-//      group <- groups
-//      // split the component by POS tag
-//      nodes = group.toList.sorted
-//      dividorSplit <- splitByDividor(nodes)
-//      part <- splitByPos(dividorSplit)
-//      if part.size > 1
-//    } yield(part.toSet))(scala.collection.breakOut)
-//
-//    new DependencyGraph(this.tokens, this.dependencies, graph.collapseGroups(groupsToCollapse))
-//  }
-//
-//  def directedAdjacentCollapse(labels: Set[String]): DependencyGraph[Token] = {
-//    def pred(edge: Edge[DependencyNode]) = labels.contains(edge.label)
-//
-//    // If we get a component that is not connected, remove it from consideration.
-//    // It is often a mistake due to a strange parse.  It may also be an unusual edge.
-//    val components = adjacentComponents(pred) filter (this.graph.areConnected)
-//    val graph = this.graph.collapseGroups(components)(DependencyNode.directedMerge(this.graph))
-//    new DependencyGraph(this.tokens, this.dependencies, graph)
-//  }
-//
-//  def directedAdjacentCollapse(label: String): DependencyGraph[_] = directedAdjacentCollapse(Set(label))
-//
-//  def collapseWeakLeaves =
-//    directedAdjacentCollapse(Set("neg", "det", "aux", "amod", "num", "quantmod", "advmod"))
-//
-//  def normalize = collapseNounGroups().collapseNNPOf
+  /** Simplify xsubj and nsubj to just subj. */
+  def collapseXNsubj = {
+    val edges = graph.edges.map { dep =>
+      if ((dep.label equals "xsubj") || (dep.label equals "nsubj"))
+        new Edge[DependencyNode](dep.source, dep.dest, "subj")
+      else dep
+    }
+    new DependencyGraph(this.dependencies, new Graph[DependencyNode](edges))
+  }
+
+  def joined: DependencyGraph.JoinedDependencyGraph = {
+    val joinedNodes = this.graph.vertices map JoinedDependencyNode.from
+    val joinedEdges = this.graph.edges map { edge =>
+      edge.copy(
+          source=JoinedDependencyNode.from(edge.source), 
+          dest=JoinedDependencyNode.from(edge.dest))
+      }
+    new Graph[JoinedDependencyNode](joinedNodes, joinedEdges)
+  }
+
 }
 
 object DependencyGraph {
   val logger = LoggerFactory.getLogger(this.getClass)
+  
+  type JoinedDependencyGraph = Graph[JoinedDependencyNode]
   
   def create[T <: Token](dependencies: Iterable[Dependency]): DependencyGraph = {
     new DependencyGraph(dependencies.toSeq, new Graph[DependencyNode](dependencies.flatMap(dep => Set(dep.source, dep.dest)).toSet, dependencies))
