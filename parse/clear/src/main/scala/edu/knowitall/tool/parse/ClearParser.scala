@@ -52,10 +52,10 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
 }
 
 object ClearParser {
-  def graphFromTree(tree: DEPTree, tokens: Seq[Token]) = {
+  def graphFromTree(tree: DEPTree, tokens: Seq[Token]): DependencyGraph = {
     val nodeMap = (for ((node, i) <- tree.iterator.asScala.zipWithIndex) yield {
-      if (i == 0) node.id -> new DependencyNode(node.form, node.pos, -1, -1)
-      else node.id -> new DependencyNode(node.form, node.pos, i - 1, tokens(i - 1).offset)
+      if (i == 0) node.id -> new DependencyNode(-1, node.form)
+      else node.id -> new DependencyNode(-1, node.form)
     }).toMap
 
     val deps = for {
@@ -69,7 +69,7 @@ object ClearParser {
       new Dependency(nodeMap(destNode.id), nodeMap(sourceNode.id), label)
     }
 
-    new DependencyGraph(nodeMap.values filterNot (_.index == -1), deps)
+    new DependencyGraph(nodeMap.values.toSet filterNot (_.id == -1), deps.toSet)
   }
 }
 

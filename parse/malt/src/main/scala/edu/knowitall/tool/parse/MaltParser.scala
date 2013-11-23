@@ -80,13 +80,13 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
       replaceAll("[\u2018\u2019\u201a\u201b\u275b\u275c]", "'")
   }
   
-  private def dependenciesPostagged(tokens: Seq[PostaggedToken]): Iterable[Dependency] = {
+  private def dependenciesPostagged(tokens: Seq[PostaggedToken]): Set[Dependency] = {
  
     val nodes = tokens.iterator.zipWithIndex.map { case (t, i) =>
-      new DependencyNode(t, Interval.singleton(i))
+      new DependencyNode(i, t.string)
     }.toIndexedSeq
 
-    val lemmatized = nodes.map(stemmer.stemToken)
+    val lemmatized = tokens.map(stemmer.stemToken)
 
     val maltTokens: Array[String] = lemmatized.iterator.zipWithIndex.map { case (ltok, i) =>
       Iterable(i+1,
@@ -100,7 +100,7 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
 
     val tables = structure.getSymbolTables
 
-    val deps: SortedSet[Dependency] = structure.getEdges.flatMap { edge =>
+    val deps = structure.getEdges.flatMap { edge =>
       if (edge.getSource.getIndex == 0 || edge.getTarget.getIndex == 0) {
         // skip the root
         None
@@ -115,9 +115,9 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
 
         Some(new Dependency(source, dest, label))
       }
-    }(scala.collection.breakOut)
+    }
 
-    deps
+    deps.toSet
   }
 
   def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
