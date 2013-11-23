@@ -19,6 +19,7 @@ import edu.knowitall.tool.stem.Stemmer
 import edu.knowitall.tool.postag.Postagger
 import edu.knowitall.tool.tokenize.Token
 import edu.knowitall.tool.postag.PostaggedToken
+import edu.knowitall.tool.stem.Lemmatized
 
 /** A representation of a graph over dependencies.
   * This richer representation may include the text of the original sentence,
@@ -247,16 +248,26 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
     new DependencyGraph(edges)
   }
 
-  def joined: DependencyGraph.JoinedDependencyGraph = {
+  def joined: JoinedDependencyGraph = {
     val joinedNodes = this.vertices map JoinedDependencyNode.from
     val joinedEdges = this.edges map { edge =>
       edge.copy(
           source=JoinedDependencyNode.from(edge.source), 
           dest=JoinedDependencyNode.from(edge.dest))
       }
-    new Graph[JoinedDependencyNode](joinedNodes, joinedEdges)
+    new JoinedDependencyGraph(joinedNodes, joinedEdges)
   }
-
+  
+  def tokenized(tokens: Seq[Lemmatized[PostaggedToken]]): Graph[TokenDependencyNode] = {
+    def from = TokenDependencyNode.from(tokens) _
+    val joinedNodes = this.vertices map from
+    val joinedEdges = this.edges map { edge =>
+      edge.copy(
+          source=from(edge.source), 
+          dest=from(edge.dest))
+      }
+    new Graph[TokenDependencyNode](joinedNodes, joinedEdges)
+  }
 }
 
 object DependencyGraph {
