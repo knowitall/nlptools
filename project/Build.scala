@@ -46,9 +46,9 @@ object NlpToolsBuild extends Build {
 
   val weka = "nz.ac.waikato.cms.weka" % "weka-dev" % "3.7.9"
 
-  val stanfordModelGroup = "edu.washington.cs.knowitall.stanford-corenlp"
-  val stanfordVersion = "1.3.5"
+  val stanfordVersion = "3.3.0"
   val stanford = "edu.stanford.nlp" % "stanford-corenlp" % stanfordVersion
+  val stanfordModels = "edu.stanford.nlp" % "stanford-corenlp" % stanfordVersion classifier("models")
 
   val clearGroup = "com.clearnlp"
   val clearVersion = "2.0.0"
@@ -228,7 +228,7 @@ object NlpToolsBuild extends Build {
     base = file("postag/stanford"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl2),
-      libraryDependencies ++= Seq(stanford, stanfordModelGroup % "stanford-postag-models" % stanfordVersion ))
+      libraryDependencies ++= Seq(stanford, stanfordModels))
   ) dependsOn(stanfordTokenize)
 
   lazy val stanfordParse = Project(
@@ -236,7 +236,7 @@ object NlpToolsBuild extends Build {
     base = file("parse/stanford"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl2),
-      libraryDependencies ++= Seq(stanford, stanfordModelGroup % "stanford-parse-models" % stanfordVersion),
+      libraryDependencies ++= Seq(stanford, stanfordModels),
       mainClass in assembly := Some("edu.knowitall.tool.parse.StanfordParserMain"))
   ) dependsOn(stanfordPostag)
 
@@ -246,9 +246,8 @@ object NlpToolsBuild extends Build {
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl2),
       libraryDependencies ++= Seq(stanford,
-        stanfordModelGroup % "stanford-sutime-models" % stanfordVersion ,
-        stanfordModelGroup % "stanford-ner-models" % stanfordVersion ,
-        stanfordModelGroup % "stanford-dcoref-models" % stanfordVersion, scopt ))
+        stanfordModels,
+        scopt ))
   ) dependsOn(stanfordParse)
 
   lazy val stanfordTyper = Project(
@@ -256,7 +255,7 @@ object NlpToolsBuild extends Build {
     base = file("typer/stanford"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl2),
-      libraryDependencies ++= Seq(stanford, stanfordModelGroup % "stanford-ner-models" % stanfordVersion ))
+      libraryDependencies ++= Seq(stanford, stanfordModels))
   ) dependsOn(core)
 
   // Malt
