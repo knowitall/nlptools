@@ -5,7 +5,8 @@ package tokenize
 import edu.knowitall.common.HashCodeHelper
 import edu.knowitall.collection.immutable.Interval
 
-/** The most simple representation of a token.  A token has a string
+/**
+  * The most simple representation of a token.  A token has a string
   * and a character offset in the original text.
   *
   * @param  string  the string of the token

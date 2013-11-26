@@ -18,8 +18,9 @@ class ClearPostagger(override val tokenizer: Tokenizer = new ClearTokenizer) ext
 
   override def postagTokenized(tokens: Seq[Token]) = {
     val tree = new DEPTree()
-    tokens.zipWithIndex.foreach { case (token, i) =>
-      tree.add(new DEPNode(i + 1, token.string))
+    tokens.zipWithIndex.foreach {
+      case (token, i) =>
+        tree.add(new DEPNode(i + 1, token.string))
     }
 
     clearPosTagger.process(tree)

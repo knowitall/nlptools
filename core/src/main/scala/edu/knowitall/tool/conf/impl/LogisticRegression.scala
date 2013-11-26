@@ -13,17 +13,17 @@ import edu.knowitall.tool.conf.ConfidenceFunction
 import edu.knowitall.tool.conf.FeatureSet
 
 /**
- * An implementation of logistic regression of features that can be
- * represented as a double.
- *
- * @param  featureSet  the features to use
- * @param  featureWeights  the feature weights
- * @param  intercept  the intercept value
- */
+  * An implementation of logistic regression of features that can be
+  * represented as a double.
+  *
+  * @param  featureSet  the features to use
+  * @param  featureWeights  the feature weights
+  * @param  intercept  the intercept value
+  */
 class LogisticRegression[T](
-  featureSet: FeatureSet[T, Double],
-  val featureWeights: Map[String, Double],
-  val intercept: Double) extends ConfidenceFunction[T](featureSet) {
+    featureSet: FeatureSet[T, Double],
+    val featureWeights: Map[String, Double],
+    val intercept: Double) extends ConfidenceFunction[T](featureSet) {
 
   featureSet.featureNames.foreach { name =>
     require(featureWeights.keySet.contains(name), "No weight for feature: " + name)

@@ -10,7 +10,8 @@ import edu.knowitall.collection.immutable.Interval
 import tool.stem.{ Stemmer, IdentityStemmer }
 import tool.postag.PostaggedToken
 
-/** A representation for a node in the graph of dependencies.  A node
+/**
+  * A representation for a node in the graph of dependencies.  A node
   * represents one or more adjacent tokens in the source sentence.
   */
 case class DependencyNode(val id: Int, val string: String) {
@@ -27,7 +28,7 @@ object DependencyNode {
 
   object stringFormat extends Format[DependencyNode, String] {
     def write(node: DependencyNode): String = {
-      val cleanText = node.string.replaceAll("[[_()][^\\p{Graph}]]", "") 
+      val cleanText = node.string.replaceAll("[[_()][^\\p{Graph}]]", "")
       Iterator(cleanText, node.id).mkString("-")
     }
 
@@ -47,5 +48,5 @@ object DependencyNode {
   }
 
   class SerializationException(message: String, cause: Throwable)
-  extends RuntimeException(message, cause)
+    extends RuntimeException(message, cause)
 }

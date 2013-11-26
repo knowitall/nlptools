@@ -10,7 +10,8 @@ import edu.knowitall.collection.immutable.Interval
 import tool.stem.{ Stemmer, IdentityStemmer }
 import tool.postag.PostaggedToken
 
-/** A representation for a node in the graph of dependencies.  A node
+/**
+  * A representation for a node in the graph of dependencies.  A node
   * represents one or more adjacent tokens in the source sentence.
   */
 case class JoinedDependencyNode(val ids: Seq[Int], val strings: Seq[String]) {
@@ -18,7 +19,7 @@ case class JoinedDependencyNode(val ids: Seq[Int], val strings: Seq[String]) {
   require(!strings.isEmpty)
 
   def string = strings.mkString(" ")
-  
+
   def span = Interval.closed(ids.min, ids.max)
 
   // extend Object
@@ -29,11 +30,11 @@ object JoinedDependencyNode {
   def from(node: DependencyNode) = JoinedDependencyNode(Seq(node.id), Seq(node.string))
 
   /**
-   * Merge nodes that correspond to adjacent tokens.
-   *
-   * @throws  IllegalArgumentException  there is no superior of the set
-   * @return  the superior node of the set
-   */
+    * Merge nodes that correspond to adjacent tokens.
+    *
+    * @throws  IllegalArgumentException  there is no superior of the set
+    * @return  the superior node of the set
+    */
   implicit def directedMerge(graph: Graph[JoinedDependencyNode])(nodes: Traversable[JoinedDependencyNode]) = {
     if (nodes.isEmpty) throw new IllegalArgumentException("argument nodes empty")
     val sorted = nodes.toList.sortBy(_.span)

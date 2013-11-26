@@ -48,6 +48,6 @@ object OpenNlpSentencer {
 }
 
 object OpenNlpSegmenterMain
-extends SegmenterMain {
+    extends SegmenterMain {
   lazy val sentencer = new OpenNlpSentencer
 }

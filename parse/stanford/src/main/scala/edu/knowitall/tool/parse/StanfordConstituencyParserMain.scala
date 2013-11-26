@@ -3,6 +3,6 @@ package tool
 package parse
 
 object StanfordConstituencyParserMain
-  extends ConstituencyParserMain {
+    extends ConstituencyParserMain {
   lazy val constituencyParser = new StanfordParser();
 }

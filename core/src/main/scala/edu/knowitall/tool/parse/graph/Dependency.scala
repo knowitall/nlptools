@@ -30,14 +30,13 @@ object Dependency {
   def deserialize(string: String) = stringFormat.read(string)
 
   class SerializationException(message: String, cause: Throwable)
-  extends RuntimeException(message, cause)
+    extends RuntimeException(message, cause)
 }
-
 
 object Dependencies {
   def serialize(deps: Iterable[Dependency]) = (deps.iterator).map(Dependency.stringFormat.write(_)).mkString("; ")
   def deserialize(string: String): Seq[Dependency] = string.split("""\s*(?:;|\n)\s*""").
-      map(Dependency.stringFormat.read(_))
+    map(Dependency.stringFormat.read(_))
 
   object DependencyOrdering extends Ordering[Dependency] {
     def compare(a: Dependency, b: Dependency) = {

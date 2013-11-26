@@ -32,10 +32,11 @@ class ClearParser(val postagger: Postagger = new ClearPostagger()) extends Depen
 
   def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     val tree = new DEPTree()
-    tokens.zipWithIndex.foreach { case (token, i) =>
-      val node = new DEPNode(i + 1, token.string)
-      node.pos = token.postag
-      tree.add(node)
+    tokens.zipWithIndex.foreach {
+      case (token, i) =>
+        val node = new DEPNode(i + 1, token.string)
+        node.pos = token.postag
+        tree.add(node)
     }
 
     clearMorpha.process(tree)
@@ -51,7 +52,7 @@ object ClearParser {
       if (i == 0) node.id -> new DependencyNode(-1, node.form)
       else node.id -> new DependencyNode(i, node.form)
     }).toMap
-    
+
     val deps = for {
       sourceNode <- tree.iterator.asScala.toList
       if sourceNode.hasHead

@@ -11,7 +11,7 @@ import tool.tokenize.Token
 class StanfordPostagger(
   val tagger: MaxentTagger,
   override val tokenizer: tokenize.Tokenizer = new tokenize.StanfordTokenizer())
-extends Postagger {
+    extends Postagger {
 
   def this() = this(StanfordPostagger.loadDefaultModel())
 
@@ -21,11 +21,11 @@ extends Postagger {
         val corelabel = new CoreLabel();
         corelabel.setWord(token.string);
         corelabel
-      }.toList
-    ).map(_.tag())
+      }.toList).map(_.tag())
 
-    (tokens zip postags) map { case (token, postag) =>
-      PostaggedToken(token, postag)
+    (tokens zip postags) map {
+      case (token, postag) =>
+        PostaggedToken(token, postag)
     }
   }
 }

@@ -12,7 +12,8 @@ import tool.postag.PostaggedToken
 import edu.knowitall.tool.tokenize.Token
 import edu.knowitall.tool.stem.Lemmatized
 
-/** A representation for a node in the graph of dependencies.  A node
+/**
+  * A representation for a node in the graph of dependencies.  A node
   * represents one or more adjacent tokens in the source sentence.
   */
 case class TokenDependencyNode(val id: Int, val token: Lemmatized[PostaggedToken]) {
@@ -25,6 +26,6 @@ case class TokenDependencyNode(val id: Int, val token: Lemmatized[PostaggedToken
 }
 
 object TokenDependencyNode {
-  def from(tokens: Seq[Lemmatized[PostaggedToken]])(node: DependencyNode) = 
+  def from(tokens: Seq[Lemmatized[PostaggedToken]])(node: DependencyNode) =
     TokenDependencyNode(node.id, tokens(node.id))
 }

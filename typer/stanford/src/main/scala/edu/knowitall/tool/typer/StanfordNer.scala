@@ -46,8 +46,8 @@ object StanfordNer {
   final val defaultModelUrl = StanfordNer.getClass().getResource("/edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz")
   require(defaultModelUrl != null, "resource could not be found")
 
- def fromModelUrl(url: URL) = {
-    using (url.openStream()) { stream =>
+  def fromModelUrl(url: URL) = {
+    using(url.openStream()) { stream =>
       new StanfordNer(CRFClassifier.getClassifier(new BufferedInputStream(new GZIPInputStream(stream))))
     }
   }

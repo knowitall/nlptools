@@ -4,7 +4,8 @@ package postag
 import edu.knowitall.common.HashCodeHelper
 import edu.knowitall.tool.tokenize.Token
 
-/** A representation for a part-of-speech tagged token.  POS tokens
+/**
+  * A representation for a part-of-speech tagged token.  POS tokens
   * use PENN-treebank style tags.
   *
   * @param  string  the string of the token
@@ -13,7 +14,7 @@ import edu.knowitall.tool.tokenize.Token
   * @param  chunk   the chunk tag of the token in BIO format
   */
 class PostaggedToken(val postagSymbol: Symbol, override val string: String, override val offset: Int)
-extends Token(string, offset) {
+    extends Token(string, offset) {
   def postag = postagSymbol.name
   require(postag.forall(!_.isWhitespace), "postag contains whitespace: " + postag)
 
@@ -29,9 +30,9 @@ extends Token(string, offset) {
   }
 
   def isProperNoun = postagSymbol == Symbol("NNP") || postagSymbol == Symbol("NNPS")
-  def isCommonNoun = postagSymbol ==Symbol("NN") || postagSymbol ==Symbol("NNS")
+  def isCommonNoun = postagSymbol == Symbol("NN") || postagSymbol == Symbol("NNS")
   def isNoun = isProperNoun || isCommonNoun
-  def isPluralNoun = postagSymbol ==Symbol("NNS") || postagSymbol ==Symbol("NNPS")
+  def isPluralNoun = postagSymbol == Symbol("NNS") || postagSymbol == Symbol("NNPS")
 
   def isVerbBase = postagSymbol == Symbol("VB")
   def isVerbPast = postagSymbol == Symbol("VBD")
@@ -98,7 +99,7 @@ object PostaggedToken {
 
   implicit object stringFormat extends Format[PostaggedToken, String] {
     def write(postaggedToken: PostaggedToken): String = {
-      Iterator(Token.stringFormat.write(postaggedToken),postaggedToken.postag).mkString(" ")
+      Iterator(Token.stringFormat.write(postaggedToken), postaggedToken.postag).mkString(" ")
     }
     def read(str: String): PostaggedToken = {
       val postaggedTokenRegex = """(.*?) +([^ ]*)""".r
@@ -106,8 +107,7 @@ object PostaggedToken {
         val postaggedTokenRegex(pickledToken, postag) = str
         val token = Token.stringFormat.read(pickledToken)
         PostaggedToken(token, postag)
-      }
-      catch {
+      } catch {
         case e: Exception => {
           throw new MatchError("Error deserializing PostaggedToken: " + str)
         }

@@ -10,7 +10,7 @@ import java.util.zip.ZipInputStream
 import java.net.URL
 
 class ClearTokenizer
-extends Tokenizer {
+    extends Tokenizer {
   val tokenizer =
     NLPGetter.getTokenizer("en")
 

@@ -5,7 +5,8 @@ package postag
 import edu.knowitall.tool.tokenize._
 import scala.collection.immutable
 
-/** A POS tagger takes tokenized input and associates a part of speech
+/**
+  * A POS tagger takes tokenized input and associates a part of speech
   * tag with each token.
   */
 abstract class Postagger {
@@ -67,15 +68,15 @@ object Postagger {
     (postags zip tokens).map { case (postag, token) => PostaggedToken(token, postag) }
   }
 
-  class stringFormat(val delim: String) extends Format[Seq[PostaggedToken],String]{
+  class stringFormat(val delim: String) extends Format[Seq[PostaggedToken], String] {
     def write(tokens: Seq[PostaggedToken]): String = {
-      val serializedTokens = for(tok <- tokens) yield {
+      val serializedTokens = for (tok <- tokens) yield {
         PostaggedToken.stringFormat.write(tok)
       }
       serializedTokens.mkString(delim)
     }
 
-    def read(string: String): Seq[PostaggedToken] ={
+    def read(string: String): Seq[PostaggedToken] = {
       for (str <- string.split(delim)) yield PostaggedToken.stringFormat.read(str)
     }
   }

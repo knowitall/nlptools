@@ -18,7 +18,7 @@ import postag.PostaggedToken
 import edu.knowitall.tool.tokenize.Token
 
 class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends BaseStanfordParser with ConstituencyParser {
-  def this(postagger: Postagger = new StanfordPostagger()) = 
+  def this(postagger: Postagger = new StanfordPostagger()) =
     this(LexicalizedParser.loadModel(StanfordParser.pcfgModelPath), postagger)
 
   private def postagToStanfordRepr(tokens: Seq[PostaggedToken]): java.util.List[TaggedWord] = {
@@ -40,16 +40,16 @@ class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends Ba
   }
 
   /**
-   * Create a graph of the dependencies from Tokens without postagging.
-   */
+    * Create a graph of the dependencies from Tokens without postagging.
+    */
   def dependencyGraphWithoutPostags(tokens: Seq[Token]): DependencyGraph = {
     val postaggedTokens = tokens.map { t => PostaggedToken(t, null) }
     dependencyGraphPostagged(postaggedTokens)
   }
 
   /**
-   * Create a graph of the dependencies from Tokens without postagging.
-   */
+    * Create a graph of the dependencies from Tokens without postagging.
+    */
   def dependencyGraphWithoutPostags(text: String): (Seq[Token], DependencyGraph) = {
     val tokens = postagger.tokenizer(text)
     val graph = this.dependencyGraphWithoutPostags(tokens)
@@ -65,7 +65,7 @@ class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends Ba
 object StanfordParser {
   val pcfgModelPath = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz"
   val rnnModelPath = "edu/stanford/nlp/models/lexparser/englishRNN.ser.gz"
-    
+
   private val tlp = new PennTreebankLanguagePack()
   private val gsf = tlp.grammaticalStructureFactory()
 

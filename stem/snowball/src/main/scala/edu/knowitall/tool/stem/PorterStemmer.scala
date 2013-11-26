@@ -6,13 +6,13 @@ import org.tartarus.snowball.SnowballProgram
 import org.tartarus.snowball
 
 class PorterStemmer
-extends SnowballStemmer(new snowball.ext.PorterStemmer)
+  extends SnowballStemmer(new snowball.ext.PorterStemmer)
 
 object PorterStemmer {
   implicit def instance: Stemmer = new PorterStemmer
 }
 
 object PorterStemmerMain
-extends StemmerMain {
+    extends StemmerMain {
   lazy val stemmer = new PorterStemmer
 }

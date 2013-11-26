@@ -11,8 +11,7 @@ class SnowballStemmer(stemmer: SnowballProgram) extends Stemmer {
 
     if (stemmer.stem()) {
       stemmer.getCurrent
-    }
-    else {
+    } else {
       word
     }
   }

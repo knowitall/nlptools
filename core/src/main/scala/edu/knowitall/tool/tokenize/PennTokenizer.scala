@@ -29,14 +29,15 @@ object PennTokenizer extends Tokenizer {
     (""" ([^'])' """, " '$1 "),
     ("""'([sSmMdD]) """, " '$1 "),
     ("'(ll|re|ve|LL|RE|VE) ", " '$1 "),
-    ("(n't|N'T) ", " $1 ")
-  ).map { case (a, b) =>
-    (Pattern.compile(a), b)
-  }
+    ("(n't|N'T) ", " $1 ")).map {
+      case (a, b) =>
+        (Pattern.compile(a), b)
+    }
 
   def tokenize(sentence: String) = {
-    val split = replacements.foldRight(sentence) { case ((t, r), s) =>
-      t.matcher(s).replaceAll(r)
+    val split = replacements.foldRight(sentence) {
+      case ((t, r), s) =>
+        t.matcher(s).replaceAll(r)
     }.trim.split("\\s+")
 
     Tokenizer.computeOffsets(split, sentence)

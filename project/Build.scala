@@ -94,7 +94,7 @@ object NlpToolsBuild extends Build {
   }
 
   // parent build definition
-  val buildSettings = Defaults.defaultSettings ++ assemblySettings ++ Seq (
+  val buildSettings = Defaults.defaultSettings ++ assemblySettings ++ Format.settings ++ Seq (
     organization := buildOrganization,
     crossScalaVersions := buildScalaVersions,
     scalaVersion <<= (crossScalaVersions) { versions => versions.head },

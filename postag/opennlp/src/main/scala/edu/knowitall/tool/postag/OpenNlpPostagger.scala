@@ -10,20 +10,20 @@ import edu.knowitall.common.Resource
 class OpenNlpPostagger(
   val model: POSModel,
   override val tokenizer: tokenize.Tokenizer)
-extends Postagger {
+    extends Postagger {
 
   def this(tokenizer: tokenize.Tokenizer) =
     this(OpenNlpPostagger.loadDefaultModel(), tokenizer)
 
   def this() = this(new tokenize.OpenNlpTokenizer())
 
-
   val tagger = new POSTaggerME(model)
 
   override def postagTokenized(tokens: Seq[Token]): Seq[PostaggedToken] = {
     val postags = tagger.tag(tokens.iterator.map(_.string).toArray)
-    (tokens zip postags).map { case (token, postag) =>
-      PostaggedToken(token, postag)
+    (tokens zip postags).map {
+      case (token, postag) =>
+        PostaggedToken(token, postag)
     }
   }
 }

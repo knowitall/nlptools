@@ -1,13 +1,15 @@
 package edu.knowitall.tool.conf
 import scala.collection.immutable.SortedMap
 
-/** FeatureSet represents a set of features on T that can be
+/**
+  * FeatureSet represents a set of features on T that can be
   * represented as a double.
   *
-  * @param  featureMap  a lookup for the features */
+  * @param  featureMap  a lookup for the features
+  */
 class FeatureSet[T, V](val featureMap: SortedMap[String, Feature[T, V]]) {
   def this() = this(SortedMap.empty[String, Feature[T, V]])
-  
+
   def apply(name: String) = featureMap(name)
 
   def featureNames(): Seq[String] =
@@ -27,7 +29,7 @@ object FeatureSet {
   val binaryClass = true
 
   def apply[T, V](features: Iterable[Feature[T, V]]): FeatureSet[T, V] = {
-    new FeatureSet[T, V](SortedMap.empty[String, Feature[T, V]] ++ 
-        features.map(feature => (feature.name, feature)))
+    new FeatureSet[T, V](SortedMap.empty[String, Feature[T, V]] ++
+      features.map(feature => (feature.name, feature)))
   }
 }

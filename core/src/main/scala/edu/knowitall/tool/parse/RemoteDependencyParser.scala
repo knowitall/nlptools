@@ -17,15 +17,15 @@ class RemoteDependencyParser(val urlString: String) extends DependencyParser wit
   }
 
   /**
-   * Throws UnsupportedOperationException
-   */
+    * Throws UnsupportedOperationException
+    */
   override def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     throw new UnsupportedOperationException()
   }
 
   /**
-   * Throws UnsupportedOperationException
-   */
+    * Throws UnsupportedOperationException
+    */
   override def dependencyGraphTokenized(tokens: Seq[Token]): (Seq[PostaggedToken], DependencyGraph) = {
     throw new UnsupportedOperationException()
   }

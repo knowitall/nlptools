@@ -5,7 +5,7 @@ package graph
 
 import scala.Option.option2Iterable
 import scala.collection.immutable
-import scala.util.{Try, Success, Failure}
+import scala.util.{ Try, Success, Failure }
 import org.slf4j.LoggerFactory
 import edu.knowitall.collection.immutable.Interval
 import edu.knowitall.collection.immutable.graph.Direction
@@ -21,11 +21,13 @@ import edu.knowitall.tool.tokenize.Token
 import edu.knowitall.tool.postag.PostaggedToken
 import edu.knowitall.tool.stem.Lemmatized
 
-/** A representation of a graph over dependencies.
+/**
+  * A representation of a graph over dependencies.
   * This richer representation may include the text of the original sentence,
-  * the original nodes (before collapsing), and the original dependencies. */
+  * the original nodes (before collapsing), and the original dependencies.
+  */
 class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]])
-  extends Graph[DependencyNode](vertices, edges) {
+    extends Graph[DependencyNode](vertices, edges) {
 
   def this(edges: Iterable[Edge[DependencyNode]]) =
     this(edges.flatMap(_.vertices).toSet, edges.toSet)
@@ -59,23 +61,20 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
       try {
         g = g.collapse { edge =>
           edge.label == "pobj" && (g.incoming(edge.source) exists (_.label startsWith "prep"))
-        } ((nodes: Traversable[DependencyNode]) =>
-          nodes.find(n => g.edges(n).exists(e => e.label == "pobj" && e.dest == n)).get
-        )
-      }
-      catch {
+        }((nodes: Traversable[DependencyNode]) =>
+          nodes.find(n => g.edges(n).exists(e => e.label == "pobj" && e.dest == n)).get)
+      } catch {
         case e: Throwable => DependencyGraph.logger.error("could not collapse pobj.", e)
       }
 
       // collapse edges (pcomp) preceeded by prep
       try {
         g = g.collapse { edge =>
-            edge.label == "pcomp" && (g.incoming(edge.source) exists (_.label startsWith "prep"))
-          }( (nodes: Traversable[DependencyNode]) => {
+          edge.label == "pcomp" && (g.incoming(edge.source) exists (_.label startsWith "prep"))
+        }((nodes: Traversable[DependencyNode]) => {
           nodes.find(n => g.edges(n).exists(e => e.label == "pcomp" && e.dest == n)).get
         })
-      }
-      catch {
+      } catch {
         case e: Throwable => DependencyGraph.logger.error("could not collapse pcomp.", e)
       }
 
@@ -134,30 +133,32 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
       val conjGraph = graph.edges.filter(edge =>
         // conj edges to a node with no children
         edge.label == "conj" &&
-        // source of conj edges has a child cc edge
-        graph.dedges(edge.source).exists { case DownEdge(e) => e.label == "cc" case _ => false}
-      ).foldLeft(graph) { case (graph, conj) =>
-        val ccNodes = graph.dedges(conj.source).filter {
-          case DownEdge(e) => e.label == "cc"
-          case _ => false
-        }.iterator.map(_.edge.dest).toList
+          // source of conj edges has a child cc edge
+          graph.dedges(edge.source).exists { case DownEdge(e) => e.label == "cc" case _ => false }).foldLeft(graph) {
+        case (graph, conj) =>
+          val ccNodes = graph.dedges(conj.source).filter {
+            case DownEdge(e) => e.label == "cc"
+            case _ => false
+          }.iterator.map(_.edge.dest).toList
 
-        // look left (negative distance) and then right.
-        val bestCC = ccNodes.minBy { case cc =>
-          val dist = math.abs(cc.id - conj.dest.id)
-          if (dist < 0) -ccNodes.length - dist
-          else dist
-        }
+          // look left (negative distance) and then right.
+          val bestCC = ccNodes.minBy {
+            case cc =>
+              val dist = math.abs(cc.id - conj.dest.id)
+              if (dist < 0) -ccNodes.length - dist
+              else dist
+          }
 
-        val newEdges = scala.collection.Set[Edge[DependencyNode]]() ++ graph.edges - conj + conj.copy(label = "conj_"+bestCC.string)
+          val newEdges = scala.collection.Set[Edge[DependencyNode]]() ++ graph.edges - conj + conj.copy(label = "conj_" + bestCC.string)
 
-        new Graph[DependencyNode](graph.vertices, newEdges)
+          new Graph[DependencyNode](graph.vertices, newEdges)
       }
 
       new Graph[DependencyNode](conjGraph.edges filterNot (_.label == "cc"))
     }
 
-    /** Distribute some edges to other nodes connected by conj_and.
+    /**
+      * Distribute some edges to other nodes connected by conj_and.
       *
       * Incoming/outgoing are defined as a direction relative to the
       * connected component joined by the conjunction.
@@ -201,11 +202,10 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
         for (
           dedge <- dedges;
           if (dedge.edge.label == "nsubj" ||
-              dedge.edge.label == "nsubjpass" ||
-              dedge.dir == Direction.Down && (
-                // distribute "to" in: "I want to swim and eat cherries"
-                dedge.edge.label == "aux"
-              ) ||
+            dedge.edge.label == "nsubjpass" ||
+            dedge.dir == Direction.Down && (
+              // distribute "to" in: "I want to swim and eat cherries"
+              dedge.edge.label == "aux") ||
               dedge.dir == Direction.Up && (
                 dedge.edge.label == "advmod" ||
                 dedge.edge.label == "amod" ||
@@ -230,10 +230,10 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
     }
 
     val graph =
-        edgifyPrepositions(
-            distributeConjunctions(
-                collapseJunctions(
-                    collapseMultiwordPrepositions(this))))
+      edgifyPrepositions(
+        distributeConjunctions(
+          collapseJunctions(
+            collapseMultiwordPrepositions(this))))
 
     new DependencyGraph(graph.vertices, graph.edges)
   }
@@ -252,9 +252,9 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
     val joinedNodes = this.vertices map JoinedDependencyNode.from
     val joinedEdges = this.edges map { edge =>
       edge.copy(
-          source=JoinedDependencyNode.from(edge.source),
-          dest=JoinedDependencyNode.from(edge.dest))
-      }
+        source = JoinedDependencyNode.from(edge.source),
+        dest = JoinedDependencyNode.from(edge.dest))
+    }
     new JoinedDependencyGraph(joinedNodes, joinedEdges)
   }
 
@@ -263,9 +263,9 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
     val joinedNodes = this.vertices map from
     val joinedEdges = this.edges map { edge =>
       edge.copy(
-          source=from(edge.source),
-          dest=from(edge.dest))
-      }
+        source = from(edge.source),
+        dest = from(edge.dest))
+    }
     new Graph[TokenDependencyNode](joinedNodes, joinedEdges)
   }
 }
@@ -357,7 +357,7 @@ object DependencyGraph {
   */
 
   class SerializationException(message: String, cause: Throwable)
-  extends RuntimeException(message, cause)
+    extends RuntimeException(message, cause)
 
   val reversedSplitMultiwordPrepositions = Postagger.complexPrepositions.map(_.split(" ").toList.reverse)
 }
