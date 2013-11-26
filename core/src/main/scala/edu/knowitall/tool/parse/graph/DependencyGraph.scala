@@ -29,7 +29,7 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
 
   def this(edges: Iterable[Edge[DependencyNode]]) =
     this(edges.flatMap(_.vertices).toSet, edges.toSet)
-  
+
   val nodes = vertices
   val dependencies = edges
 
@@ -229,7 +229,7 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
       new Graph[DependencyNode](graph.vertices, graph.edges ++ newEdges)
     }
 
-    val graph = 
+    val graph =
         edgifyPrepositions(
             distributeConjunctions(
                 collapseJunctions(
@@ -252,18 +252,18 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
     val joinedNodes = this.vertices map JoinedDependencyNode.from
     val joinedEdges = this.edges map { edge =>
       edge.copy(
-          source=JoinedDependencyNode.from(edge.source), 
+          source=JoinedDependencyNode.from(edge.source),
           dest=JoinedDependencyNode.from(edge.dest))
       }
     new JoinedDependencyGraph(joinedNodes, joinedEdges)
   }
-  
+
   def tokenized(tokens: Seq[Lemmatized[PostaggedToken]]): Graph[TokenDependencyNode] = {
     def from = TokenDependencyNode.from(tokens) _
     val joinedNodes = this.vertices map from
     val joinedEdges = this.edges map { edge =>
       edge.copy(
-          source=from(edge.source), 
+          source=from(edge.source),
           dest=from(edge.dest))
       }
     new Graph[TokenDependencyNode](joinedNodes, joinedEdges)
@@ -272,13 +272,13 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
 
 object DependencyGraph {
   val logger = LoggerFactory.getLogger(this.getClass)
-  
+
   type JoinedDependencyGraph = Graph[JoinedDependencyNode]
-  
+
   def create[T <: Token](dependencies: Iterable[Dependency]): DependencyGraph = {
     new DependencyGraph(dependencies)
   }
-  
+
   object singlelineStringFormat extends StringFormat("; ")
   object multilineStringFormat extends StringFormat("\n")
 
@@ -291,12 +291,12 @@ object DependencyGraph {
 
     val nodeRegex = "\\s*\\((.*)\\)\\s*".r
     def read(pickled: String) = {
-      val pickledDeps = pickled.split("seperator")
+      val pickledDeps = pickled.split(seperator)
       val deps = pickledDeps map Dependency.stringFormat.read
       DependencyGraph.create(deps)
     }
   }
-  
+
   /*
   class ConllFormat[T <: PostaggedToken](lemmatizer: Stemmer)(implicit tokenSerializer: Format[T, String]) extends Format[DependencyGraph[T], String] {
     def write(graph: DependencyGraph[T]): String = {

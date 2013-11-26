@@ -2,6 +2,7 @@ package edu.knowitall.tool
 package parse
 
 import edu.knowitall.tool.parse.graph._
+import edu.knowitall.tool.postag.Postagger
 
 abstract class DependencyParserMain extends LineProcessor("parser") {
   def dependencyParser: DependencyParser
@@ -12,7 +13,7 @@ abstract class DependencyParserMain extends LineProcessor("parser") {
   }
 
   override def process(line : String) = {
-    val (tokens, graph) = dependencyParser.dependencyGraph(line)
-    DependencyGraph.multilineStringFormat.write(graph)
+    val dgraph = dependencyParser.dependencyGraph(line)
+    DependencyParser.multilineStringFormat.write(dgraph)
   }
 }

@@ -8,7 +8,7 @@ import scala.util.matching.Regex
 import scala.collection.immutable.SortedSet
 
 object Dependency {
-  val Serialized = new Regex("""(\p{Graph}+)\(\s*(\p{Graph}*?-\d\d*?,\s*(\p{Graph}*?_\d\d*)\s*\)""")
+  val Serialized = new Regex("""(\p{Graph}+)\(\s*(\p{Graph}*?-\d\d*?),\s*(\p{Graph}*?-\d\d*)\s*\)""")
 
   object stringFormat extends Format[Dependency, String] {
     def write(dep: Dependency): String = {
