@@ -9,13 +9,13 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-object StanfordParserTest extends Specification {
+object StanfordPostaggerTest extends Specification {
   "postag example sentence" in {
     val text = "This is a test of the Stanford postagger."
     val postagger = new StanfordPostagger
 
     val postagged = postagger.postag(text)
-    postagged.mkString(" ") must_== "This/DT@0 is/VBZ@5 a/DT@8 test/NN@10 of/IN@15 the/DT@18 Stanford/NNP@22 postagger/NN@31 ./.@40"
+    postagged.mkString("; ") must_== "This 0 DT; is 5 VBZ; a 8 DT; test 10 NN; of 15 IN; the 18 DT; Stanford 22 NNP; postagger 31 NN; . 40 ."
   }
 }
 

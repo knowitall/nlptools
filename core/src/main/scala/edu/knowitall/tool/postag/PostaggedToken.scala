@@ -17,7 +17,7 @@ extends Token(string, offset) {
   def postag = postagSymbol.name
   require(postag.forall(!_.isWhitespace), "postag contains whitespace: " + postag)
 
-  override def toString = string+"/"+postag+"@"+offset
+  override def toString = PostaggedToken.stringFormat.write(this)
 
   override def hashCode = super.hashCode * 31 + HashCodeHelper(this.postag)
   def canEqual(that: PostaggedToken) = that.isInstanceOf[PostaggedToken]

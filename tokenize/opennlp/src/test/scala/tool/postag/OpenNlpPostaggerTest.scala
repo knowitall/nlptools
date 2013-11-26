@@ -9,13 +9,13 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-object OpenNlpParserTest extends Specification {
+object OpenNlpTokenizerTest extends Specification {
   "tokenize example sentence" in {
     val text = "This is a test of the OpenNlp tokenizer."
     val tokenizer = new OpenNlpTokenizer
 
     val tokenized = tokenizer.tokenize(text)
-    tokenized.mkString(" ") must_== "This@0 is@5 a@8 test@10 of@15 the@18 OpenNlp@22 tokenizer@30 .@39"
+    tokenized.mkString("; ") must_== "This 0; is 5; a 8; test 10; of 15; the 18; OpenNlp 22; tokenizer 30; . 39"
   }
 }
 

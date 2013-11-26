@@ -9,13 +9,13 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-object OpenNlpParserTest extends Specification {
+object OpenNlpPostaggerTest extends Specification {
   "postag example sentence" in {
     val text = "This is a test of the OpenNlp postagger."
     val postagger = new OpenNlpPostagger
 
     val postagged = postagger.postag(text)
-    postagged.mkString(" ") must_== "This/DT@0 is/VBZ@5 a/DT@8 test/NN@10 of/IN@15 the/DT@18 OpenNlp/NNP@22 postagger/NN@30 ./.@39"
+    postagged.mkString("; ") must_== "This 0 DT; is 5 VBZ; a 8 DT; test 10 NN; of 15 IN; the 18 DT; OpenNlp 22 NNP; postagger 30 NN; . 39 ."
   }
 }
 

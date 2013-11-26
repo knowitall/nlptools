@@ -12,7 +12,7 @@ import edu.knowitall.collection.immutable.Interval
   * @param  offset  the character offset of the token in the source sentence
   */
 class Token(val string: String, val offset: Int) {
-  override def toString = string + "@" + offset
+  override def toString = Token.stringFormat.write(this)
 
   override def hashCode = HashCodeHelper(this.string, this.offset)
   def canEqual(that: Token) = that.isInstanceOf[Token]

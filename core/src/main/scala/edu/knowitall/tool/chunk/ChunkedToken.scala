@@ -19,7 +19,7 @@ extends PostaggedToken(postagSymbol, string, offset) {
   def chunk = chunkSymbol.name
   require(chunk.forall(!_.isWhitespace), "chunk contains whitespace: " + chunk)
 
-  override def toString = string+"/"+postag+"/"+chunk+"@"+offset
+  override def toString = ChunkedToken.stringFormat.write(this)
 
   override def hashCode = super.hashCode * 31 + HashCodeHelper(this.postag, this.chunk)
   def canEqual(that: ChunkedToken) = that.isInstanceOf[ChunkedToken]
