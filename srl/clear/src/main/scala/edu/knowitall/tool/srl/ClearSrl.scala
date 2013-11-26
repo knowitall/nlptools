@@ -7,12 +7,10 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.JavaConverters.asScalaIteratorConverter
 import scala.io.Source
 
-import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
-import com.googlecode.clearnlp.component.srl.CPredIdentifier
-import com.googlecode.clearnlp.component.srl.CRolesetClassifier
-import com.googlecode.clearnlp.component.srl.CSRLabeler
-import com.googlecode.clearnlp.dependency.DEPNode
-import com.googlecode.clearnlp.dependency.DEPTree
+import com.clearnlp.nlp.NLPGetter
+import com.clearnlp.nlp.NLPLib
+import com.clearnlp.dependency.DEPNode
+import com.clearnlp.dependency.DEPTree
 
 import edu.knowitall.collection.immutable.Interval
 import edu.knowitall.common.Resource.using
@@ -20,18 +18,13 @@ import edu.knowitall.tool.parse.ClearParser
 import edu.knowitall.tool.parse.graph.DependencyGraph
 
 class ClearSrl extends Srl {
-  val clearMorpha = using(this.getClass.getResource("/edu/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
-    new CEnglishMPAnalyzer(new ZipInputStream(input))
-  }
-  val clearRoles = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-role-1.3.0.jar").openStream()) { input =>
-    new CRolesetClassifier(new ZipInputStream(input))
-  }
-  val clearPred = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-pred-1.3.0.jar").openStream()) { input =>
-    new CPredIdentifier(new ZipInputStream(input))
-  }
-  val clearSrl = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-srl-1.3.0.jar").openStream()) { input =>
-    new CSRLabeler(new ZipInputStream(input))
-  }
+  private val modelType = "general-en"
+  private val language = "en"
+
+  private val clearMorpha = NLPGetter.getComponent(modelType, language, NLPLib.MODE_MORPH)
+  private val clearRoles = NLPGetter.getComponent(modelType, language, NLPLib.MODE_ROLE)
+  private val clearPred = NLPGetter.getComponent(modelType, language, NLPLib.MODE_PRED)
+  private val clearSrl = NLPGetter.getComponent(modelType, language, NLPLib.MODE_SRL)
 
   def apply(graph: DependencyGraph): Seq[Frame] = {
     val tree = new DEPTree()
@@ -39,13 +32,13 @@ class ClearSrl extends Srl {
     graph.nodes.zipWithIndex.foreach {
       case (token, i) =>
         val node = new DEPNode(i + 1, token.string)
-        node.pos = token.postag
+        // node.pos = token.postag
         tree.add(node)
     }
 
     for (edge <- graph.dependencies) {
-      val source = tree.get(edge.source.indices.head + 1)
-      val dest = tree.get(edge.dest.indices.head + 1)
+      val source = tree.get(edge.source.id + 1)
+      val dest = tree.get(edge.dest.id + 1)
       dest.setHead(source, edge.label)
     }
 
@@ -65,13 +58,13 @@ class ClearSrl extends Srl {
     val treeNodes = tree.asScala.toSeq
     val relations = treeNodes.flatMap { node =>
       val index = node.id - 1
-      Option(node.getFeat("pb")).map(index -> Relation.fromString(graph.nodes.find(_.indices == Interval.singleton(index)).get, _))
+      Option(node.getFeat("pb")).map(index -> Relation.fromString(graph.nodes.find(_.id == index).get, _))
     }
 
     val arguments = treeNodes.flatMap { node =>
       val index = node.id - 1
       node.getSHeads().asScala.map { head =>
-        (head.getNode.id - 1) -> Argument(graph.nodes.find(_.indices == Interval.singleton(index)).get, Roles(head.getLabel))
+        (head.getNode.id - 1) -> Argument(graph.nodes.find(_.id == index).get, Roles(head.getLabel))
       }
     }
 

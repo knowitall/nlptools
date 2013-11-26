@@ -279,6 +279,7 @@ object DependencyGraph {
     new DependencyGraph(dependencies)
   }
   
+  object singlelineStringFormat extends StringFormat("; ")
   object multilineStringFormat extends StringFormat("\n")
 
   class StringFormat(seperator: String) extends Format[DependencyGraph, String] {

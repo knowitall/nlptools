@@ -12,11 +12,11 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 object DependencySpecTest extends Specification {
   val nodes = List(
-    new DependencyNode("One", "NN", 0, -1),
-    new DependencyNode("man", "NN", 1, -1),
-    new DependencyNode("fell", "VB", 2, -1),
-    new DependencyNode("", ",", 3, -1),
-    new DependencyNode("it", "PRP", 4, -1))
+    new DependencyNode(0, "One"),
+    new DependencyNode(1, "man"),
+    new DependencyNode(2, "fell"),
+    new DependencyNode(3, "through"),
+    new DependencyNode(4, "it"))
 
   val deps = List(
     new Dependency(nodes(0), nodes(1), "one"),
@@ -32,7 +32,7 @@ object DependencySpecTest extends Specification {
 
   "dependency nodes" should {
     "remove nongraphical characters when serialized" in {
-      new DependencyNode("asdf", "NN", 1, 0).serialize must_== "asdf_NN_1_0"
+      DependencyNode.stringFormat.write(new DependencyNode(0, "asdf")) must_== "asdf-0"
     }
   }
 }

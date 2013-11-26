@@ -4,20 +4,17 @@ package postag
 
 import java.util.zip.ZipInputStream
 import scala.collection.JavaConverters.asScalaIteratorConverter
-import com.googlecode.clearnlp.component.pos.CPOSTagger
-import com.googlecode.clearnlp.dependency.DEPNode
-import com.googlecode.clearnlp.dependency.DEPTree
+import com.clearnlp.nlp.NLPGetter
+import com.clearnlp.nlp.NLPLib
+import com.clearnlp.dependency.DEPNode
+import com.clearnlp.dependency.DEPTree
 import edu.knowitall.common.Resource.using
 import edu.knowitall.tool.tokenize.Tokenizer
 import edu.knowitall.tool.tokenize.ClearTokenizer
 import edu.knowitall.tool.tokenize.Token
 
 class ClearPostagger(override val tokenizer: Tokenizer = new ClearTokenizer) extends Postagger {
-  val clearPosUrl = this.getClass.getResource("/knowitall/models/clear/ontonotes-en-pos-1.3.0.jar")
-  require(clearPosUrl != null, "clear pos model not found")
-  val clearPosTagger = using (clearPosUrl.openStream()) { input =>
-    new CPOSTagger(new ZipInputStream(input));
-  }
+  val clearPosTagger = NLPGetter.getComponent("general-en", "en", NLPLib.MODE_POS);
 
   override def postagTokenized(tokens: Seq[Token]) = {
     val tree = new DEPTree()

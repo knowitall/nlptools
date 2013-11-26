@@ -4,32 +4,19 @@ package tokenize
 
 import scala.collection.JavaConversions._
 import edu.knowitall.common.Resource.using
-import com.googlecode.clearnlp.engine.EngineGetter
-import com.googlecode.clearnlp.tokenization.EnglishTokenizer
+import com.clearnlp.tokenization.AbstractTokenizer
+import com.clearnlp.nlp.NLPGetter
 import java.util.zip.ZipInputStream
 import java.net.URL
 
-class ClearTokenizer(modelUrl: URL = ClearTokenizer.defaultModelUrl)
+class ClearTokenizer
 extends Tokenizer {
-  require(modelUrl != null, "tokenizer model url is null")
-
   val tokenizer =
-    using(modelUrl.openStream()) { inputStream =>
-      new EnglishTokenizer(new ZipInputStream(inputStream))
-    }
+    NLPGetter.getTokenizer("en")
 
   def tokenize(sentence: String): Seq[Token] = {
     val strings = tokenizer.getTokens(sentence)
     Tokenizer.computeOffsets(strings, sentence)
-  }
-}
-
-object ClearTokenizer {
-  val defaultModelUrl = {
-    val url = "dictionary-1.2.0.zip"
-    val resource = classOf[ClearTokenizer].getResource(url)
-    require(resource != null, "Could not find tokenizer models: " + url)
-    resource
   }
 }
 
