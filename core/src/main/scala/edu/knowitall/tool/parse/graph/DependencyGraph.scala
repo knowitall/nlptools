@@ -33,7 +33,7 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
   val nodes = vertices
   val dependencies = edges
 
-  override def toString = DependencyGraph.multilineStringFormat.write(this)
+  override def toString = DependencyGraph.singlelineStringFormat.write(this)
 
   /** Approximate Stanford's procedure to create collapsed dependencies. */
   def collapse = {
