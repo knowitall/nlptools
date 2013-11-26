@@ -4,7 +4,6 @@ package parse
 
 import scala.Array.canBuildFrom
 import scala.collection.JavaConversions.asScalaBuffer
-
 import edu.knowitall.tool.parse.BaseStanfordParser.CollapseType
 import edu.knowitall.tool.postag.Postagger
 import edu.knowitall.tool.postag.StanfordPostagger
@@ -16,6 +15,7 @@ import graph.Dependency
 import graph.DependencyGraph
 import graph.DependencyNode
 import postag.PostaggedToken
+import edu.knowitall.tool.tokenize.Token
 
 class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends BaseStanfordParser with ConstituencyParser {
   def this(postagger: Postagger = new StanfordPostagger()) = 
@@ -37,6 +37,23 @@ class StanfordParser(lp: LexicalizedParser, val postagger: Postagger) extends Ba
   override def dependencyGraphPostagged(tokens: Seq[PostaggedToken], collapse: CollapseType) = {
     val (nodes, deps) = StanfordParser.dependencyHelper(lp.parse(postagToStanfordRepr(tokens)), collapse)
     DependencyGraph.create(deps)
+  }
+
+  /**
+   * Create a graph of the dependencies from Tokens without postagging.
+   */
+  def dependencyGraphWithoutPostags(tokens: Seq[Token]): DependencyGraph = {
+    val postaggedTokens = tokens.map { t => PostaggedToken(t, null) }
+    dependencyGraphPostagged(postaggedTokens)
+  }
+
+  /**
+   * Create a graph of the dependencies from Tokens without postagging.
+   */
+  def dependencyGraphWithoutPostags(text: String): (Seq[Token], DependencyGraph) = {
+    val tokens = postagger.tokenizer(text)
+    val graph = this.dependencyGraphWithoutPostags(tokens)
+    (tokens, graph)
   }
 
   override def parse(string: String) = {
