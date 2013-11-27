@@ -64,7 +64,7 @@ object ClearParser {
       new Dependency(nodeMap(destNode.id), nodeMap(sourceNode.id), label)
     }
 
-    new DependencyGraph(nodeMap.values.toSet filterNot (_.id == -1), deps.toSet)
+    DependencyGraph(nodeMap.values.toSet filterNot (_.id == -1), deps.toSet)
   }
 }
 

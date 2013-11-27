@@ -124,6 +124,6 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
   def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     val deps = dependenciesPostagged(tokens)
     val nodes: Set[DependencyNode] = deps.flatMap(dep => Set(dep.source, dep.dest))(scala.collection.breakOut)
-    new DependencyGraph(nodes, deps)
+    DependencyGraph(nodes, deps)
   }
 }

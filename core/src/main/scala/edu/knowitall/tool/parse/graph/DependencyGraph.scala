@@ -26,11 +26,8 @@ import edu.knowitall.tool.stem.Lemmatized
   * This richer representation may include the text of the original sentence,
   * the original nodes (before collapsing), and the original dependencies.
   */
-class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]])
+class DependencyGraph private (vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]])
     extends Graph[DependencyNode](vertices, edges) {
-
-  def this(edges: Iterable[Edge[DependencyNode]]) =
-    this(edges.flatMap(_.vertices).toSet, edges.toSet)
 
   val nodes = vertices
   val dependencies = edges
@@ -235,7 +232,7 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
           collapseJunctions(
             collapseMultiwordPrepositions(this))))
 
-    new DependencyGraph(graph.vertices, graph.edges)
+    DependencyGraph(graph.vertices, graph.edges)
   }
 
   /** Simplify xsubj and nsubj to just subj. */
@@ -245,7 +242,7 @@ class DependencyGraph(vertices: Set[DependencyNode], edges: Set[Edge[DependencyN
         new Edge[DependencyNode](dep.source, dep.dest, "subj")
       else dep
     }
-    new DependencyGraph(edges)
+    DependencyGraph(edges)
   }
 
   def joined: JoinedDependencyGraph = {
@@ -275,8 +272,21 @@ object DependencyGraph {
 
   type JoinedDependencyGraph = Graph[JoinedDependencyNode]
 
-  def create[T <: Token](dependencies: Iterable[Dependency]): DependencyGraph = {
-    new DependencyGraph(dependencies)
+  def apply(vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]]) = {
+    import Dependency.DependencyOrdering
+
+    val sortedVertices = immutable.SortedSet.empty[DependencyNode] ++ vertices
+    val sortedEdges = immutable.SortedSet.empty[Dependency] ++ edges
+
+    new DependencyGraph(sortedVertices, sortedEdges)
+  }
+
+  def apply(dependencies: Iterable[Dependency]): DependencyGraph = {
+    this.apply(dependencies.flatMap(_.vertices).toSet, dependencies.toSet)
+  }
+
+  def create(dependencies: Iterable[Dependency]): DependencyGraph = {
+    this.apply(dependencies)
   }
 
   object singlelineStringFormat extends StringFormat("; ")

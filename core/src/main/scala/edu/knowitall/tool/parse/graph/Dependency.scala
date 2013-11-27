@@ -10,6 +10,14 @@ import scala.collection.immutable.SortedSet
 object Dependency {
   val Serialized = new Regex("""(\p{Graph}+)\(\s*(\p{Graph}*?-\d\d*?),\s*(\p{Graph}*?-\d\d*)\s*\)""")
 
+  implicit object DependencyOrdering extends Ordering[Dependency] {
+    def compare(a: Dependency, b: Dependency) = {
+      def tupled(x: Dependency) = (x.dest.id, x.source.id)
+
+      implicitly[Ordering[(Int, Int)]].compare(tupled(a), tupled(b))
+    }
+  }
+
   object stringFormat extends Format[Dependency, String] {
     def write(dep: Dependency): String = {
       dep.label + "(" + DependencyNode.stringFormat.write(dep.source) + ", " + DependencyNode.stringFormat.write(dep.dest) + ")"
