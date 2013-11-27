@@ -26,7 +26,7 @@ import edu.knowitall.tool.stem.Lemmatized
   * This richer representation may include the text of the original sentence,
   * the original nodes (before collapsing), and the original dependencies.
   */
-class DependencyGraph private (vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]])
+class DependencyGraph private (val root: DependencyNode, vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]])
     extends Graph[DependencyNode](vertices, edges) {
 
   val nodes = vertices
@@ -272,13 +272,28 @@ object DependencyGraph {
 
   type JoinedDependencyGraph = Graph[JoinedDependencyNode]
 
-  def apply(vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]]) = {
+  def apply(root: DependencyNode, vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]]): DependencyGraph = {
     import Dependency.DependencyOrdering
 
     val sortedVertices = immutable.SortedSet.empty[DependencyNode] ++ vertices
     val sortedEdges = immutable.SortedSet.empty[Dependency] ++ edges
 
-    new DependencyGraph(sortedVertices, sortedEdges)
+    new DependencyGraph(root, sortedVertices, sortedEdges)
+  }
+
+  def apply(vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]]): DependencyGraph = {
+    val roots = vertices.filter { v =>
+      edges.exists(e => e.source == v) &&
+        edges.forall(e => e.dest != v)
+    }
+
+    edges foreach println
+
+    val root = roots.headOption.getOrElse {
+      throw new IllegalArgumentException("There must be a single root: " + roots)
+    }
+
+    this.apply(root, vertices, edges)
   }
 
   def apply(dependencies: Iterable[Dependency]): DependencyGraph = {
@@ -294,16 +309,51 @@ object DependencyGraph {
 
   class StringFormat(seperator: String) extends Format[DependencyGraph, String] {
     def write(graph: DependencyGraph) = {
-      // serialize tokens on first line
-      val pickledDeps = graph.dependencies.iterator map Dependency.stringFormat.write
+      import Dependency.DependencyOrdering
+
+      // create a root dependency
+      val root = new Edge[DependencyNode](
+        new DependencyNode(0, "ROOT"),
+        graph.root.copy(id = graph.root.id + 1),
+        "root")
+
+      // increment all dependency node ids
+      val incrementedDeps: immutable.SortedSet[Dependency] = immutable.SortedSet[Dependency]() + root ++
+        graph.dependencies.map { dep =>
+          dep.copy(
+            source = dep.source.copy(id = dep.source.id + 1),
+            dest = dep.dest.copy(id = dep.dest.id + 1))
+        }
+
+      // serialize dependencies on first line
+      val pickledDeps = incrementedDeps.iterator map Dependency.stringFormat.write
+
+      // create a pickled string
       pickledDeps.mkString(seperator)
     }
 
     val nodeRegex = "\\s*\\((.*)\\)\\s*".r
     def read(pickled: String) = {
+      import Dependency.DependencyOrdering
+
+      // split dependencies
       val pickledDeps = pickled.split(seperator)
-      val deps = pickledDeps map Dependency.stringFormat.read
-      DependencyGraph.create(deps)
+
+      // deserialize
+      val allDeps = pickledDeps map Dependency.stringFormat.read
+
+      // separate the root and decrement node ids
+      val rootDep = allDeps.find(_.label == "root").getOrElse {
+        throw new MatchError("Could not find root dependency: " + allDeps)
+      }
+      val deps: immutable.SortedSet[Dependency] = (allDeps filterNot (_ == rootDep)).map(dep => dep.copy(
+        source = dep.source.copy(id = dep.source.id - 1),
+        dest = dep.dest.copy(id = dep.dest.id - 1)))(scala.collection.breakOut)
+
+      val root = rootDep.dest.copy(id = rootDep.dest.id - 1)
+
+      val vertices = deps.flatMap(_.vertices).toSet
+      DependencyGraph(root, vertices, deps)
     }
   }
 

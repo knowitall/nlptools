@@ -23,7 +23,7 @@ object StanfordParserTest extends Specification {
     val parser = new StanfordParser
 
     val dependency = parser.dependencyGraph(text, BaseStanfordParser.CCCompressed)
-    dependency.toString must_== "nsubj(test-3, This-0); cop(test-3, is-1); det(test-3, a-2); det(Parser-7, the-5); nn(Parser-7, Stanford-6); prep_of(test-3, Parser-7)"
+    dependency.toString must_== "nsubj(test-4, This-1); cop(test-4, is-2); det(test-4, a-3); root(ROOT-0, test-4); det(Parser-8, the-6); nn(Parser-8, Stanford-7); prep_of(test-4, Parser-8)"
   }
 }
 
