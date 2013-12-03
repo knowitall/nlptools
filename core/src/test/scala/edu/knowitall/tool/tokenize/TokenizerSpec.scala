@@ -45,4 +45,11 @@ object TokenizerSpecTest extends Specification {
     // make sure we can go back to the original sentence
     Tokenizer.originalText(tokens, tokens.head.offset) must_== trimmedSentence
   }
+  
+  "offsets are computed correctly when a token is a unicode control symbol" in {
+    val sentence = "hello \u0097"
+    val tokens = Tokenizer.computeOffsets(Seq("hello", "\u0097"), sentence)
+    tokens.map(_.offsets.start) must_== Seq(0, 6)
+    Tokenizer.originalText(tokens) must_== sentence
+  }
 }
