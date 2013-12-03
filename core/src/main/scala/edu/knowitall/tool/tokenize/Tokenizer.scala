@@ -17,28 +17,14 @@ object Tokenizer {
     * It adds offset information to the strings by tracing through
     * the source sentence and skipping whitespace. */
   def computeOffsets(strings: TraversableOnce[String], sentence: String) = {
-    var sent: Array[Char] = sentence.toCharArray()
-    var offset: Int = 0
-    var tokens: Seq[Token] = Seq.empty
-
-    // remove leading spaces
-    val (spaces, rest) = sent.span(c => c.isWhitespace || c.isControl)
-    offset += spaces.size
-    sent = rest
-
-    for (string <- strings) {
-      val leftOffset = offset
-      assume(sent startsWith string, "Wrong sentence prefix: '" + string + "' of " + "'" + sentence + "'")
-
-      sent = sent.drop(string.length)
-      val skip = sent.takeWhile(c => c.isWhitespace || c.isControl).length
-      sent = sent.drop(skip)
-
-      offset += string.length + skip
-      tokens = tokens :+ Token(string, leftOffset)
+    var searchIndex = 0
+    val tokens = for (s <- strings) yield {
+      val startIndex = sentence.indexOf(s, searchIndex)
+      assume(startIndex >= 0, s"Could not find offset of '$s' in '$sentence' starting at $searchIndex")
+      searchIndex = startIndex + s.size
+      Token(s, startIndex)
     }
-
-    tokens
+    tokens.toSeq
   }
 
   /** Rebuild the original text from tokens.  This will maintain
