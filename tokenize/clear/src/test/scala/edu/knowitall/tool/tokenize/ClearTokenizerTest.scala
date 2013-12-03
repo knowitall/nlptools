@@ -21,4 +21,24 @@ object ClearTokenizerTest extends Specification {
     val tokenizer = new ClearTokenizer()
     tokenizer(text).mkString(" ") must_== "rough@0 straight@7 and@16"
   }
+  
+  "tokenize a sentence with unicode weirdness" in {
+    val bytes = Array(112,	// p 
+    				  117,	// u
+    				  114,	// r
+    				  112,	// p
+    				  111,	// o
+    				  115,	// s
+    				  101,	// e
+    				  32,	// space
+    				  -62,	// not sure
+    				  -105)	// not sure
+    				  .map(_.asInstanceOf[Byte])
+    val string = new String(bytes)
+    val tokenizer = new ClearTokenizer()
+    
+    // Not sure what the expected output should be, but it should have at least
+    // one token and not throw an exception.
+    tokenizer(string).size must_!= 0
+  }
 }
