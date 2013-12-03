@@ -21,4 +21,5 @@ object ClearTokenizerTest extends Specification {
     val tokenizer = new ClearTokenizer()
     tokenizer(text).mkString(" ") must_== "rough@0 straight@7 and@16"
   }
+  
 }
