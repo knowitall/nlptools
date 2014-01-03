@@ -146,7 +146,7 @@ object NlpToolsBuild extends Build {
 
   // Core
 
-  lazy val core = Project(id = "nlptools-core", base = file("core"), settings = buildSettings ++ Seq(
+  lazy val core = Project(id = "core", base = file("core"), settings = buildSettings ++ Seq(
     licenses := Seq(apache2),
     libraryDependencies ++= Seq(commonScala, scopt, slf4j)
   ))
@@ -154,7 +154,7 @@ object NlpToolsBuild extends Build {
   // Headwords
 
   lazy val uwHeadword = Project(
-    id = "nlptools-headword-uw",
+    id = "headword-uw",
     base = file("headword/uw"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2))
@@ -163,7 +163,7 @@ object NlpToolsBuild extends Build {
   // Wordnet
 
   lazy val uwWordnet = Project(
-    id = "nlptools-wordnet-uw",
+    id = "wordnet-uw",
     base = file("wordnet/uw"),
     settings = buildSettings ++ Seq(
       licenses := Seq("MIT Java Wordnet Interface License" -> url("http://projects.csail.mit.edu/jwi/license.html")),
@@ -173,7 +173,7 @@ object NlpToolsBuild extends Build {
   // OpenNLP
 
   lazy val opennlpSentence = Project(
-    id = "nlptools-sentence-opennlp",
+    id = "sentence-opennlp",
     base = file("sentence/opennlp"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -181,7 +181,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(core)
 
   lazy val opennlpTokenize = Project(
-    id = "nlptools-tokenize-opennlp",
+    id = "tokenize-opennlp",
     base = file("tokenize/opennlp"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -190,7 +190,7 @@ object NlpToolsBuild extends Build {
 
 
   lazy val opennlpPostag = Project(
-    id = "nlptools-postag-opennlp",
+    id = "postag-opennlp",
     base = file("postag/opennlp"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -198,7 +198,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(opennlpTokenize)
 
   lazy val opennlpChunk = Project(
-    id = "nlptools-chunk-opennlp",
+    id = "chunk-opennlp",
     base = file("chunk/opennlp"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -206,7 +206,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(opennlpPostag)
 
   lazy val opennlpParse = Project(
-    id = "nlptools-parse-opennlp",
+    id = "parse-opennlp",
     base = file("parse/opennlp"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -216,7 +216,7 @@ object NlpToolsBuild extends Build {
   // Stanford
 
   lazy val stanfordTokenize = Project(
-    id = "nlptools-tokenize-stanford",
+    id = "tokenize-stanford",
     base = file("tokenize/stanford"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl2),
@@ -224,7 +224,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(core)
 
   lazy val stanfordPostag = Project(
-    id = "nlptools-postag-stanford",
+    id = "postag-stanford",
     base = file("postag/stanford"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl2),
@@ -232,7 +232,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(stanfordTokenize)
 
   lazy val stanfordParse = Project(
-    id = "nlptools-parse-stanford",
+    id = "parse-stanford",
     base = file("parse/stanford"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl2),
@@ -241,7 +241,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(stanfordPostag)
 
   lazy val stanfordCoref = Project(
-    id = "nlptools-coref-stanford",
+    id = "coref-stanford",
     base = file("coref/stanford"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl2),
@@ -251,7 +251,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(stanfordParse)
 
   lazy val stanfordTyper = Project(
-    id = "nlptools-typer-stanford",
+    id = "typer-stanford",
     base = file("typer/stanford"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl2),
@@ -261,7 +261,7 @@ object NlpToolsBuild extends Build {
   // Malt
 
   lazy val maltParse = Project(
-    id = "nlptools-parse-malt",
+    id = "parse-malt",
     base = file("parse/malt"),
     settings = buildSettings ++ Seq(
       licenses := Seq("Malt Parser License" -> url("http://www.maltparser.org/license.html")),
@@ -271,7 +271,7 @@ object NlpToolsBuild extends Build {
   // Clear
 
   lazy val clearTokenize = Project(
-    id = "nlptools-tokenize-clear",
+    id = "tokenize-clear",
     base = file("tokenize/clear"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -279,7 +279,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(core)
 
   lazy val clearPostag = Project(
-    id = "nlptools-postag-clear",
+    id = "postag-clear",
     base = file("postag/clear"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -287,7 +287,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(clearTokenize)
 
   lazy val clearParse = Project(
-    id = "nlptools-parse-clear",
+    id = "parse-clear",
     base = file("parse/clear"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -295,7 +295,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(clearPostag)
 
   lazy val clearSrl = Project(
-    id = "nlptools-srl-clear",
+    id = "srl-clear",
     base = file("srl/clear"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -307,7 +307,7 @@ object NlpToolsBuild extends Build {
   // Breeze
 
   lazy val breezeTokenize = Project(
-    id = "nlptools-tokenize-breeze",
+    id = "tokenize-breeze",
     base = file("tokenize/breeze"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -316,7 +316,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(core)
 
   lazy val breezeSentence = Project(
-    id = "nlptools-sentence-breeze",
+    id = "sentence-breeze",
     base = file("sentence/breeze"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -324,7 +324,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(core)
 
   lazy val breezeConf = Project(
-    id = "nlptools-conf-breeze",
+    id = "conf-breeze",
     base = file("conf/breeze"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
@@ -334,7 +334,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(core)
 
   lazy val wekaConf = Project(
-    id = "nlptools-conf-weka",
+    id = "conf-weka",
     base = file("conf/weka"),
     settings = buildSettings ++ Seq(
       licenses := Seq(gpl3),
@@ -344,7 +344,7 @@ object NlpToolsBuild extends Build {
   // Stemmers
 
   lazy val morphaStemmer = Project(
-    id = "nlptools-stem-morpha",
+    id = "stem-morpha",
     base = file("stem/morpha"),
     settings = buildSettings ++ Seq(
       licenses := Seq(
@@ -355,7 +355,7 @@ object NlpToolsBuild extends Build {
   ) dependsOn(core)
 
   lazy val snowballStemmer = Project(
-    id = "nlptools-stem-snowball",
+    id = "stem-snowball",
     base = file("stem/snowball"),
     settings = buildSettings ++ Seq(
       licenses := Seq("BSD" -> url("http://snowball.tartarus.org/license.php")),
