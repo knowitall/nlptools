@@ -36,7 +36,7 @@ line.  Here are some examples:
 You can also spin each tool up as an HTTP server.
 
   `sbt 'project nlptools-parse-stanford' 'run-main edu.knowitall.tool.parse.StanfordParserMain --server'`
-  
+
 It's also possible to spin up all nlptools components as HTTP servers.
 
 ```
@@ -45,7 +45,7 @@ $ scala scripts/runservers.scala servers.config
 ```
 
 Inconveniently, this spins up many programs on different ports that can receive POST and GET requests.
-Remembering which port corresponds to which tool is confusing at best.  There is a simple scala 
+Remembering which port corresponds to which tool is confusing at best.  There is a simple scala
 application in `/server` that runs yet another server to unify the tools.  Once you run the nlptools
 server you can post to the subpath corresponding to your tool.
 
