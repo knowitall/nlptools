@@ -4,4 +4,4 @@ scala:
 jdk:
   - openjdk7
 script:
-  sbt 'project core' test
+  sbt 'project nlptools-core' test
