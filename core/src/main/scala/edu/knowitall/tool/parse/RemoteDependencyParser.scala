@@ -1,13 +1,14 @@
 package edu.knowitall.tool
 package parse
 
-import edu.knowitall.tool.parse.graph._
-
-import edu.knowitall.tool.tokenize._
-import edu.knowitall.tool.postag._
 import edu.knowitall.tool.chunk._
+import edu.knowitall.tool.parse.graph._
+import edu.knowitall.tool.postag._
+import edu.knowitall.tool.tokenize._
 
-class RemoteDependencyParser(val urlString: String) extends DependencyParser with Remote {
+import scala.concurrent.ExecutionContext
+
+class RemoteDependencyParser(val urlString: String)(implicit executionContext: ExecutionContext) extends DependencyParser with Remote {
   override def postagger = throw new UnsupportedOperationException()
 
   override def dependencyGraph(sentence: String) = {

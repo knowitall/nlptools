@@ -1,12 +1,12 @@
 package edu.knowitall.tool
 
-import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.DurationInt
-
-import dispatch.Http
 import dispatch.as
+import dispatch.Http
 import dispatch.url
+
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.ExecutionContext
 
 trait Remote {
   def urlString: String
@@ -14,6 +14,6 @@ trait Remote {
 
   val svc = url(urlString)
 
-  def post(string: String) =
+  def post(string: String)(implicit executor: ExecutionContext) =
     Await.result(Http(svc << string OK as.String), timeout)
 }
