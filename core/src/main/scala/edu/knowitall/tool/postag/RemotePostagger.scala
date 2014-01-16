@@ -3,7 +3,9 @@ package postag
 
 import edu.knowitall.tool.tokenize._
 
-class RemotePostagger(val urlString: String) extends Postagger with Remote {
+import scala.concurrent.ExecutionContext
+
+class RemotePostagger(val urlString: String)(implicit executionContext: ExecutionContext) extends Postagger with Remote {
   override def tokenizer = throw new UnsupportedOperationException()
   override def postagTokenized(tokens: Seq[Token]) = throw new UnsupportedOperationException()
   override def postag(sentence: String) = {
