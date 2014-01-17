@@ -157,6 +157,7 @@ object NlpToolsBuild extends Build {
     id = "headword-uw",
     base = file("headword/uw"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-headword-uw",
       licenses := Seq(apache2))
   ) dependsOn(uwWordnet)
 
@@ -166,6 +167,7 @@ object NlpToolsBuild extends Build {
     id = "wordnet-uw",
     base = file("wordnet/uw"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-wordnet-uw",
       licenses := Seq("MIT Java Wordnet Interface License" -> url("http://projects.csail.mit.edu/jwi/license.html")),
       libraryDependencies ++= Seq("edu.mit" % "jwi" % "2.2.3"))
   ) dependsOn(core)
@@ -176,6 +178,7 @@ object NlpToolsBuild extends Build {
     id = "sentence-opennlp",
     base = file("sentence/opennlp"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-sentence-opennlp",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(opennlp, "edu.washington.cs.knowitall" % "opennlp-sent-models" % "1.5" ))
   ) dependsOn(core)
@@ -184,6 +187,7 @@ object NlpToolsBuild extends Build {
     id = "tokenize-opennlp",
     base = file("tokenize/opennlp"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-tokenize-opennlp",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(opennlp, "edu.washington.cs.knowitall" % "opennlp-tokenize-models" % "1.5" ))
   ) dependsOn(core)
@@ -193,6 +197,7 @@ object NlpToolsBuild extends Build {
     id = "postag-opennlp",
     base = file("postag/opennlp"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-postag-opennlp",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(opennlp, "edu.washington.cs.knowitall" % "opennlp-postag-models" % "1.5" ))
   ) dependsOn(opennlpTokenize)
@@ -201,6 +206,7 @@ object NlpToolsBuild extends Build {
     id = "chunk-opennlp",
     base = file("chunk/opennlp"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-chunk-opennlp",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(opennlp, "edu.washington.cs.knowitall" % "opennlp-chunk-models" % "1.5" ))
   ) dependsOn(opennlpPostag)
@@ -209,6 +215,7 @@ object NlpToolsBuild extends Build {
     id = "parse-opennlp",
     base = file("parse/opennlp"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-parse-opennlp",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(opennlp, "edu.washington.cs.knowitall" % "opennlp-parse-models" % "1.5" ))
   ) dependsOn(opennlpPostag)
@@ -219,6 +226,7 @@ object NlpToolsBuild extends Build {
     id = "tokenize-stanford",
     base = file("tokenize/stanford"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-tokenize-stanford",
       licenses := Seq(gpl2),
       libraryDependencies ++= Seq(stanford))
   ) dependsOn(core)
@@ -227,6 +235,7 @@ object NlpToolsBuild extends Build {
     id = "postag-stanford",
     base = file("postag/stanford"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-postag-stanford",
       licenses := Seq(gpl2),
       libraryDependencies ++= Seq(stanford, stanfordModels))
   ) dependsOn(stanfordTokenize)
@@ -235,6 +244,7 @@ object NlpToolsBuild extends Build {
     id = "parse-stanford",
     base = file("parse/stanford"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-parse-stanford",
       licenses := Seq(gpl2),
       libraryDependencies ++= Seq(stanford, stanfordModels),
       mainClass in assembly := Some("edu.knowitall.tool.parse.StanfordParserMain"))
@@ -244,6 +254,7 @@ object NlpToolsBuild extends Build {
     id = "coref-stanford",
     base = file("coref/stanford"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-coref-stanford",
       licenses := Seq(gpl2),
       libraryDependencies ++= Seq(stanford,
         stanfordModels,
@@ -254,6 +265,7 @@ object NlpToolsBuild extends Build {
     id = "typer-stanford",
     base = file("typer/stanford"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-typer-stanford",
       licenses := Seq(gpl2),
       libraryDependencies ++= Seq(stanford, stanfordModels))
   ) dependsOn(core)
@@ -264,6 +276,7 @@ object NlpToolsBuild extends Build {
     id = "parse-malt",
     base = file("parse/malt"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-parse-malt",
       licenses := Seq("Malt Parser License" -> url("http://www.maltparser.org/license.html")),
       libraryDependencies ++= Seq("org.maltparser" % "maltparser" % "1.7.2"))
   ) dependsOn(morphaStemmer, opennlpPostag)
@@ -274,6 +287,7 @@ object NlpToolsBuild extends Build {
     id = "tokenize-clear",
     base = file("tokenize/clear"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-tokenize-clear",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear, clearGroup % "clearnlp-dictionary" % "1.0"))
   ) dependsOn(core)
@@ -282,6 +296,7 @@ object NlpToolsBuild extends Build {
     id = "postag-clear",
     base = file("postag/clear"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-postag-clear",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear, clearGroup % "clearnlp-general-en-pos" % "1.0" ))
   ) dependsOn(clearTokenize)
@@ -290,6 +305,7 @@ object NlpToolsBuild extends Build {
     id = "parse-clear",
     base = file("parse/clear"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-parse-clear",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear, clearGroup % "clearnlp-general-en-dep" % "1.1" ))
   ) dependsOn(clearPostag)
@@ -298,6 +314,7 @@ object NlpToolsBuild extends Build {
     id = "srl-clear",
     base = file("srl/clear"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-srl-clear",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(
         clear,
@@ -310,6 +327,7 @@ object NlpToolsBuild extends Build {
     id = "tokenize-breeze",
     base = file("tokenize/breeze"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-tokenize-breeze",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear, breezeProcess),
       mainClass in assembly := Some("edu.knowitall.tool.tokenize.SimpleEnglishTokenizerMain"))
@@ -319,6 +337,7 @@ object NlpToolsBuild extends Build {
     id = "sentence-breeze",
     base = file("sentence/breeze"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-sentence-breeze",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear, breezeProcess))
   ) dependsOn(core)
@@ -327,6 +346,7 @@ object NlpToolsBuild extends Build {
     id = "conf-breeze",
     base = file("conf/breeze"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-conf-breeze",
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(clear,
         breezeProcess,
@@ -337,6 +357,7 @@ object NlpToolsBuild extends Build {
     id = "conf-weka",
     base = file("conf/weka"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-conf-weka",
       licenses := Seq(gpl3),
       libraryDependencies ++= Seq(weka, specs2, junit))
   ) dependsOn(core)
@@ -347,6 +368,7 @@ object NlpToolsBuild extends Build {
     id = "stem-morpha",
     base = file("stem/morpha"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-stem-morpha",
       licenses := Seq(
         "Academic License (for original lex files)" -> url("http://www.informatics.sussex.ac.uk/research/groups/nlp/carroll/morph.tar.gz"),
         "Apache 2.0 (for supplemental code)" -> url("http://www.opensource.org/licenses/bsd-3-clause")),
@@ -358,6 +380,7 @@ object NlpToolsBuild extends Build {
     id = "stem-snowball",
     base = file("stem/snowball"),
     settings = buildSettings ++ Seq(
+      name := "nlptools-stem-snowball",
       licenses := Seq("BSD" -> url("http://snowball.tartarus.org/license.php")),
       libraryDependencies ++= Seq(clear,
         "org.apache.lucene" % "lucene-snowball" % "3.0.3"))
