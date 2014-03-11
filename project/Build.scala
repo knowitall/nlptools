@@ -1,9 +1,6 @@
 import sbt._
 import Keys._
 
-import sbtassembly.Plugin._
-import AssemblyKeys._
-
 import sbtrelease._
 import ReleasePlugin._
 import ReleaseKeys._
@@ -94,7 +91,7 @@ object NlpToolsBuild extends Build {
   }
 
   // parent build definition
-  val buildSettings = Defaults.defaultSettings ++ assemblySettings ++ Format.settings ++ Seq (
+  val buildSettings = Defaults.defaultSettings ++ Format.settings ++ Deploy.settings ++ Package.settings ++ Seq (
     organization := buildOrganization,
     crossScalaVersions := buildScalaVersions,
     scalaVersion <<= (crossScalaVersions) { versions => versions.head },
@@ -116,10 +113,6 @@ object NlpToolsBuild extends Build {
         Some("releases"  at nexus + "service/local/staging/deploy/maven2")
     },
     homepage := Some(url("https://github.com/knowitall/nlptools")),
-    mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) => {
-      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-      case _ => MergeStrategy.first
-    }},
     releaseProcess := Seq[ReleaseStep](
       checkSnapshotDependencies,
       inquireVersions,
@@ -246,8 +239,7 @@ object NlpToolsBuild extends Build {
     settings = buildSettings ++ Seq(
       name := "nlptools-parse-stanford",
       licenses := Seq(gpl2),
-      libraryDependencies ++= Seq(stanford, stanfordModels),
-      mainClass in assembly := Some("edu.knowitall.tool.parse.StanfordParserMain"))
+      libraryDependencies ++= Seq(stanford, stanfordModels))
   ) dependsOn(stanfordPostag)
 
   lazy val stanfordCoref = Project(
@@ -329,8 +321,7 @@ object NlpToolsBuild extends Build {
     settings = buildSettings ++ Seq(
       name := "nlptools-tokenize-breeze",
       licenses := Seq(apache2),
-      libraryDependencies ++= Seq(clear, breezeProcess),
-      mainClass in assembly := Some("edu.knowitall.tool.tokenize.SimpleEnglishTokenizerMain"))
+      libraryDependencies ++= Seq(clear, breezeProcess))
   ) dependsOn(core)
 
   lazy val breezeSentence = Project(
