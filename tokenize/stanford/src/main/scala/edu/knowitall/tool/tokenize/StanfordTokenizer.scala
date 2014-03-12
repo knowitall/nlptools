@@ -13,8 +13,8 @@ class StanfordTokenizer extends Tokenizer {
       new java.io.StringReader(sentence),
       new CoreLabelTokenFactory(),
       "").map { stoken =>
-    new Token(stoken.word, stoken.beginPosition())
-  }.toList
+      new Token(stoken.word, stoken.beginPosition())
+    }.toList
 }
 
 object StanfordTokenizerMain extends TokenizerMain {

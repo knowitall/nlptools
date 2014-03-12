@@ -10,8 +10,8 @@ import scala.collection.JavaConversions._
 import java.util.ArrayList
 
 /**
- * Wraps the Weka Instances container and provides translation from features of E to Weka Instance objects.
- */
+  * Wraps the Weka Instances container and provides translation from features of E to Weka Instance objects.
+  */
 class WekaInstanceCollection[E](val training: Iterable[Labelled[E]], val featureSet: FeatureSet[E, Double]) {
 
   private val classValues = List("positive", "negative")
@@ -19,9 +19,9 @@ class WekaInstanceCollection[E](val training: Iterable[Labelled[E]], val feature
   private val classAttr = new Attribute("class", classValues)
 
   /**
-   * Wraps featureSet.featureNames with weka Attributes.
-   * Appended is a "class" attribute with values of "positive" and "negative". 
-   */
+    * Wraps featureSet.featureNames with weka Attributes.
+    * Appended is a "class" attribute with values of "positive" and "negative".
+    */
   val attributes = {
     val featureAttrs = featureSet.featureNames.map(name => new Attribute(name))
     featureAttrs :+ classAttr
@@ -35,10 +35,10 @@ class WekaInstanceCollection[E](val training: Iterable[Labelled[E]], val feature
   }
 
   /**
-   * A Weka Instances object containing all elements of this.training, 
-   * attributes for all features in this.featureSet, 
-   * and a "class" attribute with values of "positive" and "negative".
-   */
+    * A Weka Instances object containing all elements of this.training,
+    * attributes for all features in this.featureSet,
+    * and a "class" attribute with values of "positive" and "negative".
+    */
   val trainingInstances = {
     val insts = new Instances("Default training instances", attrsList, 0)
     insts.setClass(classAttr)

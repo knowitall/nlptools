@@ -18,4 +18,3 @@ object OpenNlpParserTest extends Specification {
     constituency.toString must_== "(TOP (S (NP (DT This)) (VP (VBZ is) (NP (NP (DT a) (NN test)) (PP (IN of) (NP (DT the) (NNP OpenNlp) (NN parser))))) (. .)))"
   }
 }
-

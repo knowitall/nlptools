@@ -15,9 +15,9 @@ object PTBTokenizerTest extends Specification {
     val tokenizer = new PTBTokenizer()
 
     val tokenized = tokenizer.tokenize(text)
-    tokenized.mkString(" ") must_== "This@0 is@7 a@10 test@12 of@17 the@20 breeze@25 PTBTokenizer@32 .@44"
+    tokenized.mkString("; ") must_== "This 0; is 7; a 10; test 12; of 17; the 20; breeze 25; PTBTokenizer 32; . 44"
 
-    tokenizer.tokenize("Mr. Obama's campaign.").mkString(" ") must_== "Mr.@0 Obama@4 's@9 campaign@12 .@20"
+    tokenizer.tokenize("Mr. Obama's campaign.").mkString("; ") must_== "Mr. 0; Obama 4; 's 9; campaign 12; . 20"
   }
 }
 

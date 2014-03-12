@@ -54,8 +54,9 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
   }
 
   def resolve(text: String, transform: (String, String) => String): String = {
-    val substitutions = this.substitutions(text).map { case Substitution(from, to) =>
-      Substitution(from, to.copy(text = from.text + "[" + to.text + "]"))
+    val substitutions = this.substitutions(text).map {
+      case Substitution(from, to) =>
+        Substitution(from, to.copy(text = from.text + "[" + to.text + "]"))
     }
 
     CoreferenceResolver.substitute(text, substitutions)
@@ -64,9 +65,9 @@ class StanfordCoreferenceResolver extends CoreferenceResolver {
 
 object StanfordCoreferenceResolverMain {
   case class Config(
-    val inputFile: Option[File] = None,
-    val outputFile: Option[File] = None,
-    val bratOutput: Boolean = false) {
+      val inputFile: Option[File] = None,
+      val outputFile: Option[File] = None,
+      val bratOutput: Boolean = false) {
 
     def writer = outputFile match {
       case Some(file) => new PrintWriter(file)

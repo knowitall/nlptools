@@ -19,7 +19,8 @@ import tokenize.Token
 import stem.MorphaStemmer
 import scala.collection.immutable.SortedSet
 
-/** MaltParser is much faster than the StanfordParser but has a lower F-score.
+/**
+  * MaltParser is much faster than the StanfordParser but has a lower F-score.
   * It includes wrapper code so that it can still use the Stanford postprocessing.
   */
 object MaltParserMain extends DependencyParserMain {
@@ -28,10 +29,10 @@ object MaltParserMain extends DependencyParserMain {
   lazy val dependencyParser = new MaltParser(model);
 }
 
-class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL, 
-    val postagger: Postagger = new OpenNlpPostagger, 
+class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
+    val postagger: Postagger = new OpenNlpPostagger,
     val logFile: Option[File] = None) extends DependencyParser {
-  
+
   val parser = initializeMaltParserService()
   val stemmer = MorphaStemmer
 
@@ -46,25 +47,24 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
 
     val command =
       "-u " + modelUrl +
-      " -m parse" +
-      // turn logging off if no log file is specified
-      (logFile match {
-        case Some(file) => " -lfi " + file.getPath
-        case None => " -cl off"
-      })
+        " -m parse" +
+        // turn logging off if no log file is specified
+        (logFile match {
+          case Some(file) => " -lfi " + file.getPath
+          case None => " -cl off"
+        })
 
     System.err.println("Initializing malt: " + command);
     val service = new MaltParserService()
 
     try {
       service.initializeParserModel(command);
-    }
-    catch {
+    } catch {
       case e: org.maltparser.core.config.ConfigurationException =>
-        println("\n" + 
-        "There was an error configurating MaltParser.\n" +
-        "This is most likely because the model file '" + modelUrl + "' was not found.\n" +
-        "Please download the MaltParser model file from http://www.maltparser.org.\n")
+        println("\n" +
+          "There was an error configurating MaltParser.\n" +
+          "This is most likely because the model file '" + modelUrl + "' was not found.\n" +
+          "Please download the MaltParser model file from http://www.maltparser.org.\n")
 
         throw e
     }
@@ -79,17 +79,19 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
       // replace unicode single quotes
       replaceAll("[\u2018\u2019\u201a\u201b\u275b\u275c]", "'")
   }
-  
-  private def dependenciesPostagged(tokens: Seq[PostaggedToken]): Iterable[Dependency] = {
- 
-    val nodes = tokens.iterator.zipWithIndex.map { case (t, i) =>
-      new DependencyNode(t, Interval.singleton(i))
+
+  private def dependenciesPostagged(tokens: Seq[PostaggedToken]): Set[Dependency] = {
+
+    val nodes = tokens.iterator.zipWithIndex.map {
+      case (t, i) =>
+        new DependencyNode(i, t.string)
     }.toIndexedSeq
 
-    val lemmatized = nodes.map(stemmer.stemToken)
+    val lemmatized = tokens.map(stemmer.stemToken)
 
-    val maltTokens: Array[String] = lemmatized.iterator.zipWithIndex.map { case (ltok, i) =>
-      Iterable(i+1,
+    val maltTokens: Array[String] = lemmatized.iterator.zipWithIndex.map {
+      case (ltok, i) =>
+        Iterable(i + 1,
           ltok.token.string,
           ltok.lemma,
           ltok.token.postag,
@@ -100,12 +102,11 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
 
     val tables = structure.getSymbolTables
 
-    val deps: SortedSet[Dependency] = structure.getEdges.flatMap { edge =>
+    val deps = structure.getEdges.flatMap { edge =>
       if (edge.getSource.getIndex == 0 || edge.getTarget.getIndex == 0) {
         // skip the root
         None
-      }
-      else {
+      } else {
         val source = nodes(edge.getSource.getIndex - 1)
         val dest = nodes(edge.getTarget.getIndex - 1)
 
@@ -115,14 +116,14 @@ class MaltParser(modelUrl: URL = new File("engmalt.linear-1.7.mco").toURI.toURL,
 
         Some(new Dependency(source, dest, label))
       }
-    }(scala.collection.breakOut)
+    }
 
-    deps
+    deps.toSet
   }
 
   def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     val deps = dependenciesPostagged(tokens)
     val nodes: Set[DependencyNode] = deps.flatMap(dep => Set(dep.source, dep.dest))(scala.collection.breakOut)
-    new DependencyGraph(nodes, deps)
+    DependencyGraph(nodes, deps)
   }
 }

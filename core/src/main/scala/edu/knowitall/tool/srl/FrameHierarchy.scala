@@ -19,31 +19,31 @@ object FrameHierarchy {
       // find all ancestor -> descendant relationships
       val descendants = framesWithIndex.map {
         case (frame, index) =>
-          val inferiors = dgraph.graph.inferiors(frame.relation.node, dedge => !(dedge.source == frame.relation.node && dedge.label == "conj"))
+          val inferiors = dgraph.inferiors(frame.relation.node, dedge => !(dedge.source == frame.relation.node && dedge.label == "conj"))
           val children = framesWithIndex.filter {
             case (child, index) =>
               frame != child && (
-                  // first arguments must match
-                  (for (frameRole <- frame.argument(Roles.A0); childRole <- child.argument(Roles.A0)) yield (frameRole == childRole)).getOrElse(false) &&
-                  // child frame must be beneath parent frame relation in dependency graph
-                  (inferiors contains child.relation.node) ||
-                  // all child nodes are in the inferiors of the relation
-                  (child.nodes.forall(inferiors contains _)) &&
-                  // relations are connected by ccomp
-                  (dgraph.graph.neighbors(frame.relation.node,
-                      dedge => dedge.dir == Direction.Down && dedge.edge.label == "ccomp").contains(child.relation.node))
-                )
+                // first arguments must match
+                (for (frameRole <- frame.argument(Roles.A0); childRole <- child.argument(Roles.A0)) yield (frameRole == childRole)).getOrElse(false) &&
+                // child frame must be beneath parent frame relation in dependency graph
+                (inferiors contains child.relation.node) ||
+                // all child nodes are in the inferiors of the relation
+                (child.nodes.forall(inferiors contains _)) &&
+                // relations are connected by ccomp
+                (dgraph.neighbors(frame.relation.node,
+                  dedge => dedge.dir == Direction.Down && dedge.edge.label == "ccomp").contains(child.relation.node)))
           }
           index -> children.map(_._2).toSet
       }.toMap
 
       def transitiveClosure(hierarchy: Map[Int, Set[Int]]): Map[Int, Set[Int]] = {
-        val targets = hierarchy.map { case (parent, children) =>
-          val descendants = children flatMap hierarchy
-          // add children of children
-          if (descendants != children) parent -> (descendants ++ children)
-          // there is no change
-          else parent -> children
+        val targets = hierarchy.map {
+          case (parent, children) =>
+            val descendants = children flatMap hierarchy
+            // add children of children
+            if (descendants != children) parent -> (descendants ++ children)
+            // there is no change
+            else parent -> children
         }
 
         // unstable, continue

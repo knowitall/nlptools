@@ -28,8 +28,8 @@ object NlpToolServer extends App {
     val source = io.Source.fromFile(configFile)
     try {
       source.getLines().map { line =>
-        val Array(path, port, jar) = line.split("\t")
-        Tool(path, port.toInt)
+        val Array(path, url, jar) = line.split("\t")
+        Tool(path, url)
       }.toList
     }
     finally {
@@ -38,8 +38,8 @@ object NlpToolServer extends App {
   }
 }
 
-case class Tool(path: String, port: Int) {
-  val svc = host("localhost", port)
+case class Tool(path: String, url: String) {
+  val svc = dispatch.url(url)
 
   def withoutTrailingSlash = {
     if (path endsWith "/") this.copy(path = path.dropRight(1))
@@ -68,7 +68,7 @@ class NlpToolServer(config: NlpToolServer.Config, tools: Seq[Tool]) {
               case Left(_) => "darkred"
               case Right(_) => "darkgreen"
             }
-            s"<font color='$color'>$path</font> at :${tool.port}"
+            s"<font color='$color'>$path</font> at <a href='${tool.url}'>${tool.url}</a>"
           }.mkString("<br/>\n") +
           """</html>"""
         )
@@ -82,8 +82,8 @@ class NlpToolServer(config: NlpToolServer.Config, tools: Seq[Tool]) {
         ResponseString(Http(tool.svc OK as.String).apply())
 
       // GET tool logs
-      case GET(Path(Seg(tool :: impl :: ext :: Nil))) 
-        if toolMap.contains(s"/$tool/$impl") && 
+      case GET(Path(Seg(tool :: impl :: ext :: Nil)))
+        if toolMap.contains(s"/$tool/$impl") &&
            config.logPath.isDefined =>
           val filename = s"$tool-$impl.$ext"
           val file = new File(config.logPath.get, filename)
@@ -96,6 +96,7 @@ class NlpToolServer(config: NlpToolServer.Config, tools: Seq[Tool]) {
       case req @ POST(Path(path)) if toolMap.contains(dropSlash(path)) =>
         val tool = toolMap(dropSlash(path))
         val payload = Body.string(req)
+        println("DISPATCH: " + payload)
         ResponseString(Http(tool.svc << payload OK as.String).apply())
       case req @ GET(Path(path)) => ResponseString("Tool not found in GET: " + path)
       case req @ POST(Path(path)) => ResponseString("Tool not found in POST: " + path)

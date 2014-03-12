@@ -2,7 +2,7 @@ package edu.knowitall.tool
 package chunk
 
 abstract class ChunkerMain
-extends LineProcessor("chunker") {
+    extends LineProcessor("chunker") {
   def chunker: Chunker
   override def process(line: String) =
     Chunker.multilineStringFormat.write(chunker.chunk(line))

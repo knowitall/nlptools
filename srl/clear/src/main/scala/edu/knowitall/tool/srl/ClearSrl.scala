@@ -1,59 +1,54 @@
 package edu.knowitall.tool.srl
 
 import java.util.zip.ZipInputStream
-
 import scala.Option.option2Iterable
 import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.JavaConverters.asScalaIteratorConverter
 import scala.io.Source
-
-import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
-import com.googlecode.clearnlp.component.srl.CPredIdentifier
-import com.googlecode.clearnlp.component.srl.CRolesetClassifier
-import com.googlecode.clearnlp.component.srl.CSRLabeler
-import com.googlecode.clearnlp.dependency.DEPNode
-import com.googlecode.clearnlp.dependency.DEPTree
-
+import com.clearnlp.nlp.NLPGetter
+import com.clearnlp.nlp.NLPLib
+import com.clearnlp.dependency.DEPNode
+import com.clearnlp.dependency.DEPTree
 import edu.knowitall.collection.immutable.Interval
 import edu.knowitall.common.Resource.using
 import edu.knowitall.tool.parse.ClearParser
 import edu.knowitall.tool.parse.graph.DependencyGraph
+import edu.knowitall.tool.postag.PostaggedToken
 
 class ClearSrl extends Srl {
-  val clearMorpha = using(this.getClass.getResource("/edu/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
-    new CEnglishMPAnalyzer(new ZipInputStream(input))
-  }
-  val clearRoles = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-role-1.3.0.jar").openStream()) { input =>
-    new CRolesetClassifier(new ZipInputStream(input))
-  }
-  val clearPred = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-pred-1.3.0.jar").openStream()) { input =>
-    new CPredIdentifier(new ZipInputStream(input))
-  }
-  val clearSrl = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-srl-1.3.0.jar").openStream()) { input =>
-    new CSRLabeler(new ZipInputStream(input))
-  }
+  private val modelType = "general-en"
+  private val language = "en"
 
-  def apply(graph: DependencyGraph): Seq[Frame] = {
+  private val clearMorpha = NLPGetter.getComponent(modelType, language, NLPLib.MODE_MORPH)
+  private val clearRoles = NLPGetter.getComponent(modelType, language, NLPLib.MODE_ROLE)
+  private val clearPred = NLPGetter.getComponent(modelType, language, NLPLib.MODE_PRED)
+  private val clearSrl = NLPGetter.getComponent(modelType, language, NLPLib.MODE_SRL)
+
+  def apply(tokens: Seq[PostaggedToken], graph: DependencyGraph): Seq[Frame] = {
+    // A new tree comes with a root node.
     val tree = new DEPTree()
 
-    graph.nodes.zipWithIndex.foreach {
-      case (token, i) =>
-        val node = new DEPNode(i + 1, token.string)
-        node.pos = token.postag
+    graph.nodes.foreach {
+      case token =>
+        val node = new DEPNode(token.id, token.string)
+        node.pos = tokens(token.id - 1).postag
         tree.add(node)
     }
 
     for (edge <- graph.dependencies) {
-      val source = tree.get(edge.source.indices.head + 1)
-      val dest = tree.get(edge.dest.indices.head + 1)
+      val source = tree.get(edge.source.id)
+      require(source != null, "No dest node found in DEPTree: " + edge.source.id)
+      val dest = tree.get(edge.dest.id)
+      require(dest != null, "No source node found in DEPTree: " + edge.dest.id)
       dest.setHead(source, edge.label)
     }
 
     // link all nodes other than the root (hence the drop 1)
-    // to the root node.
-    for (node <- tree.iterator.asScala.drop(1)) {
+    // to the root node if they have no parent.
+    val root = tree.get(0)
+    for (node <- tree.iterator.asScala filter (_.id != 0)) {
       if (node.getHead == null) {
-        node.setHead(tree.get(0), "root")
+        node.setHead(root, "root")
       }
     }
 
@@ -64,14 +59,12 @@ class ClearSrl extends Srl {
 
     val treeNodes = tree.asScala.toSeq
     val relations = treeNodes.flatMap { node =>
-      val index = node.id - 1
-      Option(node.getFeat("pb")).map(index -> Relation.fromString(graph.nodes.find(_.indices == Interval.singleton(index)).get, _))
+      Option(node.getFeat("pb")).map(node.id -> Relation.fromString(graph.nodes.find(_.id == node.id).get, _))
     }
 
     val arguments = treeNodes.flatMap { node =>
-      val index = node.id - 1
       node.getSHeads().asScala.map { head =>
-        (head.getNode.id - 1) -> Argument(graph.nodes.find(_.indices == Interval.singleton(index)).get, Roles(head.getLabel))
+        (head.getNode.id) -> Argument(graph.nodes.find(_.id == node.id).get, Roles(head.getLabel))
       }
     }
 

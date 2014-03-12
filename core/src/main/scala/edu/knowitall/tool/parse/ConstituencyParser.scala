@@ -4,7 +4,8 @@ package parse
 
 import graph._
 
-/** A constituency parser turns a sentence into a constituency
+/**
+  * A constituency parser turns a sentence into a constituency
   * tree, a structure that is somewhat like chunking but
   * hierarchical.
   */
@@ -32,8 +33,8 @@ abstract class ParseTree(val token: String, var index: Int, val children: Array[
   def print {
     def print(tree: ParseTree, indent: Int) {
       if (tree.children.isEmpty) {
-        println(" " * indent + "(" + tree.token + ")") }
-      else {
+        println(" " * indent + "(" + tree.token + ")")
+      } else {
         println(" " * indent + "(" + tree.token)
         tree.children.foreach { tree => print(tree, indent + 2) }
         println(" " * indent + ")")
@@ -56,7 +57,7 @@ abstract class ParseTree(val token: String, var index: Int, val children: Array[
         case node: ParseTreePostag => "invtriangle"
         case node: ParseTreeToken => "circle"
       }
-      writer.append(indent + node.index + " [label=" + quote(nodeString(node))  + ", shape="+quote(shape)+"]\n")
+      writer.append(indent + node.index + " [label=" + quote(nodeString(node)) + ", shape=" + quote(shape) + "]\n")
     }
 
     for (node <- this) {

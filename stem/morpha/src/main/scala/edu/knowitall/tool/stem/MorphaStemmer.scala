@@ -17,6 +17,6 @@ class MorphaStemmer extends Stemmer with PostaggedStemmer {
 object MorphaStemmer extends MorphaStemmer
 
 object MorphaStemmerMain
-extends StemmerMain {
+    extends StemmerMain {
   lazy val stemmer = new MorphaStemmer
 }

@@ -27,7 +27,7 @@ object Frame {
 case class Relation(node: DependencyNode, name: String, sense: String) {
   require(!(name matches """.*[:\[\]].*"""), "Invalid relation name: " + name)
   override def toString = name + "." + sense
-  def serialize = name + "_" + node.index + "." + sense
+  def serialize = name + "_" + node.id + "." + sense
 }
 object Relation {
   val relationRegex = "(.*)\\.(.*)".r
@@ -45,9 +45,10 @@ object Relation {
     Relation(node, cleanName, sense)
   }
 
+  private val splitLabelRegex = "(.*)\\.(.*)".r
   def deserialize(dgraph: DependencyGraph)(pickled: String) = {
-    val (label, sense) = pickled.split("\\.") match {
-      case Array(label, sense) => (label, sense)
+    val (label, sense) = pickled match {
+      case splitLabelRegex(label, sense) => (label, sense)
       case _ => throw new MatchError("Could not deserialize relation: " + pickled)
     }
     val (name, nodeIndex) = label.split("_") match {
@@ -55,14 +56,14 @@ object Relation {
       case _ => throw new MatchError("Could not deserialize relation label: " + label)
     }
 
-    val node = dgraph.nodes.find(_.index == nodeIndex.toInt).get
+    val node = dgraph.nodes.find(_.id == nodeIndex.toInt).get
     Relation(node, name, sense)
   }
 }
 
 case class Argument(node: DependencyNode, role: Role) {
   override def toString = role + "=" + node.string
-  def serialize = role + "=" + node.string + "_" + node.index
+  def serialize = role + "=" + node.string + "_" + node.id
 }
 object Argument {
   def deserialize(dgraph: DependencyGraph)(pickled: String) = {
@@ -71,8 +72,8 @@ object Argument {
       case Array(string, nodeIndex) => (string, nodeIndex)
       case _ => throw new MatchError("Could not deserialize argument: " + rest)
     }
-    val node = dgraph.nodes.find(_.index == nodeIndex.toInt).get
-    require(node.text == string, node.text + " != " + string)
+    val node = dgraph.nodes.find(_.id == nodeIndex.toInt).get
+    require(node.string == string, node.string + " != " + string)
     Argument(node, Roles(roleString))
   }
 }

@@ -11,7 +11,7 @@ import edu.knowitall.tool.tokenize.Token
 
 class BreezeSentencer extends Segmenter {
   val sentencer = new JavaSentenceSegmenter()
-  
+
   override def segmentTexts(document: String) = {
     sentencer(document)
   }
@@ -24,6 +24,6 @@ class BreezeSentencer extends Segmenter {
 }
 
 object BreezeSentencerMain
-  extends SegmenterMain {
+    extends SegmenterMain {
   lazy val sentencer = new BreezeSentencer
 }

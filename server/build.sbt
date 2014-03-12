@@ -14,6 +14,9 @@ libraryDependencies ++= Seq(
     "com.github.scopt" %% "scopt" % "3.1.0",
     "net.databinder" %% "unfiltered-filter" % "0.7.0",
     "net.databinder" %% "unfiltered-jetty" % "0.7.0",
-    "net.databinder.dispatch" %% "dispatch-core" % "0.11.0")
+    "net.databinder.dispatch" %% "dispatch-core" % "0.11.0",
+    "org.slf4j" % "slf4j-api" % "1.7.5",
+    "ch.qos.logback" % "logback-core" % "1.0.13",
+    "ch.qos.logback" % "logback-classic" % "1.0.13")
 
 licenses := Seq("BSD 3-clause License" -> url("http://www.opensource.org/licenses/bsd-3-clause"))

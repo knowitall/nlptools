@@ -19,11 +19,11 @@ object BreezeLogisticRegressionTrainerTest extends Specification {
     val trainer = new BreezeLogisticRegressionTrainer[String](featureSet)
 
     val conf = trainer.train(examples)
-    
+
     "works for true" in {
       conf("true") must be_>(0.5)
     }
-    
+
     // there is no intercept with L1 so the false case
     // will have a confidence value of 0.5
     "works for false" in {

@@ -153,12 +153,10 @@ case class Substitution(mention: Mention, best: Mention) {
 
   def fixPossessive = {
     if (best.possessive && !mention.possessive) {
-      this.copy(best=best.depossessivize)
-    }
-    else if (!best.possessive && mention.possessive) {
-      this.copy(best=best.possessivize)
-    }
-    else {
+      this.copy(best = best.depossessivize)
+    } else if (!best.possessive && mention.possessive) {
+      this.copy(best = best.possessivize)
+    } else {
       this
     }
   }
