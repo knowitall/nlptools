@@ -87,6 +87,11 @@ object NlpToolsBuild extends Build {
   val unfilteredJetty = "net.databinder" %% "unfiltered-jetty" % "0.7.0"
   val dispatch = "net.databinder.dispatch" %% "dispatch-core" % "0.11.0"
 
+  val logbackVersion = "1.0.13"
+  val logbackCore = "ch.qos.logback" % "logback-core" % logbackVersion
+  val logbackClassic = "ch.qos.logback" % "logback-classic" % logbackVersion
+  val loggingImpls = Seq(logbackCore, logbackClassic)
+
   lazy val publishSignedAction = { st: State =>
     val extracted = st.extract
     val ref = extracted.get(thisProjectRef)
@@ -99,7 +104,7 @@ object NlpToolsBuild extends Build {
     crossScalaVersions := buildScalaVersions,
     scalaVersion <<= (crossScalaVersions) { versions => versions.head },
     libraryDependencies ++= Seq(junit % "test", specs2 % "test",
-      dispatch, unfilteredFilter, unfilteredJetty),
+      dispatch, unfilteredFilter, unfilteredJetty) ++ loggingImpls,
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     parallelExecution in ThisBuild := false,
     javaOptions += "-Xms512M",
