@@ -82,8 +82,8 @@ class NlpToolServer(config: NlpToolServer.Config, tools: Seq[Tool]) {
         ResponseString(Http(tool.svc OK as.String).apply())
 
       // GET tool logs
-      case GET(Path(Seg(tool :: impl :: ext :: Nil))) 
-        if toolMap.contains(s"/$tool/$impl") && 
+      case GET(Path(Seg(tool :: impl :: ext :: Nil)))
+        if toolMap.contains(s"/$tool/$impl") &&
            config.logPath.isDefined =>
           val filename = s"$tool-$impl.$ext"
           val file = new File(config.logPath.get, filename)
