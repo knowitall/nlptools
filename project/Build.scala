@@ -140,6 +140,7 @@ object NlpToolsBuild extends Build {
   // Core
 
   lazy val core = Project(id = "core", base = file("core"), settings = buildSettings ++ Seq(
+    name := "nlptools-core",
     licenses := Seq(apache2),
     libraryDependencies ++= Seq(commonScala, scopt, slf4j)
   ))
