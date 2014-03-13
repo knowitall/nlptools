@@ -28,11 +28,10 @@ class ClearSrl extends Srl {
     // A new tree comes with a root node.
     val tree = new DEPTree()
 
-    graph.nodes.foreach {
-      case token =>
-        val node = new DEPNode(token.id + 1, token.string)
-        node.pos = tokens(token.id).postag
-        tree.add(node)
+    graph.nodes.foreach { token =>
+      val node = new DEPNode(token.id + 1, token.string)
+      node.pos = tokens(token.id).postag
+      tree.add(node)
     }
 
     for (edge <- graph.dependencies) {
