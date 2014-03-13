@@ -5,10 +5,12 @@ package graph
 
 import edu.knowitall.collection.immutable.graph.Graph
 import edu.knowitall.collection.immutable.graph.Graph._
-import scala.collection.immutable.SortedSet
 import edu.knowitall.collection.immutable.Interval
 import tool.stem.{ Stemmer, IdentityStemmer }
 import tool.postag.PostaggedToken
+
+import scala.collection.immutable.SortedSet
+import scala.util.matching.Regex
 
 /**
   * A representation for a node in the graph of dependencies.  A node
@@ -27,14 +29,15 @@ object DependencyNode {
   }
 
   object stringFormat extends Format[DependencyNode, String] {
+    val Serialized = new Regex("""(\p{Graph}*?)-(\d\d*)""")
     def write(node: DependencyNode): String = {
       val cleanText = node.string.replaceAll("[[_()][^\\p{Graph}]]", "")
       Iterator(cleanText, node.id).mkString("-")
     }
 
     def read(pickled: String): DependencyNode = {
-      val (text, id) = pickled.split("-") match {
-        case Array(text, id) => (text, id)
+      val (text, id) = pickled match {
+        case Serialized(text, id) => (text, id)
         case _ => throw new MatchError("Could not split pickled node into parts: " + pickled)
       }
 
