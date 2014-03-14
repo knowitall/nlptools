@@ -165,6 +165,36 @@ class JwiTools(dict: Dictionary) {
     hypernymIDs.map(sid => dict.getSynset(sid))
   }
   
+  /**
+   * Takes a synset and returns the path of hypernyms from the starting synset
+   * to the highest synset in the hypernym path.
+   */
+ def synsetToHypernymPath(synset: Option[ISynset]): List[ISynset] = {
+	  if(synset.isEmpty){
+	    List.empty;
+	  }
+	  else{
+	    val s = synset.get
+	    val hypernymIDs = s.getRelatedSynsets(Pointer.HYPERNYM).asScala.toList
+	    val newSynset = 
+	      if(hypernymIDs.size > 0){
+	        Some(dict.getSynset(hypernymIDs(0)))
+	      }
+	      else{
+	        None
+	      }
+	    (s :: synsetToHypernymPath(newSynset))
+	  }
+  }
+ 
+ /**
+  * Takes a synset and returns the path of hypernyms whose ids are contained in the
+  * argument ids
+  */
+  def synsetToTargetHypernymPath(synset: Option[ISynset], ids: Set[String]): List[ISynset] = {
+    synsetToHypernymPath(synset).filter(p => ids.contains(p.getID().toString()))
+  }
+  
   /** Goes from a string word to the synset of its nth noun sense. 
     * 
     * @requires str is a noun in WordNet with an nth sense. 
