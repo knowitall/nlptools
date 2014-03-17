@@ -283,8 +283,8 @@ object DependencyGraph {
 
   def apply(vertices: Set[DependencyNode], edges: Set[Edge[DependencyNode]]): DependencyGraph = {
     val roots = vertices.filter { v =>
-      edges.exists(e => e.source == v) &&
-        edges.forall(e => e.dest != v)
+      // There's no edge that ends at the root.
+      edges forall (e => e.dest != v)
     }
 
     val root: Option[DependencyNode] = {
