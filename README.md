@@ -1,3 +1,7 @@
+** NOTICE: NLPTOOLS IS DEPRECATED.
+FURTHER DEVELOPMENT WILL MOVE TO THE AI TOOLKIT (http://github.com/allenai/aitk).
+THIS SHOULD NOT BE USED FOR NEW PROJECTS. **
+
 # UW NLPTools
 
 This is a collection of natural language processing tools wrapped behind common
