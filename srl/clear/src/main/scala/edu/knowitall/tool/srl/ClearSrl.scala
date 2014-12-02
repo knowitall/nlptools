@@ -7,12 +7,10 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.JavaConverters.asScalaIteratorConverter
 import scala.io.Source
 
-import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
-import com.googlecode.clearnlp.component.srl.CPredIdentifier
-import com.googlecode.clearnlp.component.srl.CRolesetClassifier
-import com.googlecode.clearnlp.component.srl.CSRLabeler
-import com.googlecode.clearnlp.dependency.DEPNode
-import com.googlecode.clearnlp.dependency.DEPTree
+import com.clearnlp.nlp.NLPGetter
+import com.clearnlp.nlp.NLPMode
+import com.clearnlp.dependency.DEPNode
+import com.clearnlp.dependency.DEPTree
 
 import edu.knowitall.collection.immutable.Interval
 import edu.knowitall.common.Resource.using
@@ -20,7 +18,7 @@ import edu.knowitall.tool.parse.ClearParser
 import edu.knowitall.tool.parse.graph.DependencyGraph
 
 class ClearSrl extends Srl {
-  val clearMorpha = using(this.getClass.getResource("/edu/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
+ /* val clearMorpha = using(this.getClass.getResource("/edu/knowitall/tool/tokenize/dictionary-1.2.0.zip").openStream()) { input =>
     new CEnglishMPAnalyzer(new ZipInputStream(input))
   }
   val clearRoles = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-role-1.3.0.jar").openStream()) { input =>
@@ -31,7 +29,15 @@ class ClearSrl extends Srl {
   }
   val clearSrl = using(this.getClass.getResource("/knowitall/models/clear/ontonotes-en-srl-1.3.0.jar").openStream()) { input =>
     new CSRLabeler(new ZipInputStream(input))
-  }
+  }*/
+
+  private val modelType = "general-en"
+  private val language = "en"
+
+  private val clearMorpha = NLPGetter.getComponent(modelType, language, NLPMode.MODE_MORPH)
+  private val clearRoles = NLPGetter.getComponent(modelType, language, NLPMode.MODE_ROLE)
+  private val clearPred = NLPGetter.getComponent(modelType, language, NLPMode.MODE_PRED)
+  private val clearSrl = NLPGetter.getComponent(modelType, language, NLPMode.MODE_SRL)
 
   def apply(graph: DependencyGraph): Seq[Frame] = {
     val tree = new DEPTree()

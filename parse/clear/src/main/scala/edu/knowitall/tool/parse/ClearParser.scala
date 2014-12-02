@@ -10,31 +10,37 @@ import edu.knowitall.tool.parse.graph.DependencyGraph
 import edu.knowitall.tool.parse.graph.DependencyNode
 import java.lang.ProcessBuilder
 import java.io.PrintWriter
-import com.googlecode.clearnlp.component.pos.CPOSTagger
-import com.googlecode.clearnlp.component.dep.CDEPPassParser
+
+//import com.googlecode.clearnlp.component.pos.CPOSTagger
+//import com.googlecode.clearnlp.component.dep.CDEPPassParser
 import java.util.zip.ZipInputStream
-import com.googlecode.clearnlp.nlp.NLPDecode
-import com.googlecode.clearnlp.dependency.DEPTree
-import com.googlecode.clearnlp.dependency.DEPNode
+
+//import com.googlecode.clearnlp.nlp.NLPDecode
+//import com.googlecode.clearnlp.dependency.DEPTree
+//import com.googlecode.clearnlp.dependency.DEPNode
+
 import edu.knowitall.tool.tokenize.ClearTokenizer
 import edu.knowitall.common.Resource.using
-import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
+
+//import com.googlecode.clearnlp.component.morph.CEnglishMPAnalyzer
 import edu.knowitall.tool.postag.Postagger
 import edu.knowitall.tool.postag.PostaggedToken
 import edu.knowitall.tool.postag.ClearPostagger
 
-class ClearParser(val postagger: Postagger = new ClearPostagger()) extends DependencyParser {
-  val clearMorphaUrl = this.getClass.getResource("/edu/knowitall/tool/tokenize/dictionary-1.2.0.zip")
-  require(clearMorphaUrl != null, "cannot find clear dict model")
-  val clearMorpha = using(clearMorphaUrl.openStream()) { input =>
-    new CEnglishMPAnalyzer(new ZipInputStream(input))
-  }
+import com.clearnlp.nlp.NLPGetter
+import com.clearnlp.nlp.NLPMode
+import com.clearnlp.dependency.DEPNode
+import com.clearnlp.dependency.DEPTree
 
-  val clearDepUrl = this.getClass.getResource("/knowitall/models/clear/ontonotes-en-dep-1.3.0.jar")
-  require(clearDepUrl != null, "cannot find clear dep model")
-  val clearDepParser = using(clearDepUrl.openStream()) { input =>
-    new CDEPPassParser(new ZipInputStream(input))
-  }
+
+
+
+
+class ClearParser(val postagger: Postagger = new ClearPostagger()) extends DependencyParser {
+  
+  val clearMorpha = NLPGetter.getComponent("general-en", "en", NLPMode.MODE_MORPH)
+
+  val clearDepParser = NLPGetter.getComponent("general-en", "en", NLPMode.MODE_DEP)
 
   def dependencyGraphPostagged(tokens: Seq[PostaggedToken]): DependencyGraph = {
     val tree = new DEPTree()

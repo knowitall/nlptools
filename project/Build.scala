@@ -50,10 +50,9 @@ object NlpToolsBuild extends Build {
   val stanfordVersion = "1.3.5"
   val stanford = "edu.stanford.nlp" % "stanford-corenlp" % stanfordVersion
 
-  val clearModelGroup = "edu.washington.cs.knowitall.clearnlp"
-  val clearVersion = "1.3.0"
-  val clear = "com.googlecode.clearnlp" % "clearnlp" % clearVersion
-
+  val clearGroup = "com.clearnlp"
+  val clearVersion = "2.0.2"
+  val clear = clearGroup % "clearnlp" % clearVersion
   val breezeVersion = "0.2"
   val breezeLearn = "org.scalanlp" %% "breeze-learn" % breezeVersion exclude("com.codecommit", "anti-xml_2.9.1") cross CrossVersion.binaryMapped {
           case "2.9.3" => "2.9.2"
@@ -102,8 +101,8 @@ object NlpToolsBuild extends Build {
       dispatch, unfilteredFilter, unfilteredJetty),
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     parallelExecution in ThisBuild := false,
-    javaOptions += "-Xms512M",
-    javaOptions += "-Xmx2G",
+    javaOptions += "-Xms1G",
+    javaOptions += "-Xmx4G",
     javaOptions += "-XX:MaxPermSize=512M",
     javaOptions += "-XX:ReservedCodeCacheSize=512M",
     fork in test := true,
@@ -276,7 +275,7 @@ object NlpToolsBuild extends Build {
     base = file("tokenize/clear"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
-      libraryDependencies ++= Seq(clear))
+      libraryDependencies ++= Seq(clear, clearGroup % "clearnlp-dictionary" % "1.0"))
   ) dependsOn(core)
 
   lazy val clearPostag = Project(
@@ -284,7 +283,7 @@ object NlpToolsBuild extends Build {
     base = file("postag/clear"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
-      libraryDependencies ++= Seq(clear, clearModelGroup % "clear-postag-models" % clearVersion ))
+      libraryDependencies ++= Seq(clear, clearGroup % "clearnlp-general-en-pos" % "1.1" ))
   ) dependsOn(clearTokenize)
 
   lazy val clearParse = Project(
@@ -292,7 +291,7 @@ object NlpToolsBuild extends Build {
     base = file("parse/clear"),
     settings = buildSettings ++ Seq(
       licenses := Seq(apache2),
-      libraryDependencies ++= Seq(clear, clearModelGroup % "clear-parse-models" % clearVersion ))
+      libraryDependencies ++= Seq(clear, clearGroup % "clearnlp-general-en-dep" % "1.2" ))
   ) dependsOn(clearPostag)
 
   lazy val clearSrl = Project(
@@ -302,9 +301,7 @@ object NlpToolsBuild extends Build {
       licenses := Seq(apache2),
       libraryDependencies ++= Seq(
         clear,
-        clearModelGroup % "clear-role-models" % clearVersion,
-        clearModelGroup % "clear-pred-models" % clearVersion,
-        clearModelGroup % "clear-srl-models" % clearVersion))
+        clearGroup % "clearnlp-general-en-srl" % "1.1"))
   ) dependsOn(clearParse)
 
   // Breeze
