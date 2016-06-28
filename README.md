@@ -1,3 +1,5 @@
+** **DEPRECATED!** ** Please see https://github.com/allenai/openie-standalone, which has combined multiple projects into a single project that builds on Scala 2.11.
+
 # UW NLPTools
 
 This is a collection of natural language processing tools wrapped behind common
